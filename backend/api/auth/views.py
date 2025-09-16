@@ -38,8 +38,15 @@ class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        print("=== LOGIN DEBUG ===")
+        print("Request data:", request.data)
+        print("Request headers:", dict(request.headers))
+        
         serializer = LoginSerializer(data=request.data, context={"request": request})
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            print("Serializer errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
         user = serializer.validated_data["user"]
         refresh = RefreshToken.for_user(user)
         return Response({
