@@ -24,7 +24,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://metonex.pythonanywhere.com',
+        target: 'https://*.pythonanywhere.com' || 'https://metonex.pythonanywhere.com',
         changeOrigin: true,
         secure: true,
       }
