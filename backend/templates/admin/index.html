@@ -1,0 +1,228 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--green-dark));
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border-color: var(--primary-color);
+    }
+    
+    .stat-card.users { 
+        border-left: 4px solid #22c55e;
+        background: linear-gradient(135deg, #dcfce7 0%, #ffffff 100%);
+    }
+    .stat-card.companies { 
+        border-left: 4px solid #16a34a;
+        background: linear-gradient(135deg, #bbf7d0 0%, #ffffff 100%);
+    }
+    .stat-card.items { 
+        border-left: 4px solid #15803d;
+        background: linear-gradient(135deg, #a7f3d0 0%, #ffffff 100%);
+    }
+    .stat-card.orders { 
+        border-left: 4px solid #000000;
+        background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%);
+    }
+    .stat-card.requests { 
+        border-left: 4px solid #22c55e;
+        background: linear-gradient(135deg, #dcfce7 0%, #ffffff 100%);
+    }
+    .stat-card.offers { 
+        border-left: 4px solid #16a34a;
+        background: linear-gradient(135deg, #bbf7d0 0%, #ffffff 100%);
+    }
+    .stat-card.notifications { 
+        border-left: 4px solid #15803d;
+        background: linear-gradient(135deg, #a7f3d0 0%, #ffffff 100%);
+    }
+    .stat-card.ratings { 
+        border-left: 4px solid #000000;
+        background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #000000;
+        margin-bottom: 0.5rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-label {
+        color: #6b7280;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        opacity: 0.8;
+    }
+    
+    .recent-activity {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        margin-top: 2rem;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.25rem;
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-title {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+    
+    .activity-time {
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-stats">
+    <div class="stat-card users">
+        <div class="stat-icon">👥</div>
+        <div class="stat-number">{{ user_count|default:"0" }}</div>
+        <div class="stat-label">Foydalanuvchilar</div>
+    </div>
+    <div class="stat-card companies">
+        <div class="stat-icon">🏢</div>
+        <div class="stat-number">{{ company_count|default:"0" }}</div>
+        <div class="stat-label">Kompaniyalar</div>
+    </div>
+    <div class="stat-card items">
+        <div class="stat-icon">📦</div>
+        <div class="stat-number">{{ item_count|default:"0" }}</div>
+        <div class="stat-label">Mahsulotlar</div>
+    </div>
+    <div class="stat-card orders">
+        <div class="stat-icon">🛒</div>
+        <div class="stat-number">{{ order_count|default:"0" }}</div>
+        <div class="stat-label">Buyurtmalar</div>
+    </div>
+    <div class="stat-card requests">
+        <div class="stat-icon">📋</div>
+        <div class="stat-number">{{ request_count|default:"0" }}</div>
+        <div class="stat-label">So'rovlar</div>
+    </div>
+    <div class="stat-card offers">
+        <div class="stat-icon">💰</div>
+        <div class="stat-number">{{ offer_count|default:"0" }}</div>
+        <div class="stat-label">Takliflar</div>
+    </div>
+    <div class="stat-card notifications">
+        <div class="stat-icon">🔔</div>
+        <div class="stat-number">{{ notification_count|default:"0" }}</div>
+        <div class="stat-label">Xabarnomalar</div>
+    </div>
+    <div class="stat-card ratings">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-number">{{ rating_count|default:"0" }}</div>
+        <div class="stat-label">Reytinglar</div>
+    </div>
+</div>
+
+{{ block.super }}
+
+<div class="recent-activity">
+    <h2>So'nggi Faoliyat</h2>
+    <div class="activity-item">
+        <div class="activity-icon" style="background: #dbeafe; color: #3b82f6;">
+            👤
+        </div>
+        <div class="activity-content">
+            <div class="activity-title">Yangi foydalanuvchi ro'yxatdan o'tdi</div>
+            <div class="activity-time">5 daqiqa oldin</div>
+        </div>
+    </div>
+    <div class="activity-item">
+        <div class="activity-icon" style="background: #dcfce7; color: #10b981;">
+            🏢
+        </div>
+        <div class="activity-content">
+            <div class="activity-title">Yangi kompaniya tasdiqlandi</div>
+            <div class="activity-time">15 daqiqa oldin</div>
+        </div>
+    </div>
+    <div class="activity-item">
+        <div class="activity-icon" style="background: #fef3c7; color: #f59e0b;">
+            📦
+        </div>
+        <div class="activity-content">
+            <div class="activity-title">Yangi mahsulot qo'shildi</div>
+            <div class="activity-time">1 soat oldin</div>
+        </div>
+    </div>
+    <div class="activity-item">
+        <div class="activity-icon" style="background: #fee2e2; color: #ef4444;">
+            🛒
+        </div>
+        <div class="activity-content">
+            <div class="activity-title">Yangi buyurtma yaratildi</div>
+            <div class="activity-time">2 soat oldin</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

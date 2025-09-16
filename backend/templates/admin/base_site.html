@@ -1,0 +1,115 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('MetOneX Admin') }}{% endblock %}
+
+{% block branding %}
+<div id="branding">
+    <h1 id="site-name">
+        <a href="{% url 'admin:index' %}">
+            <img src="{% static 'admin/img/logo.png' %}" alt="MetOneX" style="height: 32px; margin-right: 10px; vertical-align: middle;">
+            MetOneX Marketplace
+        </a>
+    </h1>
+</div>
+{% endblock %}
+
+{% block nav-global %}
+<div class="nav-global">
+    <div class="nav-links">
+        <a href="{% url 'admin:index' %}" class="nav-link">
+            <i class="icon-home"></i> Bosh sahifa
+        </a>
+        <a href="/api/v1/docs/" class="nav-link" target="_blank">
+            <i class="icon-docs"></i> API Docs
+        </a>
+        <a href="/health/" class="nav-link" target="_blank">
+            <i class="icon-health"></i> Health Check
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom_admin.css' %}">
+<link rel="icon" type="image/x-icon" href="{% static 'admin/img/favicon.ico' %}">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Custom styles for branding */
+    #branding h1 a {
+        color: white !important;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+    
+    .nav-global {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem 1rem;
+        margin: 0.5rem 0;
+        border-radius: 6px;
+    }
+    
+    .nav-links {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .nav-link {
+        color: rgba(255, 255, 255, 0.9) !important;
+        text-decoration: none;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white !important;
+    }
+    
+    .nav-link i {
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block extrajs %}
+{{ block.super }}
+<script src="{% static 'admin/js/custom_admin.js' %}"></script>
+<script>
+    // Custom admin JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add custom functionality here
+        console.log('MetOneX Admin Panel loaded successfully!');
+        
+        // Add keyboard shortcuts info
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === '/') {
+                e.preventDefault();
+                showKeyboardShortcuts();
+            }
+        });
+    });
+    
+    function showKeyboardShortcuts() {
+        const shortcuts = [
+            'Ctrl + S: Saqlash',
+            'Ctrl + F: Qidirish',
+            'Ctrl + /: Qisqa yo\'llar',
+            'Esc: Filtrlarni tozalash'
+        ];
+        
+        alert('Qisqa yo\'llar:\n\n' + shortcuts.join('\n'));
+    }
+</script>
+{% endblock %}
