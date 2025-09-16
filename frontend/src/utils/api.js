@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://*.pythonanywhere.com/api/v1'
+const API_URL = import.meta.env.VITE_API_URL || 'https://metonex.pythonanywhere.com/api/v1'
 
 function authHeaders() {
   const access = localStorage.getItem('access')
