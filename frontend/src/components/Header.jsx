@@ -43,7 +43,7 @@ export default function Header() {
   }
   async function doLogout(){
     try{
-      const api = (import.meta.env.VITE_API_URL||'http://localhost:8000/api/v1')
+      const api = (import.meta.env.VITE_API_URL||'https://metonex.pythonanywhere.com/api/v1')
       const refresh = localStorage.getItem('refresh')
       const access = localStorage.getItem('access')
       await fetch(api + '/auth/logout/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${access}` }, body: JSON.stringify({ refresh }) })

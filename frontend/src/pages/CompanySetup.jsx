@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import axios from 'axios'
 import { checkAuthOnPageLoadForCompanySetup } from '../utils/api.js'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+const API_URL = import.meta.env.VITE_API_URL || 'https://metonex.pythonanywhere.com/api/v1'
 
 export default function CompanySetup() {
   const token = localStorage.getItem('access')

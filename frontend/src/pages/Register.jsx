@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { checkAuthOnPageLoad } from '../utils/api.js'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+const API_URL = import.meta.env.VITE_API_URL || 'https://metonex.pythonanywhere.com/api/v1'
 
 export default function Register() {
   const [form, setForm] = useState({ role: 'sotib_oluvchi', phone: '', name: '', password: '', verification_code: '' })
