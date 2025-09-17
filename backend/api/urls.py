@@ -19,4 +19,5 @@ urlpatterns = [
     path("orders/", include("api.orders.urls")),
     path("ratings/", include("api.ratings.urls")),
     path("notifications/", include("api.notifications.urls")),
+    path("razmers/", include("api.razmers.urls")),
 ]

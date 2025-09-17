@@ -104,9 +104,15 @@ export default function ItemEdit(){
               <label className="text-sm text-gray-700">Narx (soʼm)</label>
               <input name="price" type="number" className="input mt-1" min="0" step="1000" defaultValue={item.price} required />
             </div>
-            <div className="md:col-span-2">
-              <label className="text-sm text-gray-700">Tavsif</label>
-              <textarea name="description" className="input mt-1" rows={4} defaultValue={item.description} required />
+            <div>
+              <label className="text-sm text-gray-700">Zavod</label>
+              <input 
+                name="zavod" 
+                type="text"
+                className="input mt-1"
+                defaultValue={item.zavod || ''}
+                placeholder="Ishlab chiqaruvchi zavod nomi"
+              />
             </div>
             <div className="md:col-span-2 flex gap-3 pt-2">
               <button disabled={saving} className="btn-primary flex items-center gap-2">

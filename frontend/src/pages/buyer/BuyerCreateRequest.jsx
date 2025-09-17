@@ -12,13 +12,9 @@ export default function BuyerCreateRequest() {
   const [companyId, setCompanyId] = useState(null)
   const [form, setForm] = useState({
     category: '',
-    description: '',
     quantity: '',
     unit: 'dona',
     payment_type: 'naqd_pul',
-    budget_from: '',
-    budget_to: '',
-    region: '',
     delivery_address: '',
     deadline_date: ''
   })
@@ -57,23 +53,8 @@ export default function BuyerCreateRequest() {
       if (!form.category) {
         throw new Error('Kategoriya tanlash majburiy')
       }
-      if (!form.description.trim()) {
-        throw new Error('Tavsif majburiy')
-      }
       if (!form.quantity || form.quantity <= 0) {
         throw new Error('Miqdor majburiy va 0 dan katta bo\'lishi kerak')
-      }
-      if (!form.budget_from || form.budget_from <= 0) {
-        throw new Error('Minimal narx majburiy')
-      }
-      if (!form.budget_to || form.budget_to <= 0) {
-        throw new Error('Maksimal narx majburiy')
-      }
-      if (parseInt(form.budget_from) >= parseInt(form.budget_to)) {
-        throw new Error('Minimal narx maksimal narxdan kichik bo\'lishi kerak')
-      }
-      if (!form.region.trim()) {
-        throw new Error('Viloyat majburiy')
       }
       if (!form.delivery_address.trim()) {
         throw new Error('Yetkazib berish manzili majburiy')
@@ -93,13 +74,9 @@ export default function BuyerCreateRequest() {
       const requestData = {
         buyer_company: companyId,
         category: form.category,
-        description: form.description.trim(),
         quantity: parseInt(form.quantity),
         unit: form.unit,
         payment_type: form.payment_type,
-        budget_from: parseInt(form.budget_from),
-        budget_to: parseInt(form.budget_to),
-        region: form.region.trim(),
         delivery_address: form.delivery_address.trim(),
         deadline_date: form.deadline_date
       }
@@ -179,21 +156,6 @@ export default function BuyerCreateRequest() {
               </select>
             </div>
 
-            {/* Tavsif */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tavsif <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                required
-                rows={4}
-                placeholder="Mahsulot haqida batafsil ma'lumot bering..."
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-gray-50 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
 
             {/* Miqdor va birlik */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -254,54 +216,7 @@ export default function BuyerCreateRequest() {
               </select>
             </div>
 
-            {/* Narx diapazoni */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Minimal narx (so'm) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="budget_from"
-                  value={formatPrice(form.budget_from)}
-                  onChange={handlePriceChange}
-                  required
-                  placeholder="0"
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-gray-50 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Maksimal narx (so'm) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="budget_to"
-                  value={formatPrice(form.budget_to)}
-                  onChange={handlePriceChange}
-                  required
-                  placeholder="0"
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-gray-50 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
 
-            {/* Viloyat */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Viloyat <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="region"
-                value={form.region}
-                onChange={handleChange}
-                required
-                placeholder="Viloyat nomi"
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-gray-50 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
 
             {/* Yetkazib berish manzili */}
             <div>
@@ -340,7 +255,7 @@ export default function BuyerCreateRequest() {
               <button
                 type="button"
                 onClick={() => navigate('/buyer/requests')}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                className="btn-cancel"
               >
                 Bekor qilish
               </button>

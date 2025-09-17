@@ -67,7 +67,7 @@ export default function Sidebar({ isOpen, onToggle, collapsed = true, onCollapse
                   localStorage.removeItem('access'); localStorage.removeItem('refresh'); window.location.href='/'
                 }
               }}
-              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : ''} px-3 py-2 text-sm rounded-lg transition-all duration-200 bg-red-50 hover:bg-red-100 text-red-600`}
+              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : ''} px-3 py-2 text-sm rounded-lg transition-all duration-200 btn-exit`}
             >
               <span className={`${isCollapsed ? '' : 'mr-3'}`}>🚪</span>
               {!isCollapsed && 'Chiqish'}

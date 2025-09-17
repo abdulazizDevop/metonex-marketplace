@@ -185,6 +185,22 @@ class SubCategoryAdmin(admin.ModelAdmin):
     subcategory_actions.short_description = 'Amallar'
 
 
+@admin.register(Razmer, site=admin_site)
+class RazmerAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'category', 'subcategory', 'created_at', 'razmer_actions']
+    list_filter = ['category', 'subcategory']
+    search_fields = ['name', 'category__name', 'subcategory__name']
+    readonly_fields = ['created_at', 'updated_at']
+    list_per_page = 20
+    
+    def razmer_actions(self, obj):
+        return format_html(
+            '<a class="button" href="{}">Ko\'rish</a>',
+            reverse('metonex_admin:api_razmer_change', args=[obj.pk])
+        )
+    razmer_actions.short_description = 'Amallar'
+
+
 # Qolgan modellar uchun oddiy registratsiya
 admin_site.register(CompanyMember, site=admin_site)
 admin_site.register(VerificationCode, site=admin_site)

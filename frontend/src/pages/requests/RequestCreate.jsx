@@ -13,13 +13,9 @@ export default function RequestCreate() {
   const [companyId, setCompanyId] = useState(null)
   const [form, setForm] = useState({
     category: '',
-    description: '',
     quantity: '',
     unit: 'dona',
     payment_type: 'naqd_pul',
-    budget_from: '',
-    budget_to: '',
-    region: '',
     delivery_address: '',
     deadline_date: ''
   })
@@ -338,7 +334,7 @@ export default function RequestCreate() {
               <button
                 type="button"
                 onClick={() => navigate('/requests/my')}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                className="btn-cancel"
               >
                 Bekor qilish
               </button>

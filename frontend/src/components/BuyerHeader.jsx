@@ -112,10 +112,10 @@ export default function BuyerHeader({
               Katalog
             </Link>
             <Link to="/buyer/requests" className="text-gray-700 hover:text-green-600 font-medium">
-              Zayavkalar
+              Buyurtmalar
             </Link>
             <Link to="/buyer/orders" className="text-gray-700 hover:text-green-600 font-medium">
-              Buyurtmalar
+              Xaridlarim
             </Link>
             <Link to="/buyer/cart" className="text-gray-700 hover:text-green-600 font-medium flex items-center relative px-2 py-1 rounded-md hover:bg-green-50 transition-colors">
 

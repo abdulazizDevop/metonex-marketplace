@@ -10,6 +10,7 @@ class ItemSerializer(serializers.ModelSerializer):
     company_logo = serializers.SerializerMethodField(read_only=True)
     user_name = serializers.CharField(source="user.name", read_only=True)
     subcategory_name = serializers.CharField(source="subcategory.name", read_only=True, default=None)
+    razmer_name = serializers.CharField(source="razmer.name", read_only=True, default=None)
     class Meta:
         model = Item
         fields = [
@@ -19,6 +20,8 @@ class ItemSerializer(serializers.ModelSerializer):
             "category_name",
             "subcategory",
             "subcategory_name",
+            "razmer",
+            "razmer_name",
             "company_name",
             "company_logo",
             "user_name",
@@ -29,6 +32,7 @@ class ItemSerializer(serializers.ModelSerializer):
             "quantity",
             "unit",
             "price",
+            "zavod",
             "images",
             "images_urls",
             "created_at",

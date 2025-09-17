@@ -9,6 +9,7 @@ export default function ItemCreate() {
   const [error, setError] = useState('')
   const [meta, setMeta] = useState({ categories: [], subcategories: [], units: [] })
   const [subOptions, setSubOptions] = useState([])
+  const [razmerOptions, setRazmerOptions] = useState([])
   const [companyId, setCompanyId] = useState('')
   const [selectedSubcategory, setSelectedSubcategory] = useState(null)
   const [unitValue, setUnitValue] = useState('')
@@ -42,6 +43,31 @@ export default function ItemCreate() {
     const sub = subOptions.find(s => String(s.id) === String(val))
     setSelectedSubcategory(sub)
     setUnitValue(sub?.unit || '')
+    loadRazmers(val)
+  }
+
+  async function loadRazmers(subcategoryId) {
+    if (!subcategoryId) {
+      setRazmerOptions([])
+      return
+    }
+    try {
+      const api = import.meta.env.VITE_API_URL || 'https://metonex.pythonanywhere.com/api/v1'
+      const response = await fetch(`${api}/razmers/?subcategory=${subcategoryId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access')}`
+        }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setRazmerOptions(data.results || data || [])
+      } else {
+        setRazmerOptions([])
+      }
+    } catch (error) {
+      console.error('Razmerlarni yuklashda xato:', error)
+      setRazmerOptions([])
+    }
   }
 
   async function submit(e) {
@@ -116,12 +142,26 @@ export default function ItemCreate() {
                 </div>
               )}
             </div>
-            <div className="md:col-span-2">
-              <label className="text-sm text-gray-700">Tavsif</label>
-              <textarea name="description" className="input mt-1" rows={4} placeholder="Mahsulot haqida toʼliq maʼlumot" required />
+            <div>
+              <label className="text-sm text-gray-700">Razmer</label>
+              <select name="razmer" className="input mt-1">
+                <option value="">Razmer tanlang</option>
+                {razmerOptions.map(razmer => (
+                  <option key={razmer.id} value={razmer.id}>{razmer.name}</option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="text-sm text-gray-700">Qoʼshimcha rasmlar (koʼp fayl)</label>
+              <label className="text-sm text-gray-700">Zavod</label>
+              <input 
+                name="zavod" 
+                type="text"
+                className="input mt-1"
+                placeholder="Ishlab chiqaruvchi zavod nomi"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-700">Sertifikatlar (koʼp fayl)</label>
               <input name="images" type="file" className="mt-1" accept="image/*" multiple />
             </div>
             <div className="md:col-span-2 flex gap-3 pt-2">

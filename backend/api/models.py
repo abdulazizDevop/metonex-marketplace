@@ -132,6 +132,24 @@ class SubCategory(models.Model):
     def __str__(self) -> str:
         return f"{self.category.name} / {self.name}"
 
+class Razmer(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="razmer")
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name="razmers")
+    name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ("subcategory", "name")
+        indexes = [
+            models.Index(fields=["category", "subcategory"], name="idx_razmer_cat_sub"),
+        ]
+    
+    def __str__(self) -> str:
+        return f"{self.subcategory.name} - {self.name}"
+
+
 class Item(models.Model):
     class ItemStatus(models.TextChoices):
         AVAILABLE = "mavjud", "mavjud"
@@ -151,6 +169,7 @@ class Item(models.Model):
     name = models.CharField(max_length=100)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="items")
     subcategory = models.ForeignKey('SubCategory', on_delete=models.SET_NULL, related_name='items', null=True, blank=True)
+    razmer = models.ForeignKey('Razmer', on_delete=models.SET_NULL, related_name='items', null=True, blank=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="items")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="items")
     status = models.CharField(max_length=50, choices=ItemStatus.choices, default=ItemStatus.AVAILABLE)
@@ -158,6 +177,7 @@ class Item(models.Model):
     quantity = models.IntegerField()
     unit = models.CharField(max_length=50, choices=Unit.choices, default=Unit.TONNA)
     price = models.BigIntegerField()
+    zavod = models.CharField(max_length=200, blank=True, null=True, help_text="Ishlab chiqaruvchi zavod")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
