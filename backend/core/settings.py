@@ -78,10 +78,35 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5174",
     "http://178.128.177.129",
 ] if DEBUG else [
-    "https://*.uz",
-    "https://*.com",
     "https://metonex.pythonanywhere.com",
     "http://178.128.177.129",
+]
+
+# CORS qo'shimcha sozlamalar
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Xavfsizlik uchun False
+
+# CORS headers
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# CORS methods
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
 ]
 
 REST_FRAMEWORK = {
