@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import { getItemMeta, getMyNotifications } from '../utils/api.js'
 import { useEffect } from 'react'
@@ -18,6 +18,7 @@ export default function BuyerHeader({
   cartCount = 0
 }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [meta, setMeta] = useState({ 
     categories: [], 
     subcategories: [], 
@@ -105,20 +106,19 @@ export default function BuyerHeader({
 
           {/* Navigation */}
           <nav className="flex items-center space-x-6">
-            <Link to="/buyer" className="text-gray-700 hover:text-green-600 font-medium">
+            <Link to="/buyer" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname === '/buyer' ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
               Mahsulotlar
             </Link>
-            <Link to="/buyer/catalog" className="text-gray-700 hover:text-green-600 font-medium">
+            <Link to="/buyer/catalog" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname === '/buyer/catalog' ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
               Katalog
             </Link>
-            <Link to="/buyer/requests" className="text-gray-700 hover:text-green-600 font-medium">
+            <Link to="/buyer/requests" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname.startsWith('/buyer/requests') ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
               Buyurtmalar
             </Link>
-            <Link to="/buyer/orders" className="text-gray-700 hover:text-green-600 font-medium">
+            <Link to="/buyer/orders" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname.startsWith('/buyer/orders') ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
               Xaridlarim
             </Link>
-            <Link to="/buyer/cart" className="text-gray-700 hover:text-green-600 font-medium flex items-center relative px-2 py-1 rounded-md hover:bg-green-50 transition-colors">
-
+            <Link to="/buyer/cart" className={`px-3 py-2 rounded text-white hover:font-bold transition flex items-center relative ${location.pathname === '/buyer/cart' ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
               Savat
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-semibold rounded-full h-4 w-4 flex items-center justify-center shadow-sm border border-white">
@@ -126,22 +126,22 @@ export default function BuyerHeader({
                 </span>
               )}
             </Link>
-            <Link to="/buyer/profile" className="text-gray-700 hover:text-green-600 font-medium">
+            <Link to="/buyer/profile" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname === '/buyer/profile' ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
               Profil
             </Link>
-            <Link to="/buyer/notifications" className="relative px-3 py-2 rounded border border-green-300 rounded-md bg-white text-gray-700 hover:bg-green-50 hover:text-green-700 hover:border-green-400 transition">
-                🔔
-                {notificationCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-green-600 text-white text-[10px] leading-none px-1.5 py-0.5 rounded-full">
-                    {notificationCount > 99 ? '99+' : notificationCount}
-                  </span>
-                )}
+            <Link to="/buyer/notifications" className="relative px-3 py-2 rounded bg-gray-200 text-white hover:bg-gray-300 hover:font-bold transition">
+              🔔
+              {notificationCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-green-600 text-white text-[10px] leading-none px-1.5 py-0.5 rounded-full">
+                  {notificationCount > 99 ? '99+' : notificationCount}
+                </span>
+              )}
             </Link>
             <button 
               onClick={doLogout}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-green-300 rounded-md hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+              className="btn-exit"
             >
-              Chiqish
+              🚪 Chiqish
             </button>
           </nav>
         </div>

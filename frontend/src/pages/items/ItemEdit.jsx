@@ -119,7 +119,7 @@ export default function ItemEdit(){
                 {saving && <div className="spinner w-4 h-4"></div>}
                 {saving ? 'Saqlanmoqda…' : 'Saqlash'}
               </button>
-              <button type="button" className="btn-outline" onClick={()=>navigate(-1)}>Bekor qilish</button>
+              <button type="button" className="btn-cancel" onClick={()=>navigate(-1)}>← Orqaga qaytish</button>
             </div>
           </form>
         </div>

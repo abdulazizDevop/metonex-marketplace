@@ -166,7 +166,7 @@ export default function ItemCreate() {
             </div>
             <div className="md:col-span-2 flex gap-3 pt-2">
               <button disabled={loading} className="btn-primary">{loading ? 'Yaratilmoqda…' : 'Yaratish'}</button>
-              <a href="/items" className="btn-outline">Bekor qilish</a>
+              <a href="/items" className="btn-cancel">Bekor qilish</a>
             </div>
           </form>
         </div>

@@ -132,7 +132,7 @@ export default function RequestCreate() {
           <h2 className="text-xl font-semibold text-gray-900">Yangi so'rov yaratish</h2>
           <button
             onClick={() => navigate('/requests/my')}
-            className="text-gray-600 hover:text-gray-800 text-sm font-medium"
+            className="btn-cancel"
           >
             ← Orqaga qaytish
           </button>

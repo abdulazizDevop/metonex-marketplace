@@ -115,7 +115,7 @@ export default function BuyerCreateRequest() {
           <h1 className="text-2xl font-bold text-gray-900">Yangi so'rov yaratish</h1>
           <button
             onClick={() => navigate('/buyer/requests')}
-            className="text-gray-600 hover:text-gray-800 text-sm font-medium"
+            className="btn-cancel"
           >
             ← Orqaga qaytish
           </button>
