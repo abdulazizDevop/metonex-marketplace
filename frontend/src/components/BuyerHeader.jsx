@@ -106,19 +106,19 @@ export default function BuyerHeader({
 
           {/* Navigation */}
           <nav className="flex items-center space-x-6">
-            <Link to="/buyer" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname === '/buyer' ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
+            <Link to="/buyer" className={`px-3 py-2 text-gray-700 hover:font-bold transition ${location.pathname === '/buyer' ? 'text-green-600 font-bold' : ''}`}>
               Mahsulotlar
             </Link>
-            <Link to="/buyer/catalog" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname === '/buyer/catalog' ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
+            <Link to="/buyer/catalog" className={`px-3 py-2 text-gray-700 hover:font-bold transition ${location.pathname === '/buyer/catalog' ? 'text-green-600 font-bold' : ''}`}>
               Katalog
             </Link>
-            <Link to="/buyer/requests" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname.startsWith('/buyer/requests') ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
+            <Link to="/buyer/requests" className={`px-3 py-2 text-gray-700 hover:font-bold transition ${location.pathname.startsWith('/buyer/requests') ? 'text-green-600 font-bold' : ''}`}>
               Buyurtmalar
             </Link>
-            <Link to="/buyer/orders" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname.startsWith('/buyer/orders') ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
+            <Link to="/buyer/orders" className={`px-3 py-2 text-gray-700 hover:font-bold transition ${location.pathname.startsWith('/buyer/orders') ? 'text-green-600 font-bold' : ''}`}>
               Xaridlarim
             </Link>
-            <Link to="/buyer/cart" className={`px-3 py-2 rounded text-white hover:font-bold transition flex items-center relative ${location.pathname === '/buyer/cart' ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
+            <Link to="/buyer/cart" className={`px-3 py-2 text-gray-700 hover:font-bold transition flex items-center relative ${location.pathname === '/buyer/cart' ? 'text-green-600 font-bold' : ''}`}>
               Savat
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-semibold rounded-full h-4 w-4 flex items-center justify-center shadow-sm border border-white">
@@ -126,10 +126,10 @@ export default function BuyerHeader({
                 </span>
               )}
             </Link>
-            <Link to="/buyer/profile" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname === '/buyer/profile' ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>
+            <Link to="/buyer/profile" className={`px-3 py-2 text-gray-700 hover:font-bold transition ${location.pathname === '/buyer/profile' ? 'text-green-600 font-bold' : ''}`}>
               Profil
             </Link>
-            <Link to="/buyer/notifications" className="relative px-3 py-2 rounded bg-gray-200 text-white hover:bg-gray-300 hover:font-bold transition">
+            <Link to="/buyer/notifications" className="relative px-3 py-2 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:font-bold transition">
               🔔
               {notificationCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-green-600 text-white text-[10px] leading-none px-1.5 py-0.5 rounded-full">
@@ -139,7 +139,7 @@ export default function BuyerHeader({
             </Link>
             <button 
               onClick={doLogout}
-              className="btn-exit"
+              className="px-3 py-2 rounded border border-red-300 bg-red-100 text-red-700 hover:bg-red-200 hover:font-bold transition"
             >
               🚪 Chiqish
             </button>

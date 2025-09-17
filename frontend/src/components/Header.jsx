@@ -77,17 +77,17 @@ export default function Header() {
           )}
           {isAuthed && isSeller && (
             <>
-              <Link to="/dashboard" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname === '/dashboard' ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>Dashboard</Link>
-              <Link to="/items" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname.startsWith('/items') ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>Mahsulotlar</Link>
-              <Link to="/orders/seller" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname.startsWith('/orders') ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>Buyurtmalar</Link>
-              <Link to="/requests" className={`px-3 py-2 rounded text-white hover:font-bold transition ${location.pathname.startsWith('/requests') ? 'bg-gray-400 font-bold' : 'bg-gray-200 hover:bg-gray-300'}`}>So'rovlar</Link>
-              <button aria-label="Notif" onClick={()=> setNotifOpen(v=>!v)} className="relative px-3 py-2 rounded bg-gray-200 text-white hover:bg-gray-300 hover:font-bold transition">
+              <Link to="/dashboard" className={`px-3 py-2 text-gray-700 hover:font-bold transition ${location.pathname === '/dashboard' ? 'text-blue-600 font-bold' : ''}`}>Dashboard</Link>
+              <Link to="/items" className={`px-3 py-2 text-gray-700 hover:font-bold transition ${location.pathname.startsWith('/items') ? 'text-blue-600 font-bold' : ''}`}>Mahsulotlar</Link>
+              <Link to="/orders/seller" className={`px-3 py-2 text-gray-700 hover:font-bold transition ${location.pathname.startsWith('/orders') ? 'text-blue-600 font-bold' : ''}`}>Buyurtmalar</Link>
+              <Link to="/requests" className={`px-3 py-2 text-gray-700 hover:font-bold transition ${location.pathname.startsWith('/requests') ? 'text-blue-600 font-bold' : ''}`}>So'rovlar</Link>
+              <button aria-label="Notif" onClick={()=> setNotifOpen(v=>!v)} className="relative px-3 py-2 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:font-bold transition">
                 🔔
                 {notif.unread>0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] leading-none px-1.5 py-0.5 rounded-full">{notif.unread}</span>
                 )}
               </button>
-              <button onClick={doLogout} className="btn-exit">🚪 Chiqish</button>
+              <button onClick={doLogout} className="px-3 py-2 rounded border border-red-300 bg-red-100 text-red-700 hover:bg-red-200 hover:font-bold transition">🚪 Chiqish</button>
               {notifOpen && (
                 <div className="absolute right-0 top-14 w-80 bg-white border border-gray-200 rounded-xl shadow-lg p-2 z-50">
                   <div className="flex items-center justify-between px-2 py-1">
