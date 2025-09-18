@@ -124,10 +124,16 @@ class SendVerificationCodeView(APIView):
             return Response({"detail": "phone talab qilinadi"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Phone number validatsiyasi
-        print(f"Phone validation: {phone}, isdigit: {phone.isdigit()}, len: {len(phone)}, starts_with: {phone.startswith('+998')}")
-        if not phone.isdigit() or len(phone) != 12 or not phone.startswith('+998'):
+        # Telefon raqamini tozalash (+ belgisini olib tashlash)
+        clean_phone = phone.replace('+', '')
+        print(f"Phone validation: original={phone}, clean={clean_phone}, isdigit: {clean_phone.isdigit()}, len: {len(clean_phone)}, starts_with: {clean_phone.startswith('998')}")
+        
+        if not clean_phone.isdigit() or len(clean_phone) != 12 or not clean_phone.startswith('998'):
             print(f"ERROR: Telefon raqam validatsiyasida xatolik: {phone}")
             return Response({"detail": "Telefon raqami noto'g'ri formatda. +998XXXXXXXXX ko'rinishida bo'lishi kerak"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Tozalangan raqamni ishlatish
+        phone = clean_phone
 
         now = timezone.now()
         # Cooldown: 60s ichida qayta yuborilmaydi
@@ -154,8 +160,9 @@ class SendVerificationCodeView(APIView):
         expires_at = now + timedelta(minutes=1)
         VerificationCode.objects.create(phone=phone, code=code, expires_at=expires_at)
 
-        # SMS yuborish
-        sms_result = sms_service.send_verification_code(phone, code)
+        # SMS yuborish (+ belgisini qo'shish)
+        sms_phone = f"+{phone}"
+        sms_result = sms_service.send_verification_code(sms_phone, code)
         
         if sms_result["success"]:
             logger.info(f"SMS kod muvaffaqiyatli yuborildi: {phone}")
