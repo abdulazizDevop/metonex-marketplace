@@ -85,7 +85,10 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        phone = attrs.get("phone")
+        # Telefonni normalize qilamiz: '+', bo'sh joy va '-' belgilarini olib tashlaymiz
+        raw_phone = attrs.get("phone") or ""
+        phone = raw_phone.replace('+', '').replace(' ', '').replace('-', '')
+        attrs["phone"] = phone
         password = attrs.get("password")
         user = authenticate(request=self.context.get("request"), username=phone, password=password)
         if not user:
