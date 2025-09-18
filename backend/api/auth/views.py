@@ -114,12 +114,19 @@ class SendVerificationCodeView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        print("=== SMS DEBUG ===")
+        print("Request data:", request.data)
+        print("Request headers:", dict(request.headers))
+        
         phone = request.data.get("phone")
         if not phone:
+            print("ERROR: phone talab qilinadi")
             return Response({"detail": "phone talab qilinadi"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Phone number validatsiyasi
+        print(f"Phone validation: {phone}, isdigit: {phone.isdigit()}, len: {len(phone)}, starts_with: {phone.startswith('+998')}")
         if not phone.isdigit() or len(phone) != 12 or not phone.startswith('+998'):
+            print(f"ERROR: Telefon raqam validatsiyasida xatolik: {phone}")
             return Response({"detail": "Telefon raqami noto'g'ri formatda. +998XXXXXXXXX ko'rinishida bo'lishi kerak"}, status=status.HTTP_400_BAD_REQUEST)
 
         now = timezone.now()
