@@ -9,7 +9,11 @@ from datetime import timedelta
 from api.models import Company, CompanyMember
 from .serializers import RegisterSerializer, LoginSerializer, ProfileSerializer
 from api.models import VerificationCode
+from api.sms_service import sms_service
 import random
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RegisterView(APIView):
@@ -143,8 +147,27 @@ class SendVerificationCodeView(APIView):
         expires_at = now + timedelta(minutes=1)
         VerificationCode.objects.create(phone=phone, code=code, expires_at=expires_at)
 
-        # TODO: uskiz.uz ga real yuborish. Hozircha ekranga chiqaramiz.
-        return Response({"phone": phone, "code": code, "expires_in_seconds": 60})
+        # SMS yuborish
+        sms_result = sms_service.send_verification_code(phone, code)
+        
+        if sms_result["success"]:
+            logger.info(f"SMS kod muvaffaqiyatli yuborildi: {phone}")
+            return Response({
+                "detail": "SMS kod yuborildi",
+                "phone": phone,
+                "expires_in_seconds": 60
+            })
+        else:
+            logger.error(f"SMS yuborishda xatolik: {sms_result.get('error', 'Noma\'lum xatolik')}")
+            # SMS yuborishda xatolik bo'lsa ham, kodni bazaga saqlaymiz
+            # (test rejimida ishlatish uchun)
+            return Response({
+                "detail": "SMS yuborishda xatolik yuz berdi",
+                "error": sms_result.get("error", "Noma'lum xatolik"),
+                "phone": phone,
+                "code": code,  # Test uchun kodni qaytaramiz
+                "expires_in_seconds": 60
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CustomTokenRefreshView(TokenRefreshView):

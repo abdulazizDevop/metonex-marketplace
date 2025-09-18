@@ -3,11 +3,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from api.models import Company, CompanyMember, Request, Order, CompanyCertificate, User, Notification, Item, Rating, VerificationCode
 from .serializers import CompanySerializer, CompanyMemberSerializer
+from api.sms_service import sms_service
 from django.db.models import Avg, Count
 from django.utils import timezone
 from datetime import timedelta
 import random
 import string
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -127,11 +131,20 @@ class CompanyViewSet(viewsets.ModelViewSet):
         expires_at = now + timedelta(minutes=5)  # 5 daqiqa amal qiladi
         VerificationCode.objects.create(phone=user.phone, code=code, expires_at=expires_at)
         
-        # TODO: Haqiqiy SMS xizmat bilan integratsiya qilish
-        # Hozircha faqat kod yaratiladi, notification yaratilmaydi
-        print(f"DEBUG: SMS kod {user.phone} uchun: {code}")
+        # SMS yuborish
+        sms_result = sms_service.send_verification_code(user.phone, code)
         
-        return Response({"detail": "SMS kod yuborildi"})
+        if sms_result["success"]:
+            logger.info(f"Parol o'zgartirish SMS kodi muvaffaqiyatli yuborildi: {user.phone}")
+            return Response({"detail": "SMS kod yuborildi"})
+        else:
+            logger.error(f"Parol o'zgartirish SMS yuborishda xatolik: {sms_result.get('error', 'Noma\'lum xatolik')}")
+            # SMS yuborishda xatolik bo'lsa ham, kodni bazaga saqlaymiz
+            return Response({
+                "detail": "SMS yuborishda xatolik yuz berdi",
+                "error": sms_result.get("error", "Noma'lum xatolik"),
+                "debug_code": code  # Test uchun kodni qaytaramiz
+            }, status=500)
 
     @action(detail=False, methods=["post"], permission_classes=[permissions.IsAuthenticated])
     def verify_password_change_sms(self, request):
