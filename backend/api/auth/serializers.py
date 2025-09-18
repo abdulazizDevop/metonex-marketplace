@@ -16,14 +16,23 @@ class RegisterSerializer(serializers.Serializer):
     company_region = serializers.CharField(max_length=100, required=False, allow_blank=True)
     company_inn = serializers.CharField(max_length=20, required=False, allow_blank=True)
 
+    def _normalize_phone(self, phone: str) -> str:
+        # '+' , bo'sh joy va '-' belgilarini olib tashlash
+        if not isinstance(phone, str):
+            return phone
+        return phone.replace('+', '').replace(' ', '').replace('-', '')
+
     def validate_phone(self, value):
-        if User.objects.filter(phone=value).exists():
+        normalized = self._normalize_phone(value)
+        if User.objects.filter(phone=normalized).exists():
             raise serializers.ValidationError("Telefon allaqachon ro'yxatdan o'tgan")
-        return value
+        return normalized
 
     def validate(self, attrs):
         from api.models import VerificationCode
-        phone = attrs.get("phone")
+        # Kelgan phone ni normalize qilamiz (frontend + bilan yuborsa ham)
+        phone = self._normalize_phone(attrs.get("phone", ""))
+        attrs["phone"] = phone
         code = str(attrs.get("verification_code"))
         # Faqat eng oxirgi yuborilgan kodni qabul qilamiz
         last_vc = (

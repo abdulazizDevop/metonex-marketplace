@@ -136,7 +136,7 @@ class SendVerificationCodeView(APIView):
         phone = clean_phone
 
         now = timezone.now()
-        # Cooldown: 60s ichida qayta yuborilmaydi
+        # Cooldown: 30s ichida qayta yuborilmaydi
         last = (
             VerificationCode.objects
             .filter(phone=phone)
@@ -145,10 +145,11 @@ class SendVerificationCodeView(APIView):
         )
         if last and last.used_at is None and last.expires_at > now:
             remaining = int((last.expires_at - now).total_seconds())
-            return Response({
-                "detail": "Hali amal qilayotgan kod mavjud",
-                "cooldown_remaining": remaining,
-            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+            if remaining > 30:  # Faqat 30 soniyadan ko'p qolgan bo'lsa
+                return Response({
+                    "detail": "Hali amal qilayotgan kod mavjud",
+                    "cooldown_remaining": remaining,
+                }, status=status.HTTP_429_TOO_MANY_REQUESTS)
 
         # Rate limit: 5/day
         start_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -157,7 +158,7 @@ class SendVerificationCodeView(APIView):
             return Response({"detail": "Kunlik limit tugagan"}, status=status.HTTP_429_TOO_MANY_REQUESTS)
 
         code = f"{random.randint(100000, 999999)}"
-        expires_at = now + timedelta(minutes=1)
+        expires_at = now + timedelta(minutes=5)  # 5 daqiqaga oshirildi
         VerificationCode.objects.create(phone=phone, code=code, expires_at=expires_at)
 
         # SMS yuborish (+ belgisini qo'shish)
@@ -169,7 +170,7 @@ class SendVerificationCodeView(APIView):
             return Response({
                 "detail": "SMS kod yuborildi",
                 "phone": phone,
-                "expires_in_seconds": 60
+                "expires_in_seconds": 300  # 5 daqiqa = 300 soniya
             })
         else:
             logger.error(f"SMS yuborishda xatolik: {sms_result.get('error', 'Nomalum xatolik')}")
@@ -180,7 +181,7 @@ class SendVerificationCodeView(APIView):
                 "error": sms_result.get("error", "Noma'lum xatolik"),
                 "phone": phone,
                 "code": code,  # Test uchun kodni qaytaramiz
-                "expires_in_seconds": 60
+                "expires_in_seconds": 300  # 5 daqiqa = 300 soniya
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
