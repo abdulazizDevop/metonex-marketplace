@@ -138,7 +138,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
             logger.info(f"Parol o'zgartirish SMS kodi muvaffaqiyatli yuborildi: {user.phone}")
             return Response({"detail": "SMS kod yuborildi"})
         else:
-            logger.error(f"Parol o'zgartirish SMS yuborishda xatolik: {sms_result.get('error', "Noma'lum xatolik")}")
+            logger.error(f"Parol o'zgartirish SMS yuborishda xatolik: {sms_result.get('error', 'Nomalum xatolik')}")
             # SMS yuborishda xatolik bo'lsa ham, kodni bazaga saqlaymiz
             return Response({
                 "detail": "SMS yuborishda xatolik yuz berdi",

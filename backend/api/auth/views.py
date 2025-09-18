@@ -158,7 +158,7 @@ class SendVerificationCodeView(APIView):
                 "expires_in_seconds": 60
             })
         else:
-            logger.error(f"SMS yuborishda xatolik: {sms_result.get('error', "Noma'lum xatolik")}")
+            logger.error(f"SMS yuborishda xatolik: {sms_result.get('error', 'Nomalum xatolik')}")
             # SMS yuborishda xatolik bo'lsa ham, kodni bazaga saqlaymiz
             # (test rejimida ishlatish uchun)
             return Response({
