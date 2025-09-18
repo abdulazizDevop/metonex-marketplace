@@ -63,8 +63,8 @@ class EskizSMSService:
         
         try:
             response = self.eskiz.send_sms(
-                phone=clean_phone,
-                message=message,
+                clean_phone,
+                message,
                 from_whom=self.sender
             )
             
@@ -83,7 +83,7 @@ class EskizSMSService:
     
     def send_verification_code(self, phone: str, code: str) -> Dict[str, Any]:
         """
-        Tasdiqlash kodi yuborish
+        Tasdiqlash kodi yuborish (ro'yxatdan o'tish)
         
         Args:
             phone: Telefon raqami
@@ -92,7 +92,21 @@ class EskizSMSService:
         Returns:
             Dict: API javobi
         """
-        message = f"MetOneX tasdiqlash kodi: {code}. Kodni hech kimga bermang!"
+        message = f"metonex.uz saytida ro'yxatdan o'tish uchun tasdiqlash kodi: {code}"
+        return self.send_sms(phone, message)
+    
+    def send_password_change_code(self, phone: str, code: str) -> Dict[str, Any]:
+        """
+        Parol o'zgartirish kodi yuborish
+        
+        Args:
+            phone: Telefon raqami
+            code: 6 xonali kod
+            
+        Returns:
+            Dict: API javobi
+        """
+        message = f"MetOneX Marketplaceda parolingizni o'zgartirish uchun kodi: {code}"
         return self.send_sms(phone, message)
 
 

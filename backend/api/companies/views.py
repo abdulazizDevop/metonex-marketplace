@@ -131,8 +131,8 @@ class CompanyViewSet(viewsets.ModelViewSet):
         expires_at = now + timedelta(minutes=5)  # 5 daqiqa amal qiladi
         VerificationCode.objects.create(phone=user.phone, code=code, expires_at=expires_at)
         
-        # SMS yuborish
-        sms_result = sms_service.send_verification_code(user.phone, code)
+        # SMS yuborish (parol o'zgartirish uchun)
+        sms_result = sms_service.send_password_change_code(user.phone, code)
         
         if sms_result["success"]:
             logger.info(f"Parol o'zgartirish SMS kodi muvaffaqiyatli yuborildi: {user.phone}")
