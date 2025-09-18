@@ -19,11 +19,6 @@ class EskizSMSService:
         
         if self.email and self.password:
             try:
-                print(f"=== ESKIZ DEBUG ===")
-                print(f"Email: {self.email}")
-                print(f"Password: {self.password}***")
-                print(f"Sender: {self.sender}")
-                
                 self.eskiz = EskizSMS(
                     email=self.email, 
                     password=self.password,
@@ -31,10 +26,8 @@ class EskizSMSService:
                     env_file_path='.env'
                 )
                 logger.info("Eskiz SMS xizmati muvaffaqiyatli ishga tushirildi")
-                print("Eskiz SMS xizmati ishga tushirildi")
             except Exception as e:
                 logger.error(f"Eskiz SMS xizmatini ishga tushirishda xatolik: {e}")
-                print(f"Eskiz SMS xizmatini ishga tushirishda xatolik: {e}")
                 self.eskiz = None
         else:
             logger.warning("Eskiz email yoki parol sozlanmagan")
@@ -69,18 +62,12 @@ class EskizSMSService:
             }
         
         try:
-            print(f"=== SMS SEND DEBUG ===")
-            print(f"Phone: {clean_phone}")
-            print(f"Message: {message}")
-            print(f"Sender: {self.sender}")
-            
             response = self.eskiz.send_sms(
                 clean_phone,
                 message,
                 from_whom=self.sender
             )
             
-            print(f"SMS response: {response}")
             logger.info(f"SMS muvaffaqiyatli yuborildi: {phone}")
             return {
                 "success": True,

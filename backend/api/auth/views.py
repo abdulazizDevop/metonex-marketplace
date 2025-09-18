@@ -21,8 +21,15 @@ class RegisterView(APIView):
 
     @transaction.atomic
     def post(self, request):
+        print("=== REGISTER DEBUG ===")
+        print("Request data:", request.data)
+        print("Request headers:", dict(request.headers))
+        
         serializer = RegisterSerializer(data=request.data, context={"request": request})
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            print("Register serializer errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
         result = serializer.save()
         user = result["user"]
         company = result.get("company")
@@ -114,22 +121,15 @@ class SendVerificationCodeView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        print("=== SMS DEBUG ===")
-        print("Request data:", request.data)
-        print("Request headers:", dict(request.headers))
-        
         phone = request.data.get("phone")
         if not phone:
-            print("ERROR: phone talab qilinadi")
             return Response({"detail": "phone talab qilinadi"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Phone number validatsiyasi
         # Telefon raqamini tozalash (+ belgisini olib tashlash)
         clean_phone = phone.replace('+', '')
-        print(f"Phone validation: original={phone}, clean={clean_phone}, isdigit: {clean_phone.isdigit()}, len: {len(clean_phone)}, starts_with: {clean_phone.startswith('998')}")
         
         if not clean_phone.isdigit() or len(clean_phone) != 12 or not clean_phone.startswith('998'):
-            print(f"ERROR: Telefon raqam validatsiyasida xatolik: {phone}")
             return Response({"detail": "Telefon raqami noto'g'ri formatda. +998XXXXXXXXX ko'rinishida bo'lishi kerak"}, status=status.HTTP_400_BAD_REQUEST)
         
         # Tozalangan raqamni ishlatish
