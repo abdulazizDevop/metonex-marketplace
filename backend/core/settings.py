@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import timedelta
 import os
+from tkinter import E
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -215,6 +216,6 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # SMS xizmati sozlamalari (Eskiz.uz)
-ESKIZ_EMAIL = os.environ.get('ESKIZ_EMAIL', "olimovabdulaziz464@gmail.com")
-ESKIZ_PASSWORD = os.environ.get('ESKIZ_PASSWORD', "Toshkent2024")
-ESKIZ_SENDER = os.environ.get('ESKIZ_SENDER', '4546')
+ESKIZ_EMAIL = "olimovabdulaziz464@gmail.com"
+ESKIZ_PASSWORD = "GKJCUiYZrACgkj39Fbx9st6OpA2vwaE9snIBpKo7"
+ESKIZ_SENDER = "4546"
