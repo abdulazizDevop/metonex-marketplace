@@ -637,5 +637,36 @@ export async function confirmCashPayment(id) {
 //   return data
 // }
 
+// Auth functions
+export async function sendVerificationCode(phone) {
+  const { data } = await api.post('/auth/send-code/', { phone })
+  return data
+}
+
+export async function register(registerData) {
+  const { data } = await api.post('/auth/register/', registerData)
+  return data
+}
+
+export async function login(phone, password) {
+  const { data } = await api.post('/auth/login/', { phone, password })
+  return data
+}
+
+export async function logout() {
+  const { data } = await api.post('/auth/logout/', {})
+  return data
+}
+
+export async function getProfile() {
+  const { data } = await api.get('/auth/profile/', { headers: authHeaders() })
+  return data
+}
+
+export async function updateProfile(profileData) {
+  const { data } = await api.put('/auth/profile/', profileData, { headers: authHeaders() })
+  return data
+}
+
 // Cache busting comment - updated at 2025-09-11 14:47
 // Force reload - getCategories function is available

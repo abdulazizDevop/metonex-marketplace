@@ -42,8 +42,29 @@ export default function Register() {
   async function submit(e) {
     e.preventDefault()
     setError(''); setOk('')
+    
+    // Telefon raqamini tozalash
+    let phone = form.phone.trim()
+    if (!phone.startsWith('+')) {
+      phone = '+' + phone
+    }
+    
     try {
-      await axios.post(`${API_URL}/auth/register/`, { ...form, verification_code: parseInt(form.verification_code, 10) })
+      const registerData = {
+        ...form,
+        phone: phone,
+        verification_code: parseInt(form.verification_code, 10)
+      }
+      
+      const response = await axios.post(`${API_URL}/auth/register/`, registerData)
+      
+      // Tokenlarni saqlash
+      if (response.data.access) {
+        localStorage.setItem('access', response.data.access)
+        localStorage.setItem('refresh', response.data.refresh)
+        localStorage.setItem('user_role', response.data.user?.type || '')
+      }
+      
       setOk('Muvaffaqiyatli. Endi kirishingiz mumkin.')
       const overlay=document.createElement('div');
       overlay.className='fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-[60]';
@@ -51,18 +72,39 @@ export default function Register() {
       document.body.appendChild(overlay);
       setTimeout(()=>{ window.location.href = '/login' }, 700)
     } catch (err) {
-      setError('Ro’yxatdan o’tishda xato')
+      console.error('Register xatosi:', err.response?.data || err.message)
+      setError(err.response?.data?.detail || 'Ro\'yxatdan o\'tishda xato')
     }
   }
 
   async function sendCode() {
     setError(''); setOk('')
+    
+    // Telefon raqamini tozalash va validatsiya
+    let phone = form.phone.trim()
+    if (!phone) {
+      setError('Telefon raqamini kiriting')
+      return
+    }
+    
+    // + belgisini qo'shish (agar yo'q bo'lsa)
+    if (!phone.startsWith('+')) {
+      phone = '+' + phone
+    }
+    
+    // +998 bilan boshlanishini tekshirish
+    if (!phone.startsWith('+998')) {
+      setError('Telefon raqami +998 bilan boshlanishi kerak')
+      return
+    }
+    
     try {
-      const { data } = await axios.post(`${API_URL}/auth/send-code/`, { phone: form.phone })
+      const { data } = await axios.post(`${API_URL}/auth/send-code/`, { phone })
       setCodeSent(true)
       setOk(`Kod yuborildi. Amal qilish vaqti: ${data.expires_in_seconds}s`)
     } catch (err) {
-      setError('Kod yuborishda xato yoki cooldown')
+      console.error('SMS kod yuborish xatosi:', err.response?.data || err.message)
+      setError(err.response?.data?.detail || 'Kod yuborishda xato yoki cooldown')
     }
   }
 
