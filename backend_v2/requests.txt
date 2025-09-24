@@ -49,1023 +49,626 @@ Content-Type: application/json
 # 1.5 Foydalanuvchi chiqish
 POST http://localhost:8000/api/v1/auth/logout/
 Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 1.6 Token yangilash
+POST http://localhost:8000/api/v1/auth/refresh/
 Content-Type: application/json
 
 {
-    "refresh_token": "YOUR_REFRESH_TOKEN"
+    "refresh": "YOUR_REFRESH_TOKEN"
 }
 
-# 1.6 Foydalanuvchi profili (GET)
+# 1.7 Profil ma'lumotlarini olish
 GET http://localhost:8000/api/v1/auth/profile/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 1.7 Foydalanuvchi profili (PUT)
+# 1.8 Profil ma'lumotlarini yangilash
 PUT http://localhost:8000/api/v1/auth/profile/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
-    "first_name": "John",
-    "last_name": "Doe",
-    "avatar": "base64_encoded_image_or_url"
+    "first_name": "John Updated",
+    "last_name": "Doe Updated",
+    "email": "john.doe@example.com"
 }
 
-# 1.8 Parol o'zgartirish
-POST http://localhost:8000/api/v1/auth/change-password/
-Authorization: Bearer YOUR_ACCESS_TOKEN
+# 1.9 Parol o'zgartirish uchun SMS kod yuborish
+POST http://localhost:8000/api/v1/auth/send-password-reset-sms/
 Content-Type: application/json
 
 {
-    "old_password": "OldPass123!",
-    "new_password": "NewPass123!",
-    "new_password_confirm": "NewPass123!"
+    "phone": "+998901234567"
 }
 
-# 1.9 Telefon raqami tasdiqlash
-POST http://localhost:8000/api/v1/auth/verify-phone/
-Authorization: Bearer YOUR_ACCESS_TOKEN
+# 1.10 Parol o'zgartirish
+POST http://localhost:8000/api/v1/auth/reset-password/
 Content-Type: application/json
 
 {
     "phone": "+998901234567",
-    "code": "123456"
-}
-
-# 1.10 Token yangilash
-POST http://localhost:8000/api/v1/auth/token/refresh/
-Content-Type: application/json
-
-{
-    "refresh": "YOUR_REFRESH_TOKEN"
-}
-
-# 1.11 Token blacklist
-POST http://localhost:8000/api/v1/auth/token/blacklist/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "refresh": "YOUR_REFRESH_TOKEN"
+    "code": "123456",
+    "new_password": "NewSecurePass123!",
+    "new_password_confirm": "NewSecurePass123!"
 }
 
 # ===========================================
-# 2. USER MANAGEMENT ENDPOINTS
+# 2. CATALOG ENDPOINTS
 # ===========================================
 
-# 2.1 Foydalanuvchilar ro'yxati
-GET http://localhost:8000/api/v1/users/
+# 2.1 Kategoriyalar ro'yxati
+GET http://localhost:8000/api/v1/catalog/categories/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 2.2 Foydalanuvchi batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/users/1/
+# 2.2 Kategoriya ma'lumotlari
+GET http://localhost:8000/api/v1/catalog/categories/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 2.3 Joriy foydalanuvchi ma'lumotlari
-GET http://localhost:8000/api/v1/users/me/
+# 2.3 Sub-kategoriyalar ro'yxati
+GET http://localhost:8000/api/v1/catalog/subcategories/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 2.4 Sotuvchilar ro'yxati
-GET http://localhost:8000/api/v1/users/suppliers/
+# 2.4 Sub-kategoriya ma'lumotlari
+GET http://localhost:8000/api/v1/catalog/subcategories/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 2.5 Sotib oluvchilar ro'yxati
-GET http://localhost:8000/api/v1/users/buyers/
+# 2.5 Birliklar ro'yxati
+GET http://localhost:8000/api/v1/catalog/units/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 2.6 Ishlab chiqaruvchilar ro'yxati
-GET http://localhost:8000/api/v1/users/manufacturers/
+# 2.6 Birlik ma'lumotlari
+GET http://localhost:8000/api/v1/catalog/units/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 2.7 Dilerlar ro'yxati
-GET http://localhost:8000/api/v1/users/dealers/
+# 2.7 Zavodlar ro'yxati
+GET http://localhost:8000/api/v1/catalog/factories/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 2.8 Foydalanuvchini faollashtirish
-POST http://localhost:8000/api/v1/users/1/activate/
+# 2.8 Zavod ma'lumotlari
+GET http://localhost:8000/api/v1/catalog/factories/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 2.9 Foydalanuvchini deaktivlashtirish
-POST http://localhost:8000/api/v1/users/1/deactivate/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 2.10 Foydalanuvchi mahsulotlari
-GET http://localhost:8000/api/v1/users/1/products/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 2.11 Foydalanuvchi RFQ lari
-GET http://localhost:8000/api/v1/users/1/rfqs/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 2.12 Foydalanuvchi takliflari
-GET http://localhost:8000/api/v1/users/1/offers/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 2.13 Foydalanuvchi buyurtmalari
-GET http://localhost:8000/api/v1/users/1/orders/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 2.14 Foydalanuvchi statistikasi
-GET http://localhost:8000/api/v1/users/1/stats/
+# 2.9 Kategoriya uchun mavjud birliklar
+GET http://localhost:8000/api/v1/catalog/categories/1/units/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
 # ===========================================
-# 3. COMPANY MANAGEMENT ENDPOINTS
+# 3. COMPANY ENDPOINTS
 # ===========================================
 
-# 3.1 Kompaniyalar ro'yxati
-GET http://localhost:8000/api/v1/companies/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 3.2 Kompaniya yaratish
-POST http://localhost:8000/api/v1/companies/create/
+# 3.1 Kompaniya yaratish
+POST http://localhost:8000/api/v1/companies/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
     "name": "MetOneX Company",
-    "legal_address": "Toshkent shahar, Chilonzor tumani",
-    "inn_stir": "123456789",
+    "type": "supplier",
+    "inn": "123456789",
+    "address": "Toshkent shahar, Chilonzor tumani",
+    "phone": "+998901234567",
+    "email": "info@metonex.com",
+    "description": "MetOneX kompaniyasi",
     "bank_details": {
         "bank_name": "Xalq Banki",
-        "account_number": "1234567890123456",
+        "account_number": "20208000000000000001",
         "mfo": "00014"
-    },
-    "accountant_contact": {
-        "name": "Ahmad Karimov",
-        "phone": "+998901234567",
-        "email": "ahmad@company.com"
-    },
-    "telegram_owner": "@company_owner",
-    "categories": [1, 2, 3],
-    "factories": [1, 2]
+    }
 }
 
-# 3.3 Kompaniya yangilash
-PUT http://localhost:8000/api/v1/companies/update/
+# 3.2 Kompaniya ma'lumotlarini olish
+GET http://localhost:8000/api/v1/companies/1/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 3.3 Kompaniya ma'lumotlarini yangilash
+PUT http://localhost:8000/api/v1/companies/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
-    "name": "Updated Company Name",
-    "legal_address": "Updated Address",
-    "inn_stir": "987654321",
-    "categories": [1, 2],
-    "factories": [1]
+    "name": "MetOneX Company Updated",
+    "description": "Yangilangan tavsif"
 }
 
-# 3.4 Kompaniya profili
-GET http://localhost:8000/api/v1/companies/profile/
+# 3.4 Kompaniya ro'yxati
+GET http://localhost:8000/api/v1/companies/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
 # 3.5 Mening kompaniyam
 GET http://localhost:8000/api/v1/companies/my-company/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 3.6 Kompaniya profili yaratish
-POST http://localhost:8000/api/v1/companies/create-profile/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "name": "My Company",
-    "legal_address": "Company Address",
-    "inn_stir": "123456789"
-}
-
-# 3.7 Kompaniya batafsil profili
-GET http://localhost:8000/api/v1/companies/1/profile/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 3.8 Kompaniyani tasdiqlash
-POST http://localhost:8000/api/v1/companies/1/verify/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 3.9 Kompaniya tasdiqini bekor qilish
-POST http://localhost:8000/api/v1/companies/1/unverify/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 3.10 Tasdiqlangan kompaniyalar
-GET http://localhost:8000/api/v1/companies/verified/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 3.11 Tasdiqlanmagan kompaniyalar
-GET http://localhost:8000/api/v1/companies/unverified/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
 # ===========================================
-# 4. CATALOG MANAGEMENT ENDPOINTS
+# 4. RFQ ENDPOINTS
 # ===========================================
 
-# 4.1 Katalog meta ma'lumotlari
-GET http://localhost:8000/api/v1/catalog/meta/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.2 Birliklar ro'yxati
-GET http://localhost:8000/api/v1/catalog/units/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.3 Birlik yaratish
-POST http://localhost:8000/api/v1/catalog/units/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "name": "Kilogramm",
-    "symbol": "kg",
-    "unit_type": "weight"
-}
-
-# 4.4 Birlik turlari bo'yicha
-GET http://localhost:8000/api/v1/catalog/units/by-type/?unit_type=weight
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.5 Og'irlik birliklari
-GET http://localhost:8000/api/v1/catalog/units/weight/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.6 Hajm birliklari
-GET http://localhost:8000/api/v1/catalog/units/volume/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.7 Dona birliklari
-GET http://localhost:8000/api/v1/catalog/units/piece/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.8 Uzunlik birliklari
-GET http://localhost:8000/api/v1/catalog/units/length/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.9 Maydon birliklari
-GET http://localhost:8000/api/v1/catalog/units/area/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.10 Kategoriyalar ro'yxati
-GET http://localhost:8000/api/v1/catalog/categories/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.11 Kategoriya yaratish
-POST http://localhost:8000/api/v1/catalog/categories/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "name": "Beton",
-    "slug": "beton",
-    "unit_type": "volume",
-    "default_unit": 1
-}
-
-# 4.12 Kategoriya batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/catalog/categories/1/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.13 Kategoriya sub-kategoriyalari bilan
-GET http://localhost:8000/api/v1/catalog/categories/1/with-subcategories/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.14 Kategoriya mavjud birliklari
-GET http://localhost:8000/api/v1/catalog/categories/1/available-units/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.15 Kategoriya standart birligi
-GET http://localhost:8000/api/v1/catalog/categories/1/default-unit/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.16 Barcha kategoriyalar sub-kategoriyalari bilan
-GET http://localhost:8000/api/v1/catalog/categories/with-subcategories-all/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.17 Sub-kategoriyalar ro'yxati
-GET http://localhost:8000/api/v1/catalog/subcategories/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.18 Sub-kategoriya yaratish
-POST http://localhost:8000/api/v1/catalog/subcategories/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "name": "Beton M400",
-    "category": 1
-}
-
-# 4.19 Sub-kategoriya batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/catalog/subcategories/1/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.20 Sub-kategoriya mavjud birliklari
-GET http://localhost:8000/api/v1/catalog/subcategories/1/available-units/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.21 Sub-kategoriya standart birligi
-GET http://localhost:8000/api/v1/catalog/subcategories/1/default-unit/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.22 Kategoriya bo'yicha sub-kategoriyalar
-GET http://localhost:8000/api/v1/catalog/subcategories/by-category/?category_id=1
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.23 Zavodlar ro'yxati
-GET http://localhost:8000/api/v1/catalog/factories/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.24 Zavod yaratish
-POST http://localhost:8000/api/v1/catalog/factories/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "name": "Toshkent Beton Zavodi",
-    "location": "Toshkent viloyati, Qibray tumani"
-}
-
-# 4.25 Zavod batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/catalog/factories/1/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 4.26 Zavod dilerlari
-GET http://localhost:8000/api/v1/catalog/factories/1/dealers/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# ===========================================
-# 5. PRODUCT MANAGEMENT ENDPOINTS
-# ===========================================
-
-# 5.1 Mahsulotlar ro'yxati
-GET http://localhost:8000/api/v1/products/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 5.2 Mahsulot yaratish
-POST http://localhost:8000/api/v1/products/create/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "category": 1,
-    "factory": 1,
-    "brand": "Toshkent Beton",
-    "grade": "M400",
-    "unit": 1,
-    "base_price": "150000.00",
-    "currency": "UZS",
-    "min_order_quantity": "1.00",
-    "delivery_locations": ["Toshkent", "Samarqand", "Buxoro"],
-    "photos": ["https://example.com/photo1.jpg", "https://example.com/photo2.jpg"],
-    "certificates": ["https://example.com/cert1.pdf"],
-    "specifications": {
-        "strength": "M400",
-        "water_resistance": "W6",
-        "frost_resistance": "F100"
-    },
-    "material": "Beton",
-    "origin_country": "O'zbekiston",
-    "warranty_period": 12
-}
-
-# 5.3 Mahsulot batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/products/1/detail/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 5.4 Mahsulot yangilash
-PUT http://localhost:8000/api/v1/products/1/update/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "base_price": "160000.00",
-    "min_order_quantity": "2.00",
-    "warranty_period": 24
-}
-
-# 5.5 Mahsulot qidirish
-GET http://localhost:8000/api/v1/products/search/?q=beton&category=1&min_price=100000&max_price=200000
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 5.6 Mahsulot analitikasi
-GET http://localhost:8000/api/v1/products/analytics/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 5.7 Mening mahsulotlarim
-GET http://localhost:8000/api/v1/products/my-products/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 5.8 Taniqli mahsulotlar
-GET http://localhost:8000/api/v1/products/featured/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 5.9 Kategoriya bo'yicha mahsulotlar
-GET http://localhost:8000/api/v1/products/by-category/?category_id=1
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 5.10 Sotuvchi bo'yicha mahsulotlar
-GET http://localhost:8000/api/v1/products/by-supplier/?supplier_id=1
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 5.11 Mahsulot ko'rishlar sonini oshirish
-POST http://localhost:8000/api/v1/products/1/increment-view/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# ===========================================
-# 6. RFQ (REQUEST FOR QUOTE) ENDPOINTS
-# ===========================================
-
-# 6.1 RFQ ro'yxati
-GET http://localhost:8000/api/v1/rfqs/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 6.2 RFQ yaratish
-POST http://localhost:8000/api/v1/rfqs/create/
+# 4.1 RFQ yaratish
+POST http://localhost:8000/api/v1/rfqs/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
     "category": 1,
     "subcategory": 1,
-    "brand": "Toshkent Beton",
-    "grade": "M400",
-    "sizes": ["20x20x40", "15x15x30"],
-    "volume": "100.00",
+    "brand": "Premium",
+    "grade": "A+",
+    "sizes": ["10x20", "15x25"],
+    "volume": 1000.50,
     "unit": 1,
     "delivery_location": "Toshkent shahar",
-    "delivery_date": "2024-12-31",
+    "delivery_date": "2025-10-15",
     "payment_method": "bank"
 }
 
-# 6.3 RFQ batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/rfqs/1/detail/
+# 4.2 RFQ ro'yxati
+GET http://localhost:8000/api/v1/rfqs/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 6.4 RFQ yangilash
-PUT http://localhost:8000/api/v1/rfqs/1/update/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "volume": "150.00",
-    "delivery_date": "2024-12-25"
-}
-
-# 6.5 RFQ qidirish
-GET http://localhost:8000/api/v1/rfqs/search/?q=beton&category=1&status=active
+# 4.3 RFQ ma'lumotlari
+GET http://localhost:8000/api/v1/rfqs/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 6.6 Mening RFQ larim
+# 4.4 Mening RFQ'larim
 GET http://localhost:8000/api/v1/rfqs/my-rfqs/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 6.7 Faol RFQ lar
-GET http://localhost:8000/api/v1/rfqs/active/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 6.8 Yakunlangan RFQ lar
-GET http://localhost:8000/api/v1/rfqs/completed/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 6.9 Bekor qilingan RFQ lar
-GET http://localhost:8000/api/v1/rfqs/cancelled/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 6.10 Kategoriya bo'yicha RFQ lar
-GET http://localhost:8000/api/v1/rfqs/by-category/?category_id=1
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 6.11 Sotib oluvchi bo'yicha RFQ lar
-GET http://localhost:8000/api/v1/rfqs/by-buyer/?buyer_id=1
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 6.12 RFQ takliflari
-GET http://localhost:8000/api/v1/rfqs/1/offers/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 6.13 RFQ taklifini qabul qilish
-POST http://localhost:8000/api/v1/rfqs/1/accept-offer/
+# 4.5 RFQ yangilash
+PUT http://localhost:8000/api/v1/rfqs/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
-    "offer_id": 1
+    "volume": 1500.75,
+    "delivery_date": "2025-10-20"
 }
 
-# 6.14 RFQ ni bekor qilish
+# 4.6 RFQ bekor qilish
 POST http://localhost:8000/api/v1/rfqs/1/cancel/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 6.15 RFQ ni yakunlash
-POST http://localhost:8000/api/v1/rfqs/1/complete/
+# ===========================================
+# 5. OFFER ENDPOINTS
+# ===========================================
+
+# 5.1 Taklif yaratish
+POST http://localhost:8000/api/v1/offers/
 Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
 
-# ===========================================
-# 7. OFFER MANAGEMENT ENDPOINTS
-# ===========================================
+{
+    "rfq": 1,
+    "unit_price": 15000.00,
+    "total_price": 15000000.00,
+    "delivery_time": 7,
+    "delivery_cost": 500000.00,
+    "payment_terms": "50% oldindan, 50% yetkazib berishda",
+    "notes": "Yuqori sifatli mahsulot"
+}
 
-# 7.1 Takliflar ro'yxati
+# 5.2 Taklif ro'yxati
 GET http://localhost:8000/api/v1/offers/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 7.2 Taklif yaratish
-POST http://localhost:8000/api/v1/offers/create/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "rfq": 1,
-    "product": 1,
-    "price_per_unit": "150000.00",
-    "total_amount": "15000000.00",
-    "delivery_terms": "EXW - Toshkent shahar",
-    "delivery_date": "2024-12-20"
-}
-
-# 7.3 Taklif batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/offers/1/detail/
+# 5.3 Taklif ma'lumotlari
+GET http://localhost:8000/api/v1/offers/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 7.4 Taklif yangilash
-PUT http://localhost:8000/api/v1/offers/1/update/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "price_per_unit": "145000.00",
-    "delivery_date": "2024-12-18"
-}
-
-# 7.5 Taklifni qabul qilish
-POST http://localhost:8000/api/v1/offers/1/accept/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 7.6 Taklifni rad etish
-POST http://localhost:8000/api/v1/offers/1/reject/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "reason": "Narx juda yuqori"
-}
-
-# 7.7 Qarshi taklif yaratish
-POST http://localhost:8000/api/v1/offers/counter-offers/create/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "original_offer": 1,
-    "price_per_unit": "140000.00",
-    "volume": "100.00",
-    "delivery_date": "2024-12-15",
-    "comment": "Narxni kamaytirish mumkin"
-}
-
-# 7.8 Qarshi taklifni qabul qilish
-POST http://localhost:8000/api/v1/offers/counter-offers/1/accept/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 7.9 Qarshi taklifni rad etish
-POST http://localhost:8000/api/v1/offers/counter-offers/1/reject/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 7.10 Taklif qidirish
-GET http://localhost:8000/api/v1/offers/search/?rfq_id=1&status=pending
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 7.11 Mening takliflarim
+# 5.4 Mening takliflarim
 GET http://localhost:8000/api/v1/offers/my-offers/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 7.12 Kutilayotgan takliflar
-GET http://localhost:8000/api/v1/offers/pending/
+# 5.5 Taklifni qabul qilish
+POST http://localhost:8000/api/v1/offers/1/accept/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 7.13 Qabul qilingan takliflar
-GET http://localhost:8000/api/v1/offers/accepted/
+# 5.6 Taklifni rad etish
+POST http://localhost:8000/api/v1/offers/1/reject/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 7.14 Rad etilgan takliflar
-GET http://localhost:8000/api/v1/offers/rejected/
+# 5.7 Taklif yangilash
+PUT http://localhost:8000/api/v1/offers/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
 
-# 7.15 Qarshi taklif qilingan
-GET http://localhost:8000/api/v1/offers/counter-offered/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 7.16 RFQ bo'yicha takliflar
-GET http://localhost:8000/api/v1/offers/by-rfq/?rfq_id=1
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 7.17 Sotuvchi bo'yicha takliflar
-GET http://localhost:8000/api/v1/offers/by-supplier/?supplier_id=1
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 7.18 Taklif qarshi takliflari
-GET http://localhost:8000/api/v1/offers/1/counter-offers/
-Authorization: Bearer YOUR_ACCESS_TOKEN
+{
+    "unit_price": 14500.00,
+    "total_price": 14500000.00,
+    "notes": "Yangilangan taklif"
+}
 
 # ===========================================
-# 8. ORDER MANAGEMENT ENDPOINTS
+# 6. ORDER ENDPOINTS
 # ===========================================
 
-# 8.1 Buyurtmalar ro'yxati
+# 6.1 Buyurtma ro'yxati
 GET http://localhost:8000/api/v1/orders/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 8.2 Buyurtma yaratish
-POST http://localhost:8000/api/v1/orders/create/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "rfq": 1,
-    "offer": 1,
-    "total_amount": "15000000.00",
-    "payment_method": "bank",
-    "delivery_date": "2024-12-20",
-    "delivery_address": "Toshkent shahar, Chilonzor tumani, 1-uy",
-    "delivery_contact": {
-        "name": "Ahmad Karimov",
-        "phone": "+998901234567"
-    }
-}
-
-# 8.3 Buyurtma batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/orders/1/detail/
+# 6.2 Buyurtma ma'lumotlari
+GET http://localhost:8000/api/v1/orders/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 8.4 Buyurtma yangilash
-PUT http://localhost:8000/api/v1/orders/1/update/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "delivery_address": "Yangi manzil",
-    "delivery_date": "2024-12-25"
-}
-
-# 8.5 Buyurtma holatini yangilash
-PUT http://localhost:8000/api/v1/orders/1/status/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "status": "in_preparation",
-    "comment": "Mahsulot tayyorlanmoqda"
-}
-
-# 8.6 Buyurtma qidirish
-GET http://localhost:8000/api/v1/orders/search/?status=created&buyer_id=1
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.7 Mening buyurtmalarim
+# 6.3 Mening buyurtmalarim
 GET http://localhost:8000/api/v1/orders/my-orders/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 8.8 Sotib oluvchi buyurtmalari
-GET http://localhost:8000/api/v1/orders/buyer-orders/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.9 Sotuvchi buyurtmalari
-GET http://localhost:8000/api/v1/orders/supplier-orders/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.10 Yaratilgan buyurtmalar
-GET http://localhost:8000/api/v1/orders/created/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.11 Shartnoma yaratilgan buyurtmalar
-GET http://localhost:8000/api/v1/orders/contract-generated/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.12 To'lov kutilayotgan buyurtmalar
-GET http://localhost:8000/api/v1/orders/awaiting-payment/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.13 To'lov qabul qilingan buyurtmalar
-GET http://localhost:8000/api/v1/orders/payment-received/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.14 Tayyorlanayotgan buyurtmalar
-GET http://localhost:8000/api/v1/orders/in-preparation/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.15 Yo'ldagi buyurtmalar
-GET http://localhost:8000/api/v1/orders/in-transit/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.16 Yetkazib berilgan buyurtmalar
-GET http://localhost:8000/api/v1/orders/delivered/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.17 Tasdiqlangan buyurtmalar
-GET http://localhost:8000/api/v1/orders/confirmed/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.18 Yakunlangan buyurtmalar
-GET http://localhost:8000/api/v1/orders/completed/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.19 Bekor qilingan buyurtmalar
-GET http://localhost:8000/api/v1/orders/cancelled/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.20 Hujjatlar yaratish
-POST http://localhost:8000/api/v1/orders/1/generate-documents/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.21 Yetkazib berishni tasdiqlash
-POST http://localhost:8000/api/v1/orders/1/confirm-delivery/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.22 Buyurtmani bekor qilish
-POST http://localhost:8000/api/v1/orders/1/cancel/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.23 Buyurtmani yakunlash
-POST http://localhost:8000/api/v1/orders/1/complete/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.24 Buyurtma hujjatlari
-GET http://localhost:8000/api/v1/orders/1/documents/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.25 Buyurtma hujjati yaratish
-POST http://localhost:8000/api/v1/orders/1/documents/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "document_type": "contract",
-    "file_url": "https://example.com/contract.pdf"
-}
-
-# 8.26 Buyurtma hujjati batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/orders/1/documents/1/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.27 Buyurtma hujjati yangilash
-PUT http://localhost:8000/api/v1/orders/1/documents/1/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "file_url": "https://example.com/updated_contract.pdf"
-}
-
-# 8.28 Buyurtma hujjati o'chirish
-DELETE http://localhost:8000/api/v1/orders/1/documents/1/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.29 Buyurtma holati tarixi
-GET http://localhost:8000/api/v1/orders/1/status-history/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 8.30 Buyurtma holati tarixi yaratish
-POST http://localhost:8000/api/v1/orders/1/status-history/
+# 6.4 Buyurtma holatini yangilash
+PUT http://localhost:8000/api/v1/orders/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
     "status": "in_preparation",
-    "comment": "Mahsulot tayyorlanmoqda"
+    "delivery_address": "Toshkent shahar, Chilonzor tumani, 1-uy"
 }
 
-# 8.31 Buyurtma holati tarixi batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/orders/1/status-history/1/
+# 6.5 Buyurtma holatini yangilash (supplier)
+POST http://localhost:8000/api/v1/orders/1/update-status/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+    "status": "in_transit",
+    "tracking_number": "TRK123456789"
+}
+
+# 6.6 Buyurtma tasdiqlash (buyer)
+POST http://localhost:8000/api/v1/orders/1/confirm-delivery/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 6.7 Hujjatlar yaratish (placeholder)
+POST http://localhost:8000/api/v1/orders/1/generate-documents/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
 # ===========================================
-# 9. PAYMENT MANAGEMENT ENDPOINTS
+# 7. PAYMENT ENDPOINTS (Vaqtincha o'chirilgan)
 # ===========================================
 
-# 9.1 To'lovlar ro'yxati
-GET http://localhost:8000/api/v1/payments/
+# 7.1 To'lov ro'yxati (URL o'chirilgan)
+# GET http://localhost:8000/api/v1/payments/
+# Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 7.2 To'lov ma'lumotlari (URL o'chirilgan)
+# GET http://localhost:8000/api/v1/payments/1/
+# Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 7.3 Naqd to'lov tasdiqlash (URL o'chirilgan)
+# POST http://localhost:8000/api/v1/payments/1/confirm-cash/
+# Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 7.4 Escrow dan to'lovni chiqarish (URL o'chirilgan)
+# POST http://localhost:8000/api/v1/payments/1/release-escrow/
+# Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# ===========================================
+# 8. NOTIFICATION ENDPOINTS
+# ===========================================
+
+# 8.1 Xabarnomalar ro'yxati
+GET http://localhost:8000/api/v1/notifications/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
-# 9.2 To'lov yaratish
-POST http://localhost:8000/api/v1/payments/create/
+# 8.2 Xabarnoma ma'lumotlari
+GET http://localhost:8000/api/v1/notifications/1/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 8.3 Xabarnomani o'qilgan deb belgilash
+POST http://localhost:8000/api/v1/notifications/1/mark-read/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 8.4 Barcha xabarnomalarni o'qilgan deb belgilash
+POST http://localhost:8000/api/v1/notifications/mark-all-read/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 8.5 Xabarnoma sozlamalari (placeholder)
+GET http://localhost:8000/api/v1/notifications/settings/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 8.6 Xabarnoma sozlamalarini yangilash (placeholder)
+POST http://localhost:8000/api/v1/notifications/settings/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+    "email_notifications": true,
+    "sms_notifications": false,
+    "push_notifications": true
+}
+
+# ===========================================
+# 9. RATING ENDPOINTS
+# ===========================================
+
+# 9.1 Reyting yaratish
+POST http://localhost:8000/api/v1/ratings/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
     "order": 1,
-    "amount": "15000000.00",
+    "rating": 5,
+    "comment": "Ajoyib xizmat!"
+}
+
+# 9.2 Reyting ro'yxati
+GET http://localhost:8000/api/v1/ratings/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 9.3 Reyting ma'lumotlari
+GET http://localhost:8000/api/v1/ratings/1/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 9.4 Reyting yangilash
+PUT http://localhost:8000/api/v1/ratings/1/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+    "rating": 4,
+    "comment": "Yaxshi xizmat"
+}
+
+# ===========================================
+# 10. ADMIN ENDPOINTS
+# ===========================================
+
+# 10.1 Admin panel - foydalanuvchilar
+GET http://localhost:8000/api/v1/admin/users/
+Authorization: Bearer ADMIN_ACCESS_TOKEN
+
+# 10.2 Admin panel - kompaniyalar
+GET http://localhost:8000/api/v1/admin/companies/
+Authorization: Bearer ADMIN_ACCESS_TOKEN
+
+# 10.3 Admin panel - buyurtmalar
+GET http://localhost:8000/api/v1/admin/orders/
+Authorization: Bearer ADMIN_ACCESS_TOKEN
+
+# 10.4 Admin panel - to'lovlar
+GET http://localhost:8000/api/v1/admin/payments/
+Authorization: Bearer ADMIN_ACCESS_TOKEN
+
+# ===========================================
+# 11. DIDOX API INTEGRATION (Kelajakda)
+# ===========================================
+
+# 11.1 Shartnoma yaratish (Didox API)
+POST https://api.didox.uz/v1/contracts
+Authorization: Bearer DIDOX_API_KEY
+Content-Type: application/json
+
+{
+    "title": "MetOneX Shartnoma",
+    "buyer": {
+        "name": "Kompaniya A",
+        "inn": "123456789",
+        "address": "Toshkent shahar"
+    },
+    "supplier": {
+        "name": "Kompaniya B", 
+        "inn": "987654321",
+        "address": "Samarqand shahar"
+    },
+    "amount": 15000000.00,
+    "currency": "UZS",
+    "delivery_date": "2025-10-15",
+    "terms": "Shartnoma shartlari..."
+}
+
+# 11.2 Hisob-faktura yaratish (Didox API)
+POST https://api.didox.uz/v1/invoices
+Authorization: Bearer DIDOX_API_KEY
+Content-Type: application/json
+
+{
+    "contract_id": "CONTRACT_123",
+    "order_id": "ORDER_456",
+    "amount": 15000000.00,
+    "currency": "UZS",
+    "due_date": "2025-10-20",
+    "items": [
+        {
+            "name": "Mahsulot nomi",
+            "quantity": 1000,
+            "unit_price": 15000.00,
+            "total": 15000000.00
+        }
+    ]
+}
+
+# 11.3 Hujjat holatini tekshirish (Didox API)
+GET https://api.didox.uz/v1/documents/CONTRACT_123/status
+Authorization: Bearer DIDOX_API_KEY
+
+# 11.4 Hujjatni yuklab olish (Didox API)
+GET https://api.didox.uz/v1/documents/CONTRACT_123/download
+Authorization: Bearer DIDOX_API_KEY
+
+# ===========================================
+# 12. BANK ESCROW API INTEGRATION (Kelajakda)
+# ===========================================
+
+# 12.1 Escrow hisob yaratish (Bank API)
+POST https://api.bank.uz/v1/escrow/accounts
+Authorization: Bearer BANK_API_KEY
+Content-Type: application/json
+
+{
+    "buyer_id": "BUYER_123",
+    "supplier_id": "SUPPLIER_456",
+    "order_id": "ORDER_789",
+    "amount": 15000000.00,
+    "currency": "UZS",
+    "release_conditions": "Yetkazib berish tasdiqlangandan so'ng"
+}
+
+# 12.2 To'lovni qabul qilish (Bank API)
+POST https://api.bank.uz/v1/escrow/accounts/ESCROW_123/deposit
+Authorization: Bearer BANK_API_KEY
+Content-Type: application/json
+
+{
+    "payer_id": "BUYER_123",
+    "amount": 15000000.00,
+    "currency": "UZS",
+    "payment_method": "bank_transfer"
+}
+
+# 12.3 Escrow holatini tekshirish (Bank API)
+GET https://api.bank.uz/v1/escrow/accounts/ESCROW_123/status
+Authorization: Bearer BANK_API_KEY
+
+# 12.4 Mablag'ni chiqarish (Bank API)
+POST https://api.bank.uz/v1/escrow/accounts/ESCROW_123/release
+Authorization: Bearer BANK_API_KEY
+Content-Type: application/json
+
+{
+    "release_to": "SUPPLIER_456",
+    "amount": 15000000.00,
+    "currency": "UZS",
+    "confirmation_code": "DELIVERY_CONFIRMED"
+}
+
+# ===========================================
+# 13. API DOCUMENTATION ENDPOINTS
+# ===========================================
+
+# 13.1 Swagger UI
+GET http://localhost:8000/api/schema/swagger-ui/
+
+# 13.2 ReDoc
+GET http://localhost:8000/api/schema/redoc/
+
+# 13.3 OpenAPI Schema
+GET http://localhost:8000/api/schema/
+
+# ===========================================
+# 14. TEST DATA CREATION
+# ===========================================
+
+# 14.1 Test kategoriya yaratish
+POST http://localhost:8000/api/v1/catalog/categories/
+Authorization: Bearer ADMIN_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+    "name": "Test Kategoriya",
+    "description": "Test kategoriya tavsifi",
+    "unit_type": "weight"
+}
+
+# 14.2 Test sub-kategoriya yaratish
+POST http://localhost:8000/api/v1/catalog/subcategories/
+Authorization: Bearer ADMIN_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+    "name": "Test Sub-kategoriya",
+    "description": "Test sub-kategoriya tavsifi",
+    "category": 1
+}
+
+# 14.3 Test birlik yaratish
+POST http://localhost:8000/api/v1/catalog/units/
+Authorization: Bearer ADMIN_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+    "name": "Test Birlik",
+    "symbol": "TB",
+    "unit_type": "weight"
+}
+
+# 14.4 Test zavod yaratish
+POST http://localhost:8000/api/v1/catalog/factories/
+Authorization: Bearer ADMIN_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+    "name": "Test Zavod",
+    "description": "Test zavod tavsifi",
+    "location": "Toshkent shahar"
+}
+
+# ===========================================
+# 15. ERROR HANDLING EXAMPLES
+# ===========================================
+
+# 15.1 Noto'g'ri telefon raqam
+POST http://localhost:8000/api/v1/auth/send-sms/
+Content-Type: application/json
+
+{
+    "phone": "998901234567"  # + belgisi yo'q
+}
+
+# 15.2 Noto'g'ri SMS kod
+POST http://localhost:8000/api/v1/auth/verify-sms/
+Content-Type: application/json
+
+{
+    "phone": "+998901234567",
+    "code": "000000"  # Noto'g'ri kod
+}
+
+# 15.3 Mavjud bo'lmagan RFQ
+GET http://localhost:8000/api/v1/rfqs/999999/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+# 15.4 Ruxsatsiz kirish
+GET http://localhost:8000/api/v1/rfqs/
+# Authorization header yo'q
+
+# ===========================================
+# 16. WORKFLOW EXAMPLES
+# ===========================================
+
+# 16.1 To'liq workflow: RFQ → Offer → Order
+# 1. RFQ yaratish
+POST http://localhost:8000/api/v1/rfqs/
+Authorization: Bearer BUYER_TOKEN
+Content-Type: application/json
+
+{
+    "category": 1,
+    "brand": "Premium",
+    "volume": 1000,
+    "unit": 1,
+    "delivery_location": "Toshkent",
+    "delivery_date": "2025-10-15",
     "payment_method": "bank"
 }
 
-# 9.3 To'lov batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/payments/1/detail/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.4 To'lovni tasdiqlash
-POST http://localhost:8000/api/v1/payments/1/confirm/
-Authorization: Bearer YOUR_ACCESS_TOKEN
+# 2. Taklif yaratish
+POST http://localhost:8000/api/v1/offers/
+Authorization: Bearer SUPPLIER_TOKEN
 Content-Type: application/json
 
 {
-    "payment_proof_url": "https://example.com/payment_proof.pdf"
+    "rfq": 1,
+    "unit_price": 15000.00,
+    "total_price": 15000000.00,
+    "delivery_time": 7,
+    "delivery_cost": 500000.00
 }
 
-# 9.5 To'lovni ozod qilish
-POST http://localhost:8000/api/v1/payments/1/release/
-Authorization: Bearer YOUR_ACCESS_TOKEN
+# 3. Taklifni qabul qilish
+POST http://localhost:8000/api/v1/offers/1/accept/
+Authorization: Bearer BUYER_TOKEN
 
-# 9.6 To'lovni qaytarish
-POST http://localhost:8000/api/v1/payments/1/refund/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "reason": "Buyurtma bekor qilindi"
-}
-
-# 9.7 To'lov qidirish
-GET http://localhost:8000/api/v1/payments/search/?order_id=1&status=pending
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.8 To'lov analitikasi
-GET http://localhost:8000/api/v1/payments/analytics/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.9 Mening to'lovlarim
-GET http://localhost:8000/api/v1/payments/my-payments/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.10 Kutilayotgan to'lovlar
-GET http://localhost:8000/api/v1/payments/pending/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.11 Qabul qilingan to'lovlar
-GET http://localhost:8000/api/v1/payments/received/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.12 Escrow da ushlab turilgan to'lovlar
-GET http://localhost:8000/api/v1/payments/held-in-escrow/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.13 Ozod qilingan to'lovlar
-GET http://localhost:8000/api/v1/payments/released/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.14 Qaytarilgan to'lovlar
-GET http://localhost:8000/api/v1/payments/refunded/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.15 Buyurtma bo'yicha to'lovlar
-GET http://localhost:8000/api/v1/payments/by-order/?order_id=1
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.16 To'lov usuli bo'yicha to'lovlar
-GET http://localhost:8000/api/v1/payments/by-method/?payment_method=bank
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.17 Naqd pul to'lovini tasdiqlash
-POST http://localhost:8000/api/v1/payments/1/confirm-cash/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "payment_proof_url": "https://example.com/cash_receipt.jpg"
-}
-
-# 9.18 Escrow to'lovini ozod qilish
-POST http://localhost:8000/api/v1/payments/1/release-escrow/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 9.19 To'lovni qaytarish jarayoni
-POST http://localhost:8000/api/v1/payments/1/process-refund/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "refund_amount": "15000000.00",
-    "reason": "Buyurtma bekor qilindi"
-}
+# 4. Buyurtma holatini kuzatish
+GET http://localhost:8000/api/v1/orders/1/
+Authorization: Bearer BUYER_TOKEN
 
 # ===========================================
-# 10. NOTIFICATION MANAGEMENT ENDPOINTS
+# NOTES
 # ===========================================
 
-# 10.1 Xabarnomalar ro'yxati
-GET http://localhost:8000/api/v1/notifications/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.2 Xabarnoma yaratish
-POST http://localhost:8000/api/v1/notifications/create/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "recipient_user": 1,
-    "type": "info",
-    "title": "Yangi xabar",
-    "message": "Bu test xabari",
-    "delivery_method": "database_only"
-}
-
-# 10.3 Xabarnoma batafsil ma'lumotlari
-GET http://localhost:8000/api/v1/notifications/1/detail/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.4 Xabarnomani o'qilgan deb belgilash
-POST http://localhost:8000/api/v1/notifications/1/mark-read/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.5 Xabarnomani o'qilmagan deb belgilash
-POST http://localhost:8000/api/v1/notifications/1/mark-unread/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.6 Xabarnomalar bulk amali
-POST http://localhost:8000/api/v1/notifications/bulk-action/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "action": "mark_read",
-    "notification_ids": [1, 2, 3]
-}
-
-# 10.7 Xabarnoma sozlamalari
-GET http://localhost:8000/api/v1/notifications/settings/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.8 Xabarnoma statistikasi
-GET http://localhost:8000/api/v1/notifications/stats/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.9 Xabarnoma qidirish
-GET http://localhost:8000/api/v1/notifications/search/?type=info&unread=true
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.10 Mening xabarnomalarim
-GET http://localhost:8000/api/v1/notifications/my-notifications/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.11 O'qilmagan xabarnomalar
-GET http://localhost:8000/api/v1/notifications/unread/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.12 O'qilgan xabarnomalar
-GET http://localhost:8000/api/v1/notifications/read/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.13 Tur bo'yicha xabarnomalar
-GET http://localhost:8000/api/v1/notifications/by-type/?type=info
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.14 Kanal bo'yicha xabarnomalar
-GET http://localhost:8000/api/v1/notifications/by-channel/?delivery_method=database_only
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.15 Barcha xabarnomalarni o'qilgan deb belgilash
-POST http://localhost:8000/api/v1/notifications/mark-all-read/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.16 Barcha xabarnomalarni o'qilmagan deb belgilash
-POST http://localhost:8000/api/v1/notifications/mark-all-unread/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.17 O'qilgan xabarnomalarni o'chirish
-POST http://localhost:8000/api/v1/notifications/delete-read/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# 10.18 Eski xabarnomalarni o'chirish
-POST http://localhost:8000/api/v1/notifications/delete-old/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: application/json
-
-{
-    "days_old": 30
-}
-
-# ===========================================
-# 11. ADMIN ENDPOINTS
-# ===========================================
-
-# 11.1 Admin panel
-GET http://localhost:8000/admin/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-
-# ===========================================
-# 12. API DOCUMENTATION ENDPOINTS
-# ===========================================
-
-# 12.1 OpenAPI Schema
-GET http://localhost:8000/api/schema/
-
-# 12.2 Swagger UI
-GET http://localhost:8000/api/docs/
-
-# 12.3 ReDoc
-GET http://localhost:8000/api/redoc/
-
-# ===========================================
-# NOTES:
-# ===========================================
-# 1. Barcha requestlarda YOUR_ACCESS_TOKEN o'rniga haqiqiy JWT access token yozing
-# 2. YOUR_REFRESH_TOKEN o'rniga haqiqiy JWT refresh token yozing
-# 3. ID raqamlari (1, 2, 3...) o'rniga haqiqiy ID raqamlarini yozing
-# 4. Base URL: http://localhost:8000 (production da o'zgartiring)
-# 5. Barcha POST/PUT requestlarda Content-Type: application/json header qo'shing
-# 6. Authentication kerak bo'lgan endpointlarda Authorization: Bearer TOKEN header qo'shing
-# 7. Query parametrlari uchun ?param=value formatidan foydalaning
-# 8. Pagination uchun ?page=1&page_size=20 parametrlarini qo'shing
-# 9. Filtering uchun ?field=value parametrlarini qo'shing
-# 10. Search uchun ?q=search_term parametrini qo'shing
+# 1. YOUR_ACCESS_TOKEN ni haqiqiy JWT token bilan almashtiring
+# 2. ADMIN_ACCESS_TOKEN ni admin foydalanuvchi tokeni bilan almashtiring
+# 3. DIDOX_API_KEY ni Didox API kaliti bilan almashtiring
+# 4. BANK_API_KEY ni bank API kaliti bilan almashtiring
+# 5. Barcha ID'lar (1, 2, 3...) ni haqiqiy ID'lar bilan almashtiring
+# 6. Payment endpoints hozircha o'chirilgan - didox API integratsiya qilganda qayta yoqiladi
+# 7. Notification settings va device token hozircha placeholder - keyingi qadamda to'ldiriladi
