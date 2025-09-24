@@ -28,6 +28,7 @@ django-storages==1.14.4
 
 # SMS service
 requests==2.32.3
+eskiz-sms==0.2.3
 
 # Push Notifications (Firebase Admin SDK)
 firebase-admin==6.5.0

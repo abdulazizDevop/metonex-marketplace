@@ -23,7 +23,7 @@ from ..serializers import (
     UserPasswordChangeSerializer,
     UserProfileSerializer
 )
-# from ..sms_service import SMSService  # Temporarily disabled for migrations
+from ..sms_service import sms_service
 
 
 class SendSMSView(APIView):
@@ -56,14 +56,18 @@ class SendSMSView(APIView):
             expires_at=timezone.now() + timedelta(minutes=5)
         )
         
-        # SMS yuborish - temporarily disabled for migrations
-        # try:
-        #     sms_service = SMSService()
-        #     sms_service.send_verification_code(phone, code)
-        # except Exception as e:
-        #     return Response({
-        #         'error': 'SMS yuborishda xatolik yuz berdi'
-        #     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # SMS yuborish
+        try:
+            result = sms_service.send_verification_code(phone, code)
+            if not result.get('success', False):
+                error_msg = result.get('error', 'Nomalum xatolik')
+                return Response({
+                    'error': f"SMS yuborishda xatolik: {error_msg}"
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({
+                'error': f'SMS yuborishda xatolik yuz berdi: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Rate limiting qo'yish
         cache.set(cache_key, True, 60)
@@ -236,6 +240,60 @@ class UserPasswordChangeView(APIView):
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SendPasswordChangeCodeView(APIView):
+    """
+    Parol o'zgartirish uchun SMS kod yuborish
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request):
+        user = request.user
+        phone = user.phone
+        
+        if not phone:
+            return Response({
+                'error': 'Telefon raqami kiritilmagan'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Rate limiting tekshirish
+        cache_key = f"password_change_rate_limit_{phone}"
+        if cache.get(cache_key):
+            return Response({
+                'error': 'SMS kod yuborish uchun 60 soniya kutish kerak'
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+        
+        # SMS kod yaratish
+        code = ''.join(random.choices(string.digits, k=6))
+        
+        # VerificationCode yaratish
+        VerificationCode.objects.create(
+            phone=phone,
+            code=code,
+            expires_at=timezone.now() + timedelta(minutes=5)
+        )
+        
+        # SMS yuborish
+        try:
+            result = sms_service.send_password_change_code(phone, code)
+            if not result.get('success', False):
+                error_msg = result.get('error', 'Nomalum xatolik')
+                return Response({
+                    'error': f"SMS yuborishda xatolik: {error_msg}"
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({
+                'error': f'SMS yuborishda xatolik yuz berdi: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # Rate limiting qo'yish
+        cache.set(cache_key, True, 60)
+        
+        return Response({
+            'message': 'Parol o\'zgartirish kodi yuborildi',
+            'phone': phone
+        }, status=status.HTTP_200_OK)
 
 
 class UserPhoneVerificationView(APIView):

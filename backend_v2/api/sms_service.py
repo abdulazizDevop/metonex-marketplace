@@ -1,119 +1,114 @@
-import requests
-import json
+import logging
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from typing import Optional, Dict, Any
+from eskiz_sms import EskizSMS
+
+logger = logging.getLogger(__name__)
 
 
-class SMSService:
+class EskizSMSService:
     """
-    SMS xizmati (Eskiz.uz)
+    Eskiz.uz SMS xizmati bilan integratsiya
+    Faqat ro'yxatdan o'tish va parol o'zgartirish uchun ishlatiladi
     """
     
     def __init__(self):
-        self.email = settings.SMS_SERVICE.get('EMAIL')
-        self.password = settings.SMS_SERVICE.get('PASSWORD')
-        self.sender = settings.SMS_SERVICE.get('SENDER', '4546')
+        self.email = getattr(settings, 'ESKIZ_EMAIL', None)
+        self.password = getattr(settings, 'ESKIZ_PASSWORD', None)
+        self.sender = getattr(settings, 'ESKIZ_SENDER', '4546')
+        self.eskiz = None
         
-        if not self.email or not self.password:
-            raise ImproperlyConfigured("ESKIZ_EMAIL and ESKIZ_PASSWORD environment variables are required")
-        
-        self.base_url = 'https://notify.eskiz.uz/api'
-        self.token = None
+        if self.email and self.password:
+            try:
+                self.eskiz = EskizSMS(
+                    email=self.email, 
+                    password=self.password,
+                    save_token=True,
+                    env_file_path='.env'
+                )
+                logger.info("Eskiz SMS xizmati muvaffaqiyatli ishga tushirildi")
+            except Exception as e:
+                logger.error(f"Eskiz SMS xizmatini ishga tushirishda xatolik: {e}")
+                self.eskiz = None
+        else:
+            logger.warning("Eskiz email yoki parol sozlanmagan")
     
-    def _get_token(self):
-        """Eskiz.uz dan token olish"""
-        if self.token:
-            return self.token
+    def send_sms(self, phone: str, message: str) -> Dict[str, Any]:
+        """
+        SMS xabar yuborish
         
-        url = f"{self.base_url}/auth/login"
-        data = {
-            'email': self.email,
-            'password': self.password
-        }
-        
-        try:
-            response = requests.post(url, data=data, timeout=10)
-            response.raise_for_status()
-            result = response.json()
+        Args:
+            phone: Telefon raqami (998XXXXXXXXX formatida)
+            message: Xabar matni
             
-            if result.get('data', {}).get('token'):
-                self.token = result['data']['token']
-                return self.token
-            else:
-                raise Exception(f"SMS token error: {result.get('message', 'Unknown error')}")
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"SMS authentication failed: {str(e)}")
-    
-    def send_sms(self, phone, message):
-        """
-        SMS yuborish
-        
-        Args:
-            phone (str): Telefon raqami (+998XXXXXXXXX formatida)
-            message (str): SMS matni
-        
         Returns:
-            dict: SMS response
+            Dict: API javobi
         """
-        token = self._get_token()
+        if not self.eskiz:
+            logger.error("Eskiz SMS xizmati sozlanmagan")
+            return {
+                "success": False,
+                "error": "SMS xizmati sozlanmagan"
+            }
         
-        headers = {
-            'Authorization': f'Bearer {token}',
-            'Content-Type': 'application/json'
-        }
+        # Telefon raqamini tozalash
+        clean_phone = phone.replace('+', '').replace(' ', '').replace('-', '')
         
-        data = {
-            'mobile_phone': phone,
-            'message': message,
-            'from': self.sender
-        }
-        
-        url = f"{self.base_url}/message/sms/send"
+        # Telefon raqamini tekshirish
+        if not clean_phone.startswith('998') or len(clean_phone) != 12:
+            logger.error(f"Noto'g'ri telefon raqam formati: {phone}")
+            return {
+                "success": False,
+                "error": "Noto'g'ri telefon raqam formati"
+            }
         
         try:
-            response = requests.post(url, headers=headers, json=data, timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"SMS sending failed: {str(e)}")
+            response = self.eskiz.send_sms(
+                clean_phone,
+                message,
+                from_whom=self.sender
+            )
+            
+            logger.info(f"SMS muvaffaqiyatli yuborildi: {phone}")
+            return {
+                "success": True,
+                "data": response
+            }
+            
+        except Exception as e:
+            logger.error(f"SMS yuborishda xatolik: {e}")
+            return {
+                "success": False,
+                "error": f"SMS yuborishda xatolik: {str(e)}"
+            }
     
-    def send_verification_code(self, phone, code):
+    def send_verification_code(self, phone: str, code: str) -> Dict[str, Any]:
         """
-        Tasdiqlash kodi yuborish
+        Tasdiqlash kodi yuborish (ro'yxatdan o'tish)
         
         Args:
-            phone (str): Telefon raqami
-            code (str): Tasdiqlash kodi
-        
+            phone: Telefon raqami
+            code: 6 xonali kod
+            
         Returns:
-            dict: SMS response
+            Dict: API javobi
         """
-        message = f"MetOneX tasdiqlash kodi: {code}. Bu kodni hech kimga bermang!"
+        message = f"metonex.uz saytida ro'yxatdan o'tish uchun tasdiqlash kodi: {code}"
         return self.send_sms(phone, message)
     
-    def send_order_notification(self, phone, order_id, status):
+    def send_password_change_code(self, phone: str, code: str) -> Dict[str, Any]:
         """
-        Buyurtma holati haqida SMS yuborish
+        Parol o'zgartirish kodi yuborish
         
         Args:
-            phone (str): Telefon raqami
-            order_id (str): Buyurtma ID
-            status (str): Buyurtma holati
-        
+            phone: Telefon raqami
+            code: 6 xonali kod
+            
         Returns:
-            dict: SMS response
+            Dict: API javobi
         """
-        status_messages = {
-            'pending': 'Buyurtmangiz qabul qilindi va ko\'rib chiqilmoqda.',
-            'confirmed': 'Buyurtmangiz tasdiqlandi va tayyorlanmoqda.',
-            'shipped': 'Buyurtmangiz yuborildi.',
-            'delivered': 'Buyurtmangiz yetkazib berildi.',
-            'cancelled': 'Buyurtmangiz bekor qilindi.'
-        }
-        
-        message = f"Buyurtma #{order_id}: {status_messages.get(status, status)}"
+        message = f"MetOneX Marketplaceda parolingizni o'zgartirish uchun kodi: {code}"
         return self.send_sms(phone, message)
-
-
-# Global SMS service instance
-sms_service = SMSService()
+    
+# Global instance
+sms_service = EskizSMSService()

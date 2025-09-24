@@ -275,6 +275,18 @@ class OfferAcceptView(APIView):
                 delivery_date=offer.delivery_date,
                 status='created'
             )
+            # if offer.rfq.payment_method == 'bank':
+            #     # Bank to'lov uchun - Didox API chaqirish kerak
+            #     order.status = 'contract_generated'  # Didox API dan keyin
+            #     # Didox API chaqirish
+            #     # didox_service.create_contract(order)
+            #     # didox_service.create_invoice(order)
+            #     # order.status = 'awaiting_payment'
+            # else:  # cash
+            #     # Naqd to'lov uchun - to'g'ridan-to'g'ri tayyorlash
+            #     order.status = 'in_preparation'
+            # order.save()    
+            # return order
             
             return Response({
                 'message': 'Taklif qabul qilindi',

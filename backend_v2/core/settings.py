@@ -2,6 +2,10 @@
 from pathlib import Path
 from datetime import timedelta
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,7 +36,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'drf_spectacular',  # Temporarily disabled due to serializer field errors
+    'drf_spectacular',
     'api',
 ]
 
@@ -147,7 +151,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',  # Temporarily disabled
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_FILTER_BACKENDS': [
@@ -181,14 +185,10 @@ SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST': True,
 }
 
-
 # SMS Service Configuration (Eskiz.uz)
-SMS_SERVICE = {
-    'PROVIDER': 'eskiz',
-    'EMAIL': os.environ.get('ESKIZ_EMAIL', ''),
-    'PASSWORD': os.environ.get('ESKIZ_PASSWORD', ''),
-    'SENDER': os.environ.get('ESKIZ_SENDER', '4546'),
-}
+ESKIZ_EMAIL = os.environ.get('ESKIZ_EMAIL', '')
+ESKIZ_PASSWORD = os.environ.get('ESKIZ_PASSWORD', '')
+ESKIZ_SENDER = os.environ.get('ESKIZ_SENDER', '4546')
 
 # Push Notification Service (Firebase Admin SDK)
 FIREBASE_CONFIG = {

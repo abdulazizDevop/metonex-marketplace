@@ -11,6 +11,7 @@ from ..views.auth_views import (
     UserLogoutView,
     UserProfileView,
     UserPasswordChangeView,
+    SendPasswordChangeCodeView,
     UserPhoneVerificationView,
     TokenRefreshView,
     TokenBlacklistView
@@ -30,6 +31,7 @@ auth_urlpatterns = [
     # User profile
     path('profile/', UserProfileView.as_view(), name='user-profile'),
     path('change-password/', UserPasswordChangeView.as_view(), name='change-password'),
+    path('send-password-change-code/', SendPasswordChangeCodeView.as_view(), name='send-password-change-code'),
     path('verify-phone/', UserPhoneVerificationView.as_view(), name='verify-phone'),
     
     # JWT token management
