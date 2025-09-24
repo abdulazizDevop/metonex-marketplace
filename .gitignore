@@ -145,6 +145,12 @@ temp/
 env.example
 
 # Production files
-files/
 backend/staticfiles/
-backend/media/
+backend_v2/staticfiles/
+
+mvp1.1 backend TT.txt
+Шартнома (СҚ)_ 390  30.04.2025 дан.pdf
+Ҳисоб_фактура_актсиз_763_31_05_2025_дан.pdf
+MetOneX Backend System Technical Requirements Docu.pdf
+.cursorrules
+frontend_v2/stitch_*/

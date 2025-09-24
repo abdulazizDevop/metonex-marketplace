@@ -1,0 +1,523 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const SellerProfileDetails3 = () => {
+  const navigate = useNavigate();
+  const [showReviewsModal, setShowReviewsModal] = useState(false);
+  const [selectedRating, setSelectedRating] = useState('all');
+  const [sortBy, setSortBy] = useState('recent');
+
+  const performanceMetrics = [
+    {
+      icon: 'local_shipping',
+      title: 'On-time Delivery',
+      value: '98%',
+      trend: 'up',
+      color: 'text-green-500'
+    },
+    {
+      icon: 'schedule',
+      title: 'Avg. Response',
+      value: '2 hrs',
+      trend: 'down',
+      color: 'text-red-500'
+    },
+    {
+      icon: 'thumb_up',
+      title: 'NPS Score',
+      value: '85',
+      trend: 'up',
+      color: 'text-green-500'
+    },
+    {
+      icon: 'task_alt',
+      title: 'Completed Orders',
+      value: '500+',
+      trend: 'up',
+      color: 'text-green-500'
+    },
+    {
+      icon: 'paid',
+      title: 'Avg. Order Value',
+      value: '$15,000',
+      trend: 'down',
+      color: 'text-red-500'
+    },
+    {
+      icon: 'trending_up',
+      title: 'Monthly Growth',
+      value: '+12%',
+      trend: 'up',
+      color: 'text-green-500',
+      bgColor: 'bg-[#e6f4e6]',
+      textColor: 'text-[#4caf50]'
+    }
+  ];
+
+  const certifications = [
+    {
+      icon: 'verified',
+      title: 'ISO 9001'
+    },
+    {
+      icon: 'shield',
+      title: 'Quality Assurance Seal'
+    }
+  ];
+
+  const reviewBreakdown = [
+    { rating: 5, percentage: 80, count: 96 },
+    { rating: 4, percentage: 15, count: 18 },
+    { rating: 3, percentage: 3, count: 4 },
+    { rating: 2, percentage: 1, count: 1 },
+    { rating: 1, percentage: 1, count: 1 }
+  ];
+
+  const teamMembers = [
+    {
+      name: 'Ava Chen',
+      position: 'CEO',
+      phone: '+1 (555) 123-4567',
+      email: 'ava.chen@buildright.com'
+    },
+    {
+      name: 'Leo Martinez',
+      position: 'Accountant',
+      phone: '+1 (555) 234-5678',
+      email: 'leo.martinez@buildright.com'
+    }
+  ];
+
+  const reviews = [
+    {
+      id: 1,
+      author: 'Anonymous',
+      date: '2 weeks ago',
+      rating: 5,
+      comment: 'Excellent supplier, always on time and quality materials. The best we\'ve worked with.',
+      helpful: 12,
+      comments: 0
+    },
+    {
+      id: 2,
+      author: 'Anonymous',
+      date: '3 weeks ago',
+      rating: 5,
+      comment: 'Fantastic service and product quality. Highly recommend BuildRight Supplies.',
+      helpful: 8,
+      comments: 0
+    },
+    {
+      id: 3,
+      author: 'Anonymous',
+      date: '1 month ago',
+      rating: 4,
+      comment: 'Good experience overall, some delays but resolved quickly.',
+      helpful: 2,
+      comments: 0
+    },
+    {
+      id: 4,
+      author: 'Anonymous',
+      date: '2 months ago',
+      rating: 5,
+      comment: 'Top-notch materials and customer service. Couldn\'t ask for more.',
+      helpful: 5,
+      comments: 0
+    }
+  ];
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const handleEditProfile = () => {
+    navigate('/seller/edit-profile');
+  };
+
+  const handleCall = (phone) => {
+    window.open(`tel:${phone}`);
+  };
+
+  const handleEmail = (email) => {
+    window.open(`mailto:${email}`);
+  };
+
+  const handleReviewFilter = (rating) => {
+    setSelectedRating(rating);
+  };
+
+  const handleSortChange = () => {
+    setSortBy(sortBy === 'recent' ? 'oldest' : 'recent');
+  };
+
+  const filteredReviews = selectedRating === 'all' 
+    ? reviews 
+    : reviews.filter(review => review.rating === parseInt(selectedRating));
+
+  const sortedReviews = [...filteredReviews].sort((a, b) => {
+    if (sortBy === 'recent') {
+      return new Date(b.date) - new Date(a.date);
+    } else {
+      return new Date(a.date) - new Date(b.date);
+    }
+  });
+
+  const renderStars = (rating) => {
+    return Array.from({ length: 5 }, (_, index) => (
+      <span
+        key={index}
+        className={`material-symbols-outlined text-base ${
+          index < rating ? 'text-yellow-500' : 'text-gray-300'
+        }`}
+      >
+        star
+      </span>
+    ));
+  };
+
+  const renderTrendIcon = (trend) => {
+    return (
+      <span className={`material-symbols-outlined text-sm ${
+        trend === 'up' ? 'text-green-500' : 'text-red-500'
+      }`}>
+        {trend === 'up' ? 'arrow_upward' : 'arrow_downward'}
+      </span>
+    );
+  };
+
+  return (
+    <div className="relative flex size-full min-h-screen flex-col justify-between group/design-root overflow-x-hidden bg-white">
+      <div className="flex flex-col">
+        {/* Header */}
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white/80 p-4 pb-3 backdrop-blur-sm">
+          <button 
+            onClick={handleBack}
+            className="flex size-10 items-center justify-center rounded-full text-[#140e1b] hover:bg-gray-100 transition-colors"
+          >
+            <span className="material-symbols-outlined">arrow_back_ios_new</span>
+          </button>
+          <h1 className="flex-1 text-center text-lg font-bold text-[#140e1b]">Supplier Profile</h1>
+          <div className="w-10"></div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 bg-white p-4">
+          {/* Profile Header */}
+          <div className="flex flex-col items-center gap-4 pb-6">
+            <div className="relative">
+              <div 
+                className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-28" 
+                style={{
+                  backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBj41-PwDLpMDAVf0vzGk89KRvxCUknfTyrhRvmtMkNK29xe4ngs3qUssLoayhPwAPuseJ84dl4TTlO08AqaWnQv0SwBd-5IJCxShTODuYldLnvXjMN3CQz-qUKnPRuonOTqO0zq6JFolj-oGctqKvT4CvxMJg6wBjgG6YxWYe4ZoNFYzIzAIv9RNp9agkGsbGcyyXpuZ3ZxU52YS_6KQDSKXw2zipAFfkEschcYc8183tWUl4w_G6Ni_wrkTSpRkOzPieIq_Zkh6o")'
+                }}
+              ></div>
+              <div className="absolute bottom-0 right-0 flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700 ring-2 ring-white">
+                <span className="material-symbols-outlined text-sm">star</span>
+                <span>Top Rated</span>
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-[22px] font-bold text-[#140e1b]">BuildRight Supplies</p>
+              <p className="text-sm text-gray-500">Supplier ID: 789012</p>
+              <div className="mt-2 flex flex-col items-center gap-1">
+                <div className="flex items-center gap-1 text-sm text-gray-500">
+                  <span className="font-semibold text-yellow-500">4.7</span>
+                  <span className="material-symbols-outlined text-base text-yellow-500">star</span>
+                  <span className="text-gray-400">·</span>
+                  <span className="font-medium text-gray-600">Rank #5 of 100</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {/* Performance Metrics */}
+            <section>
+              <h2 className="text-lg font-bold text-[#140e1b]">Performance Metrics</h2>
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                {performanceMetrics.map((metric, index) => (
+                  <div key={index} className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <div className={`flex size-10 shrink-0 items-center justify-center rounded-full ${
+                        metric.bgColor || 'bg-[#ede8f3]'
+                      } ${metric.textColor || 'text-[#735095]'}`}>
+                        <span className="material-symbols-outlined">{metric.icon}</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-[#140e1b]">{metric.title}</p>
+                        <div className="flex items-center gap-1">
+                          <p className={`text-lg font-bold ${metric.textColor || 'text-[#735095]'}`}>
+                            {metric.value}
+                          </p>
+                          {renderTrendIcon(metric.trend)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Product Categories */}
+            <section>
+              <h2 className="text-lg font-bold text-[#140e1b]">Product Categories</h2>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700">Concrete</span>
+                <span className="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700">Lumber</span>
+                <span className="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700">Steel</span>
+              </div>
+            </section>
+
+            {/* Certifications */}
+            <section>
+              <h2 className="text-lg font-bold text-[#140e1b]">Certifications</h2>
+              <div className="mt-3 space-y-3">
+                {certifications.map((cert, index) => (
+                  <div key={index} className="flex items-center gap-3 rounded-lg border border-gray-100 p-3">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-[#ede8f3] text-[#735095]">
+                      <span className="material-symbols-outlined">{cert.icon}</span>
+                    </div>
+                    <p className="flex-1 font-medium text-[#140e1b]">{cert.title}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Reviews */}
+            <section>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-[#140e1b]">Reviews</h2>
+                <button 
+                  onClick={() => setShowReviewsModal(true)}
+                  className="text-sm font-medium text-gray-600 hover:text-[#735095] transition-colors"
+                >
+                  120 Reviews
+                </button>
+              </div>
+              <div className="mt-4 rounded-lg border border-gray-100 bg-gray-50/50 p-4 shadow-sm">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="py-2 font-medium text-gray-600">Rating</th>
+                      <th className="py-2 font-medium text-gray-600">Percentage</th>
+                      <th className="py-2 font-medium text-gray-600">Breakdown</th>
+                      <th className="py-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reviewBreakdown.map((item, index) => (
+                      <tr key={index} className="group cursor-pointer hover:bg-gray-100">
+                        <td className="py-2.5 font-medium text-gray-800">{item.rating} ⭐</td>
+                        <td className="py-2.5 font-medium text-gray-800">{item.percentage}%</td>
+                        <td className="py-2.5">
+                          <div className="h-2 w-full rounded-full bg-gray-200">
+                            <div 
+                              className="h-full rounded-full bg-yellow-400" 
+                              style={{ width: `${item.percentage}%` }}
+                            ></div>
+                          </div>
+                        </td>
+                        <td className="py-2.5 text-right">
+                          <span className="material-symbols-outlined text-gray-400 group-hover:text-gray-600">
+                            chevron_right
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-4 space-y-5">
+                {reviews.slice(0, 2).map((review) => (
+                  <div key={review.id} className="rounded-lg border border-gray-100 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-10 items-center justify-center rounded-full bg-gray-200">
+                        <span className="material-symbols-outlined text-gray-500">person</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-baseline justify-between">
+                          <div>
+                            <p className="font-semibold text-[#140e1b]">{review.author}</p>
+                            <p className="text-xs text-gray-500">{review.date}</p>
+                          </div>
+                          <div className="flex gap-0.5">
+                            {renderStars(review.rating)}
+                          </div>
+                        </div>
+                        <p className="mt-2 text-sm text-gray-700">{review.comment}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Team */}
+            <section>
+              <h2 className="text-lg font-bold text-[#140e1b]">Team</h2>
+              <div className="mt-3 space-y-3">
+                {teamMembers.map((member, index) => (
+                  <div key={index} className="flex items-center gap-3 rounded-lg border border-gray-100 p-3">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-[#ede8f3] text-[#735095]">
+                      <span className="material-symbols-outlined">person</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-[#140e1b]">{member.name}</p>
+                      <p className="text-sm text-gray-500">{member.position}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleCall(member.phone)}
+                        className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-xl">call</span>
+                      </button>
+                      <button 
+                        onClick={() => handleEmail(member.email)}
+                        className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-xl">mail</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+
+      {/* Footer */}
+      <footer className="sticky bottom-0 border-t border-gray-100 bg-white/95 pb-safe">
+        <div className="flex flex-col gap-4 p-4">
+          <button 
+            onClick={handleEditProfile}
+            className="flex h-12 w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-[#a35ee8] text-base font-bold text-white shadow-lg shadow-[#a35ee8]/30 hover:bg-[#8e4dd1] transition-colors"
+          >
+            <span className="truncate">Edit Profile</span>
+          </button>
+        </div>
+        <nav className="flex justify-around border-t border-gray-200 py-2">
+          <button 
+            onClick={() => navigate('/seller')}
+            className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#a35ee8] transition-colors"
+          >
+            <span className="material-symbols-outlined">home</span>
+            <span className="text-xs font-medium">Home</span>
+          </button>
+          <button 
+            onClick={() => navigate('/seller/my-requests')}
+            className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#a35ee8] transition-colors"
+          >
+            <span className="material-symbols-outlined">list_alt</span>
+            <span className="text-xs font-medium">Requests</span>
+          </button>
+          <button 
+            onClick={() => navigate('/seller/add-product')}
+            className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#a35ee8] transition-colors"
+          >
+            <span className="material-symbols-outlined">grid_view</span>
+            <span className="text-xs font-medium">Products</span>
+          </button>
+          <button className="flex flex-col items-center gap-1 text-[#a35ee8]">
+            <span className="material-symbols-outlined">person</span>
+            <span className="text-xs font-bold">Profile</span>
+          </button>
+        </nav>
+      </footer>
+
+      {/* Reviews Modal */}
+      {showReviewsModal && (
+        <div className="absolute inset-0 z-20 flex flex-col bg-gray-50">
+          <header className="sticky top-0 z-20 flex flex-col border-b border-gray-200 bg-white/95 pb-3 pt-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between px-4">
+              <button 
+                onClick={() => setShowReviewsModal(false)}
+                className="flex size-10 items-center justify-center rounded-full text-[#140e1b] hover:bg-gray-100 transition-colors"
+              >
+                <span className="material-symbols-outlined">arrow_back_ios_new</span>
+              </button>
+              <h1 className="flex-1 text-center text-lg font-bold text-[#140e1b]">Reviews</h1>
+              <div className="w-10"></div>
+            </div>
+            <div className="mt-4 flex gap-2 overflow-x-auto px-4 pb-1">
+              <button 
+                onClick={() => handleReviewFilter('all')}
+                className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                  selectedRating === 'all' 
+                    ? 'border-transparent bg-[#a35ee8] text-white' 
+                    : 'border-gray-300 bg-white text-gray-700'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base">tune</span>
+                <span>All Ratings</span>
+              </button>
+              {[5, 4, 3, 2, 1].map((rating) => (
+                <button
+                  key={rating}
+                  onClick={() => handleReviewFilter(rating.toString())}
+                  className={`flex items-center gap-1 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                    selectedRating === rating.toString()
+                      ? 'border-[#a35ee8] bg-[#a35ee8] text-white'
+                      : 'border-gray-300 bg-white text-gray-700'
+                  }`}
+                >
+                  <span>{rating}</span>
+                  <span className="material-symbols-outlined text-base text-yellow-500">star</span>
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 flex items-center justify-between px-4">
+              <p className="text-sm font-medium text-gray-600">Showing {sortedReviews.length} reviews</p>
+              <button 
+                onClick={handleSortChange}
+                className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <span>{sortBy === 'recent' ? 'Most Recent' : 'Oldest First'}</span>
+                <span className="material-symbols-outlined text-base">unfold_more</span>
+              </button>
+            </div>
+          </header>
+          <main className="flex-1 overflow-y-auto p-4">
+            <div className="space-y-4">
+              {sortedReviews.map((review) => (
+                <div key={review.id} className="rounded-lg border border-gray-100 bg-white p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-gray-200">
+                      <span className="material-symbols-outlined text-gray-500">person</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-baseline justify-between">
+                        <div>
+                          <p className="font-semibold text-[#140e1b]">{review.author}</p>
+                          <p className="text-xs text-gray-500">{review.date}</p>
+                        </div>
+                        <div className="flex gap-0.5">
+                          {renderStars(review.rating)}
+                        </div>
+                      </div>
+                      <p className="mt-2 text-sm text-gray-700">{review.comment}</p>
+                      <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
+                        <button className="flex items-center gap-1.5 font-medium text-[#735095] hover:text-[#8e4dd1] transition-colors">
+                          <span className="material-symbols-outlined text-lg">thumb_up</span>
+                          <span>Helpful ({review.helpful})</span>
+                        </button>
+                        <button className="flex items-center gap-1.5 font-medium text-gray-500 hover:text-[#735095] transition-colors">
+                          <span className="material-symbols-outlined text-lg">chat_bubble_outline</span>
+                          <span>Comment</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </main>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SellerProfileDetails3;
