@@ -198,7 +198,7 @@ const SupplierMyRequests = () => {
       <footer className="sticky bottom-0 border-t border-gray-200 bg-white">
         <div className="flex justify-around py-2">
           <button 
-            onClick={() => handleNavigation('seller/home')}
+            onClick={() => navigate('/seller/dashboard')}
             className="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-600 transition-colors"
           >
             <span className="material-symbols-outlined">home</span>
@@ -209,21 +209,21 @@ const SupplierMyRequests = () => {
             <span className="text-xs font-bold">Requests</span>
           </button>
           <button 
-            onClick={() => handleNavigation('seller/products')}
+            onClick={() => navigate('/seller/products')}
             className="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-600 transition-colors"
           >
             <span className="material-symbols-outlined">grid_view</span>
             <span className="text-xs font-medium">Products</span>
           </button>
           <button 
-            onClick={() => handleNavigation('seller/profile')}
+            onClick={() => navigate('/seller/profile')}
             className="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-600 transition-colors"
           >
             <span className="material-symbols-outlined">person</span>
             <span className="text-xs font-medium">Profile</span>
           </button>
           <button 
-            onClick={() => handleNavigation('seller/analytics')}
+            onClick={() => navigate('/seller/analytics')}
             className="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-600 transition-colors"
           >
             <span className="material-symbols-outlined">analytics</span>

@@ -54,11 +54,11 @@ const OnboardingWelcome1 = () => {
   }
 
   const handleGetStarted = () => {
-    navigate('/onboarding/welcome-2')
+    navigate('/register')
   }
 
-  const handleSkip = () => {
-    navigate('/onboarding/registration-step-1')
+  const handleLogin = () => {
+    navigate('/login')
   }
 
   return (
@@ -78,16 +78,15 @@ const OnboardingWelcome1 = () => {
           <span className="text-xl font-bold text-gray-900">Metone</span>
         </div>
         <button 
-          onClick={handleSkip}
+          onClick={handleLogin}
           className="text-gray-500 hover:text-gray-700 transition-colors"
         >
-          Skip
+          Sign In
         </button>
       </header>
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6">
-        {/* Slide Container */}
         <div className="w-full max-w-md mx-auto">
           <div className={`transition-all duration-500 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
             {/* Icon */}
@@ -128,7 +127,7 @@ const OnboardingWelcome1 = () => {
         </div>
       </main>
 
-      {/* Navigation */}
+      {/* Footer */}
       <div className="relative z-10 p-6 pb-8">
         <div className="flex items-center justify-between mb-6">
           <button

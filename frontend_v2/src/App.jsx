@@ -3,50 +3,45 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import BuyerLayout from './components/BuyerLayout'
 
-// Pages
-import BuyerHomeScreen1 from './pages/buyer/BuyerHomeScreen1'
-import BuyerHomeScreen2 from './pages/buyer/BuyerHomeScreen2'
-import BuyerHomeScreen3 from './pages/buyer/BuyerHomeScreen3'
-import BuyerHomeScreen4 from './pages/buyer/BuyerHomeScreen4'
+// Buyer Pages
+import BuyerHome from './pages/buyer/BuyerHome'
+import BuyerOrders from './pages/buyer/BuyerOrders'
 import BuyerRegistration from './pages/buyer/BuyerRegistration'
-import BuyerDashboard1 from './pages/buyer/BuyerDashboard1'
-import BuyerDashboard2 from './pages/buyer/BuyerDashboard2'
-import BuyerOffers from './pages/buyer/BuyerOffers'
-import BuyerHomeOffersReceived from './pages/buyer/BuyerHomeOffersReceived'
+import BuyerDashboard from './pages/buyer/BuyerDashboard'
+import BuyerProducts from './pages/buyer/BuyerProducts'
+import ProductDetail from './pages/buyer/ProductDetail'
 
 // Seller Pages
-import SellerHomeScreen1 from './pages/seller/SellerHomeScreen1'
-import SellerHomeScreen2 from './pages/seller/SellerHomeScreen2'
-import SellerHomeScreen3 from './pages/seller/SellerHomeScreen3'
-import SellerWelcome from './pages/seller/SellerWelcome'
-import SellerProfileDetails1 from './pages/seller/SellerProfileDetails1'
-import SellerProfileDetails2 from './pages/seller/SellerProfileDetails2'
-import SellerProfileDetails3 from './pages/seller/SellerProfileDetails3'
-import SellerAnalyticsSummary from './pages/seller/SellerAnalyticsSummary'
-import SellerAnalyticsDeepDive1 from './pages/seller/SellerAnalyticsDeepDive1'
-import SellerAnalyticsDeepDive2 from './pages/seller/SellerAnalyticsDeepDive2'
+import SellerDashboard from './pages/seller/SellerDashboard'
+import SellerOrders from './pages/seller/SellerOrders'
+import SellerProfile from './pages/seller/SellerProfile'
+import SellerNotifications from './pages/seller/SellerNotifications'
+import SellerAnalytics from './pages/seller/SellerAnalytics'
+import SellerCompany from './pages/seller/SellerCompany'
 import SellerEditProfile from './pages/seller/SellerEditProfile'
 import SellerSettingsPanel from './pages/seller/SellerSettingsPanel'
+import SellerRegistration from './pages/seller/SellerRegistration'
 import SupplierAddProduct from './pages/seller/SupplierAddProduct'
 import SupplierMyRequests from './pages/seller/SupplierMyRequests'
 import SupplierAcceptance from './pages/seller/SupplierAcceptance'
-import SupplierRoleSelection from './pages/seller/SupplierRoleSelection'
+import AllSupplierOffers from './pages/seller/AllSupplierOffers'
+import AvailableSuppliers from './pages/seller/AvailableSuppliers'
+import ConfirmDelivery from './pages/seller/ConfirmDelivery'
+import CounterOffer from './pages/seller/CounterOffer'
+import FullOrderDetails from './pages/seller/FullOrderDetails'
+import OfferAcceptancePayment from './pages/seller/OfferAcceptancePayment'
 
 // Common Pages
 import PaymentConfirmed from './pages/common/PaymentConfirmed'
-import OfferAcceptancePayment from './pages/common/OfferAcceptancePayment'
-import CounterOffer from './pages/common/CounterOffer'
-import ConfirmDelivery from './pages/common/ConfirmDelivery'
 import DeliveryFeedback from './pages/common/DeliveryFeedback'
 import UploadPaymentProof from './pages/common/UploadPaymentProof'
 import FirstPaymentSuccess from './pages/common/FirstPaymentSuccess'
 import FollowingPaymentsSuccess from './pages/common/FollowingPaymentsSuccess'
 import FirstOrderCongratulations from './pages/common/FirstOrderCongratulations'
 import RequestSentConfirmation from './pages/common/RequestSentConfirmation'
-import ManualOrderRequestForm from './pages/common/ManualOrderRequestForm'
-import CategorySelection from './pages/common/CategorySelection'
-import ChooseOrderMethod from './pages/common/ChooseOrderMethod'
-import FullOrderDetails from './pages/common/FullOrderDetails'
+import ManualOrderRequestForm from './pages/buyer/ManualOrderRequestForm'
+import CategorySelection from './pages/buyer/CategorySelection'
+import ChooseOrderMethod from './pages/buyer/ChooseOrderMethod'
 import PreparingShipment1 from './pages/common/PreparingShipment1'
 import PreparingShipment2 from './pages/common/PreparingShipment2'
 import DocumentGenerationProgress from './pages/common/DocumentGenerationProgress'
@@ -63,8 +58,6 @@ import DeliveryConfirmedEscrowRelease from './pages/common/DeliveryConfirmedEscr
 import PayoutInProgress from './pages/common/PayoutInProgress'
 import EscrowPayoutCompleted from './pages/common/EscrowPayoutCompleted'
 import ManageTeamMembers from './pages/common/ManageTeamMembers'
-import AvailableSuppliers from './pages/common/AvailableSuppliers'
-import AllSupplierOffers from './pages/common/AllSupplierOffers'
 import AllMetricsDynamicView from './pages/common/AllMetricsDynamicView'
 import AnonymizedSupplierProfile from './pages/common/AnonymizedSupplierProfile'
 import AiSupplierMatcher from './pages/common/AiSupplierMatcher'
@@ -80,7 +73,12 @@ import SupplierDeliveryProcess from './pages/common/SupplierDeliveryProcess'
 import OnboardingWelcome1 from './pages/onboarding/OnboardingWelcome1'
 import OnboardingWelcome2 from './pages/onboarding/OnboardingWelcome2'
 import RegistrationStep1PhoneVerification from './pages/onboarding/RegistrationStep1PhoneVerification'
+import PhoneVerificationCode from './pages/onboarding/PhoneVerificationCode'
 import RegistrationStep3ForDealers from './pages/onboarding/RegistrationStep3ForDealers'
+import BothRegistration from './pages/common/BothRegistration'
+
+// Auth
+import Login from './pages/auth/Login'
 
 // Product
 import ProductCertificateUpload from './pages/product/ProductCertificateUpload'
@@ -93,24 +91,44 @@ function App() {
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         {/* Buyer Routes */}
-        <Route path="/buyer" element={
+        <Route path="/buyer/home" element={
           <BuyerLayout>
-            <BuyerHomeScreen1 />
+            <BuyerHome />
           </BuyerLayout>
         } />
-        <Route path="/buyer/home-2" element={
+        <Route path="/buyer/products" element={
           <BuyerLayout>
-            <BuyerHomeScreen2 />
+            <BuyerProducts />
           </BuyerLayout>
         } />
-        <Route path="/buyer/home-3" element={
+        <Route path="/buyer/product/:id" element={
           <BuyerLayout>
-            <BuyerHomeScreen3 />
+            <ProductDetail />
           </BuyerLayout>
         } />
-        <Route path="/buyer/home-4" element={
+        <Route path="/buyer/orders" element={
           <BuyerLayout>
-            <BuyerHomeScreen4 />
+            <BuyerOrders />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/counter-offers" element={
+          <BuyerLayout>
+            <CounterOffer />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/notifications" element={
+          <BuyerLayout>
+            <BuyerOrders />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/my-company" element={
+          <BuyerLayout>
+            <BuyerDashboard />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/profile" element={
+          <BuyerLayout>
+            <BuyerDashboard />
           </BuyerLayout>
         } />
         <Route path="/buyer/registration" element={
@@ -118,81 +136,51 @@ function App() {
             <BuyerRegistration />
           </BuyerLayout>
         } />
-        <Route path="/buyer/dashboard-1" element={
-          <BuyerLayout>
-            <BuyerDashboard1 />
-          </BuyerLayout>
-        } />
-        <Route path="/buyer/dashboard-2" element={
-          <BuyerLayout>
-            <BuyerDashboard2 />
-          </BuyerLayout>
-        } />
-        <Route path="/buyer/offers" element={
-          <BuyerLayout>
-            <BuyerOffers />
-          </BuyerLayout>
-        } />
-        <Route path="/buyer/offers-received" element={
-          <BuyerLayout>
-            <BuyerHomeOffersReceived />
-          </BuyerLayout>
-        } />
 
         {/* Seller Routes */}
-        <Route path="/seller" element={
+        <Route path="/seller/dashboard" element={
           <Layout>
-            <SellerHomeScreen1 />
+            <SellerDashboard />
           </Layout>
         } />
-        <Route path="/seller/home-2" element={
+        <Route path="/seller/requests" element={
           <Layout>
-            <SellerHomeScreen2 />
+            <SupplierMyRequests />
           </Layout>
         } />
-        <Route path="/seller/home-3" element={
+        <Route path="/seller/offers" element={
           <Layout>
-            <SellerHomeScreen3 />
+            <AllSupplierOffers />
           </Layout>
         } />
-        <Route path="/seller/welcome" element={
+        <Route path="/seller/orders" element={
           <Layout>
-            <SellerWelcome />
+            <SellerOrders />
           </Layout>
         } />
-        <Route path="/seller/profile-1" element={
+        <Route path="/seller/products" element={
           <Layout>
-            <SellerProfileDetails1 />
+            <SupplierAddProduct />
           </Layout>
         } />
-        <Route path="/seller/profile-2" element={
+        <Route path="/seller/analytics" element={
           <Layout>
-            <SellerProfileDetails2 />
+            <SellerAnalytics />
           </Layout>
         } />
-        <Route path="/seller/profile-3" element={
+        <Route path="/seller/notifications" element={
           <Layout>
-            <SellerProfileDetails3 />
+            <SellerNotifications />
           </Layout>
         } />
-        <Route path="/seller/analytics-summary" element={
+        <Route path="/seller/my-company" element={
           <Layout>
-            <SellerAnalyticsSummary />
+            <SellerCompany />
           </Layout>
         } />
-        <Route path="/seller/analytics-deep-dive-1" element={
+        <Route path="/seller/profile" element={
           <Layout>
-            <SellerAnalyticsDeepDive1 />
-          </Layout>
-        } />
-        <Route path="/seller/analytics-deep-dive-2" element={
-          <Layout>
-            <SellerAnalyticsDeepDive2 />
-          </Layout>
-        } />
-        <Route path="/seller/edit-profile" element={
-          <Layout>
-            <SellerEditProfile />
+            <SellerProfile />
           </Layout>
         } />
         <Route path="/seller/settings" element={
@@ -200,24 +188,16 @@ function App() {
             <SellerSettingsPanel />
           </Layout>
         } />
-        <Route path="/seller/add-product" element={
+        <Route path="/seller/registration" element={
           <Layout>
-            <SupplierAddProduct />
+            <SellerRegistration />
           </Layout>
         } />
-        <Route path="/seller/my-requests" element={
+
+        {/* Both Role Routes */}
+        <Route path="/both/registration" element={
           <Layout>
-            <SupplierMyRequests />
-          </Layout>
-        } />
-        <Route path="/seller/acceptance" element={
-          <Layout>
-            <SupplierAcceptance />
-          </Layout>
-        } />
-        <Route path="/seller/role-selection" element={
-          <Layout>
-            <SupplierRoleSelection />
+            <BothRegistration />
           </Layout>
         } />
 
@@ -449,6 +429,11 @@ function App() {
             <RegistrationStep1PhoneVerification />
           </Layout>
         } />
+        <Route path="/registration/phone-verification-code" element={
+          <Layout>
+            <PhoneVerificationCode />
+          </Layout>
+        } />
         <Route path="/registration/step-3" element={
           <Layout>
             <RegistrationStep3ForDealers />
@@ -469,11 +454,23 @@ function App() {
           </Layout>
         } />
 
+        {/* Auth Routes */}
+        <Route path="/login" element={
+          <Layout>
+            <Login />
+          </Layout>
+        } />
+        <Route path="/register" element={
+          <Layout>
+            <OnboardingWelcome2 />
+          </Layout>
+        } />
+
         {/* Default route */}
         <Route path="/" element={
-          <BuyerLayout>
-            <BuyerHomeScreen1 />
-          </BuyerLayout>
+          <Layout>
+            <OnboardingWelcome1 />
+          </Layout>
         } />
       </Routes>
     </Router>

@@ -13,7 +13,7 @@ const RegistrationStep3ForDealers = () => {
   const [error, setError] = useState('')
 
   const handleBack = () => {
-    navigate('/onboarding/registration-step-2')
+    navigate('/registration/step-2')
   }
 
   const handleAddFactory = () => {

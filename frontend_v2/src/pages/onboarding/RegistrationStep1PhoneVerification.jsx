@@ -4,30 +4,21 @@ import { useNavigate } from 'react-router-dom'
 const RegistrationStep1PhoneVerification = () => {
   const navigate = useNavigate()
   const [phoneNumber, setPhoneNumber] = useState('')
-  const [countryCode, setCountryCode] = useState('+1')
+  const [countryCode, setCountryCode] = useState('+998')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
   const countryOptions = [
-    { code: '+1', country: 'US' },
-    { code: '+998', country: 'UZ' },
-    { code: '+91', country: 'IN' },
-    { code: '+86', country: 'CN' },
-    { code: '+81', country: 'JP' },
-    { code: '+49', country: 'DE' },
-    { code: '+33', country: 'FR' },
-    { code: '+7', country: 'RU' },
-    { code: '+55', country: 'BR' },
-    { code: '+61', country: 'AU' }
+    { code: '+998', country: 'UZ' }
   ]
 
   const handleBack = () => {
-    navigate('/onboarding/welcome')
+    navigate('/register')
   }
 
   const validatePhoneNumber = (phone) => {
-    // Basic phone number validation
-    const phoneRegex = /^[0-9]{10,15}$/
+    // Uzbekistan phone number validation (+998XXXXXXXXX)
+    const phoneRegex = /^[0-9]{9}$/
     return phoneRegex.test(phone.replace(/\s/g, ''))
   }
 
@@ -40,7 +31,7 @@ const RegistrationStep1PhoneVerification = () => {
     }
 
     if (!validatePhoneNumber(phoneNumber)) {
-      setError('Please enter a valid phone number')
+      setError('Please enter a valid 9-digit phone number (e.g., 901234567)')
       return
     }
 
@@ -54,7 +45,7 @@ const RegistrationStep1PhoneVerification = () => {
       localStorage.setItem('registrationPhone', `${countryCode}${phoneNumber}`)
       
       // Navigate to verification code step
-      navigate('/onboarding/phone-verification-code')
+      navigate('/registration/phone-verification-code')
     } catch (err) {
       setError('Failed to send verification code. Please try again.')
     } finally {

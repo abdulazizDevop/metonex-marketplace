@@ -118,7 +118,7 @@ jspm_packages/
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
-
+stitch_*/
 # Next.js build output
 .next
 
@@ -138,10 +138,6 @@ tmp/
 temp/
 
 # Deployment files
-# deploy.sh
-# quick-deploy.sh
-# systemd-services.sh
-# nginx.conf
 env.example
 
 # Production files
@@ -152,5 +148,6 @@ mvp1.1 backend TT.txt
 Шартнома (СҚ)_ 390  30.04.2025 дан.pdf
 Ҳисоб_фактура_актсиз_763_31_05_2025_дан.pdf
 MetOneX Backend System Technical Requirements Docu.pdf
+backend_changes.md
+
 .cursorrules
-frontend_v2/stitch_*/

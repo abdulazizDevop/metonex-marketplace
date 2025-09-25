@@ -5,14 +5,15 @@ const BuyerBottomNavigation = () => {
   const location = useLocation()
 
   const navItems = [
-    { path: '/buyer', icon: 'home', label: 'Home' },
-    { path: '/buyer/offers', icon: 'list_alt', label: 'Requests' },
-    { path: '/buyer/dashboard-1', icon: 'bar_chart', label: 'Dashboard' },
-    { path: '/buyer/registration', icon: 'person', label: 'Profile' }
+    { path: '/buyer/home', icon: 'home', label: 'Home' },
+    { path: '/buyer/products', icon: 'storefront', label: 'Products' },
+    { path: '/buyer/orders', icon: 'list_alt', label: 'Orders' },
+    { path: '/buyer/dashboard', icon: 'bar_chart', label: 'Dashboard' },
+    { path: '/buyer/profile', icon: 'person', label: 'Profile' }
   ]
 
   return (
-    <nav className="border-t border-gray-200 bg-white">
+    <nav className="bg-white">
       <div className="flex justify-around items-center h-20 px-2 pb-safe">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path

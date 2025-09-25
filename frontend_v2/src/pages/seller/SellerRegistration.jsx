@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const BuyerRegistration = () => {
+const SellerRegistration = () => {
   const navigate = useNavigate()
   
   // Tasdiqlangan telefon raqamni localStorage'dan olish
@@ -12,6 +12,7 @@ const BuyerRegistration = () => {
     phone: verifiedPhone, // Avtomatik olinadi va o'zgartirib bo'lmaydi
     password: '',
     confirmPassword: '',
+    supplierType: 'manufacturer', // manufacturer or dealer
     
     // Company data
     companyName: '',
@@ -104,7 +105,8 @@ const BuyerRegistration = () => {
         user: {
           phone: formData.phone,
           password: formData.password,
-          role: 'buyer'
+          role: 'supplier',
+          supplier_type: formData.supplierType
         },
         company: {
           name: formData.companyName,
@@ -126,10 +128,10 @@ const BuyerRegistration = () => {
         completedAt: new Date().toISOString()
       }
       
-      localStorage.setItem('buyerRegistrationData', JSON.stringify(registrationData))
+      localStorage.setItem('sellerRegistrationData', JSON.stringify(registrationData))
       
-      // Navigate to buyer dashboard
-      navigate('/buyer/home')
+      // Navigate to seller dashboard
+      navigate('/seller/dashboard')
     } catch (err) {
       setError('Registration failed. Please try again.')
     } finally {
@@ -138,7 +140,7 @@ const BuyerRegistration = () => {
   }
 
   const handleBack = () => {
-    navigate('/register')
+    navigate('/registration/phone-verification-code')
   }
 
   return (
@@ -148,7 +150,7 @@ const BuyerRegistration = () => {
           <button onClick={handleBack} className="absolute left-0 text-gray-800">
             <span className="material-symbols-outlined text-2xl">arrow_back</span>
           </button>
-          <h1 className="text-xl font-semibold text-gray-900">Buyer Registration</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Supplier Registration</h1>
         </div>
       </header>
 
@@ -207,6 +209,56 @@ const BuyerRegistration = () => {
                   type="password"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-4">
+                  Supplier Type *
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    {
+                      id: 'manufacturer',
+                      icon: 'factory',
+                      label: 'Manufacturer',
+                      description: 'I produce equipment'
+                    },
+                    {
+                      id: 'dealer',
+                      icon: 'local_shipping',
+                      label: 'Dealer',
+                      description: 'I resell equipment'
+                    }
+                  ].map((role) => (
+                    <div
+                      key={role.id}
+                      className={`bg-white border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 ${
+                        formData.supplierType === role.id 
+                          ? 'border-blue-500 shadow-lg shadow-blue-500/20' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setFormData(prev => ({ ...prev, supplierType: role.id }))}
+                    >
+                      <div className="flex flex-col items-center text-center">
+                        <span 
+                          className={`material-symbols-outlined text-3xl mb-2 ${
+                            formData.supplierType === role.id ? 'text-blue-500' : 'text-gray-400'
+                          }`}
+                        >
+                          {role.icon}
+                        </span>
+                        <span className={`text-sm font-semibold mb-1 ${
+                          formData.supplierType === role.id ? 'text-blue-600' : 'text-gray-700'
+                        }`}>
+                          {role.label}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {role.description}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -552,4 +604,4 @@ const BuyerRegistration = () => {
   )
 }
 
-export default BuyerRegistration
+export default SellerRegistration

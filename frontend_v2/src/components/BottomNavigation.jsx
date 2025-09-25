@@ -12,7 +12,7 @@ const BottomNavigation = () => {
   ]
 
   return (
-    <nav className="sticky bottom-0 bg-white/80 backdrop-blur-sm border-t border-gray-200 safe-area-bottom">
+    <nav className="bg-white">
       <div className="flex justify-around py-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path

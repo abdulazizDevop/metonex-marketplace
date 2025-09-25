@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const BuyerRegistration = () => {
+const BothRegistration = () => {
   const navigate = useNavigate()
   
   // Tasdiqlangan telefon raqamni localStorage'dan olish
@@ -12,6 +12,8 @@ const BuyerRegistration = () => {
     phone: verifiedPhone, // Avtomatik olinadi va o'zgartirib bo'lmaydi
     password: '',
     confirmPassword: '',
+    userRole: 'both', // Both role uchun
+    supplierType: 'manufacturer', // manufacturer or dealer
     
     // Company data
     companyName: '',
@@ -104,7 +106,8 @@ const BuyerRegistration = () => {
         user: {
           phone: formData.phone,
           password: formData.password,
-          role: 'buyer'
+          role: 'both', // Both buyer and seller
+          supplier_type: formData.supplierType
         },
         company: {
           name: formData.companyName,
@@ -123,13 +126,19 @@ const BuyerRegistration = () => {
           },
           telegram_owner: formData.telegramOwner
         },
+        documents: {
+          company_license: formData.companyLicense,
+          tax_certificate: formData.taxCertificate,
+          bank_statement: formData.bankStatement,
+          other_documents: formData.otherDocuments
+        },
         completedAt: new Date().toISOString()
       }
       
-      localStorage.setItem('buyerRegistrationData', JSON.stringify(registrationData))
+      localStorage.setItem('bothRegistrationData', JSON.stringify(registrationData))
       
-      // Navigate to buyer dashboard
-      navigate('/buyer/home')
+      // Navigate to combined dashboard (can choose buyer or seller view)
+      navigate('/buyer/home') // Default to buyer home
     } catch (err) {
       setError('Registration failed. Please try again.')
     } finally {
@@ -138,7 +147,7 @@ const BuyerRegistration = () => {
   }
 
   const handleBack = () => {
-    navigate('/register')
+    navigate('/registration/phone-verification-code')
   }
 
   return (
@@ -148,7 +157,7 @@ const BuyerRegistration = () => {
           <button onClick={handleBack} className="absolute left-0 text-gray-800">
             <span className="material-symbols-outlined text-2xl">arrow_back</span>
           </button>
-          <h1 className="text-xl font-semibold text-gray-900">Buyer Registration</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Complete Registration</h1>
         </div>
       </header>
 
@@ -187,26 +196,85 @@ const BuyerRegistration = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Enter password"
+                  placeholder="Enter your password"
                   type="password"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="confirmPassword">
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="confirm-password">
                   Confirm Password *
                 </label>
                 <input
-                  id="confirmPassword"
+                  id="confirm-password"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Confirm password"
+                  placeholder="Confirm your password"
                   type="password"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-4">
+                  Supplier Type (for selling) *
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    {
+                      id: 'manufacturer',
+                      icon: 'factory',
+                      label: 'Manufacturer',
+                      description: 'I produce equipment'
+                    },
+                    {
+                      id: 'dealer',
+                      icon: 'local_shipping',
+                      label: 'Dealer',
+                      description: 'I resell equipment'
+                    }
+                  ].map((role) => (
+                    <div
+                      key={role.id}
+                      className={`bg-white border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 ${
+                        formData.supplierType === role.id 
+                          ? 'border-blue-500 shadow-lg shadow-blue-500/20' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setFormData(prev => ({ ...prev, supplierType: role.id }))}
+                    >
+                      <div className="flex flex-col items-center text-center">
+                        <span 
+                          className={`material-symbols-outlined text-3xl mb-2 ${
+                            formData.supplierType === role.id ? 'text-blue-500' : 'text-gray-400'
+                          }`}
+                        >
+                          {role.icon}
+                        </span>
+                        <span className={`text-sm font-semibold mb-1 ${
+                          formData.supplierType === role.id ? 'text-blue-600' : 'text-gray-700'
+                        }`}>
+                          {role.label}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {role.description}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <div className="flex items-center">
+                  <span className="material-symbols-outlined text-blue-600 mr-2">info</span>
+                  <p className="text-sm text-blue-800">
+                    You will have access to both buyer and seller features
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -214,14 +282,13 @@ const BuyerRegistration = () => {
           {/* Company Information Section */}
           <div className="bg-gray-50 p-4 rounded-xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Information</h3>
-            
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="companyName">
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="company-name">
                   Company Name *
                 </label>
                 <input
-                  id="companyName"
+                  id="company-name"
                   name="companyName"
                   value={formData.companyName}
                   onChange={handleInputChange}
@@ -233,31 +300,31 @@ const BuyerRegistration = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="legalAddress">
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="legal-address">
                   Legal Address
                 </label>
-                <textarea
-                  id="legalAddress"
+                <input
+                  id="legal-address"
                   name="legalAddress"
                   value={formData.legalAddress}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Enter legal address"
-                  rows="3"
+                  placeholder="123 Main St, City, Country"
+                  type="text"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="innStir">
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="inn-stir">
                   INN/STIR *
                 </label>
                 <input
-                  id="innStir"
+                  id="inn-stir"
                   name="innStir"
                   value={formData.innStir}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Enter INN/STIR"
+                  placeholder="Your Tax ID Number"
                   type="text"
                   required
                 />
@@ -268,68 +335,62 @@ const BuyerRegistration = () => {
           {/* Bank Details Section */}
           <div className="bg-gray-50 p-4 rounded-xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Bank Details</h3>
-            
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="bankName">
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="bank-name">
                   Bank Name
                 </label>
                 <input
-                  id="bankName"
+                  id="bank-name"
                   name="bankName"
                   value={formData.bankName}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Bank name"
+                  placeholder="e.g., Central Bank"
                   type="text"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="accountNumber">
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="account-number">
                   Account Number
                 </label>
                 <input
-                  id="accountNumber"
+                  id="account-number"
                   name="accountNumber"
                   value={formData.accountNumber}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Account number"
+                  placeholder="e.g., 1234567890123456"
                   type="text"
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="mfo">
-                    MFO
-                  </label>
-                  <input
-                    id="mfo"
-                    name="mfo"
-                    value={formData.mfo}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="MFO"
-                    type="text"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="inn">
-                    INN
-                  </label>
-                  <input
-                    id="inn"
-                    name="inn"
-                    value={formData.inn}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="INN"
-                    type="text"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="mfo">
+                  MFO
+                </label>
+                <input
+                  id="mfo"
+                  name="mfo"
+                  value={formData.mfo}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                  placeholder="e.g., 00876"
+                  type="text"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="bank-inn">
+                  Bank TIN
+                </label>
+                <input
+                  id="bank-inn"
+                  name="inn"
+                  value={formData.inn}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                  placeholder="e.g., 123456789"
+                  type="text"
+                />
               </div>
             </div>
           </div>
@@ -337,29 +398,27 @@ const BuyerRegistration = () => {
           {/* Accountant Contact Section */}
           <div className="bg-gray-50 p-4 rounded-xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Accountant Contact</h3>
-            
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="accountantName">
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="accountant-name">
                   Accountant Name
                 </label>
                 <input
-                  id="accountantName"
+                  id="accountant-name"
                   name="accountantName"
                   value={formData.accountantName}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Accountant name"
+                  placeholder="Jane Doe"
                   type="text"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="accountantPhone">
-                  Accountant Phone
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="accountant-phone">
+                  Accountant Phone Number
                 </label>
                 <input
-                  id="accountantPhone"
+                  id="accountant-phone"
                   name="accountantPhone"
                   value={formData.accountantPhone}
                   onChange={handleInputChange}
@@ -368,18 +427,17 @@ const BuyerRegistration = () => {
                   type="tel"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="accountantEmail">
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="accountant-email">
                   Accountant Email
                 </label>
                 <input
-                  id="accountantEmail"
+                  id="accountant-email"
                   name="accountantEmail"
                   value={formData.accountantEmail}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="accountant@company.com"
+                  placeholder="email@example.com"
                   type="email"
                 />
               </div>
@@ -552,4 +610,4 @@ const BuyerRegistration = () => {
   )
 }
 
-export default BuyerRegistration
+export default BothRegistration

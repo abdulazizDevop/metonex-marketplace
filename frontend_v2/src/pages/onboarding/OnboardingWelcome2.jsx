@@ -52,14 +52,8 @@ const OnboardingWelcome2 = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500))
       
-      // Navigate based on role
-      if (selectedRole === 'buyer') {
-        navigate('/buyer/registration')
-      } else if (selectedRole === 'supplier') {
-        navigate('/onboarding/registration-step-1')
-      } else {
-        navigate('/onboarding/registration-step-1')
-      }
+      // Barcha rollar uchun phone verification-ga o'tish
+      navigate('/registration/step-1')
     } catch (error) {
       console.error('Error:', error)
     } finally {
@@ -68,7 +62,7 @@ const OnboardingWelcome2 = () => {
   }
 
   const handleBack = () => {
-    navigate('/onboarding/welcome-1')
+    navigate('/')
   }
 
   return (
