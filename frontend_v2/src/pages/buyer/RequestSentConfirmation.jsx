@@ -11,7 +11,7 @@ const RequestSentConfirmation = () => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          navigate('/dashboard');
+          navigate('/buyer/home');
           return 0;
         }
         return prev - 1;
@@ -22,11 +22,11 @@ const RequestSentConfirmation = () => {
   }, [navigate]);
 
   const handleViewRequest = () => {
-    navigate('/view-request');
+    navigate(`/buyer/rfq/${requestId}`);
   };
 
   const handleBackToDashboard = () => {
-    navigate('/dashboard');
+    navigate('/buyer/home');
   };
 
   return (
@@ -96,13 +96,13 @@ const RequestSentConfirmation = () => {
             onClick={handleBackToDashboard}
             className="w-full bg-gray-100 text-gray-900 py-3 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
           >
-            Back to Dashboard
+            Back to Home
           </button>
         </div>
 
         {/* Auto Redirect Notice */}
         <p className="text-xs text-gray-500 mt-4">
-          Redirecting to dashboard in {countdown} seconds...
+          Redirecting to home in {countdown} seconds...
         </p>
       </div>
     </div>

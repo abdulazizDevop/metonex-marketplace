@@ -8,13 +8,11 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
-  const [showQuoteModal, setShowQuoteModal] = useState(false)
-  const [quoteData, setQuoteData] = useState({
-    quantity: 1,
-    message: '',
-    deliveryDate: '',
-    specialRequirements: ''
-  })
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [showImageModal, setShowImageModal] = useState(false)
+  const [quantityError, setQuantityError] = useState('')
+  const [cartItems, setCartItems] = useState([])
+  const [showAddToCartSuccess, setShowAddToCartSuccess] = useState(false)
 
   // Sample product data (in real app, this would come from API)
   const sampleProducts = {
@@ -82,31 +80,131 @@ const ProductDetail = () => {
       const productData = sampleProducts[id] || sampleProducts[1]
       setProduct(productData)
       setQuantity(productData.minOrder ? parseInt(productData.minOrder) : 1)
-      setQuoteData(prev => ({
-        ...prev,
-        quantity: productData.minOrder ? parseInt(productData.minOrder) : 1
-      }))
       setLoading(false)
     }, 1000)
   }, [id])
 
+  useEffect(() => {
+    // Load cart items from localStorage
+    const savedCartItems = localStorage.getItem('cartItems')
+    if (savedCartItems) {
+      setCartItems(JSON.parse(savedCartItems))
+    }
+  }, [])
+
   const handleQuantityChange = (value) => {
     const numValue = parseInt(value) || 1
+    const minOrder = product ? parseInt(product.minOrder) : 1
+    
     setQuantity(numValue)
     setQuoteData(prev => ({ ...prev, quantity: numValue }))
+    
+    // Validate minimum order
+    if (numValue < minOrder) {
+      setQuantityError(`Minimum order is ${product.minOrder}`)
+    } else {
+      setQuantityError('')
+    }
   }
 
-  const handleQuoteSubmit = (e) => {
-    e.preventDefault()
-    // Simulate API call
-    console.log('Quote request:', quoteData)
-    alert('Quote request sent successfully!')
-    setShowQuoteModal(false)
-    navigate('/buyer/orders')
+  const handleShare = () => {
+    setShowShareModal(true)
   }
 
-  const handleQuoteInputChange = (field, value) => {
-    setQuoteData(prev => ({ ...prev, [field]: value }))
+  const handleCopyLink = async () => {
+    try {
+      const url = window.location.href
+      await navigator.clipboard.writeText(url)
+      alert('Link copied to clipboard!')
+    } catch (err) {
+      console.error('Failed to copy URL:', err)
+      alert('Failed to copy link')
+    }
+  }
+
+  const handleSocialShare = (option) => {
+    const url = window.location.href
+    const shareUrl = option.url + encodeURIComponent(url)
+    window.open(shareUrl, '_blank', 'width=600,height=400')
+  }
+
+  const handleImageNavigation = (direction) => {
+    if (direction === 'prev') {
+      setSelectedImage(prev => prev === 0 ? product.images.length - 1 : prev - 1)
+    } else {
+      setSelectedImage(prev => prev === product.images.length - 1 ? 0 : prev + 1)
+    }
+  }
+
+  const handleImageClick = () => {
+    setShowImageModal(true)
+  }
+
+  const shareOptions = [
+    { 
+      name: 'Telegram', 
+      icon: 'https://telegram.org/img/t_logo.png',
+      url: 'https://t.me/share/url?url=',
+      color: 'bg-blue-500' 
+    },
+    { 
+      name: 'WhatsApp', 
+      icon: 'https://web.whatsapp.com/favicon.ico',
+      url: 'https://wa.me/?text=',
+      color: 'bg-green-500' 
+    },
+    { 
+      name: 'Facebook', 
+      icon: 'https://facebook.com/favicon.ico',
+      url: 'https://www.facebook.com/sharer/sharer.php?u=',
+      color: 'bg-blue-600' 
+    },
+    { 
+      name: 'Instagram', 
+      icon: 'https://instagram.com/favicon.ico',
+      url: 'https://www.instagram.com/',
+      color: 'bg-pink-500' 
+    }
+  ]
+
+  const handleAddToCart = () => {
+    if (quantityError) {
+      return
+    }
+
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0],
+      quantity: quantity,
+      supplier: product.supplier,
+      minOrder: product.minOrder,
+      maxOrder: product.maxOrder
+    }
+
+    const existingItemIndex = cartItems.findIndex(item => item.id === product.id)
+    let updatedCartItems
+
+    if (existingItemIndex >= 0) {
+      // Update existing item
+      updatedCartItems = cartItems.map((item, index) => 
+        index === existingItemIndex 
+          ? { ...item, quantity: item.quantity + quantity }
+          : item
+      )
+    } else {
+      // Add new item
+      updatedCartItems = [...cartItems, cartItem]
+    }
+
+    setCartItems(updatedCartItems)
+    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems))
+    setShowAddToCartSuccess(true)
+    
+    setTimeout(() => {
+      setShowAddToCartSuccess(false)
+    }, 2000)
   }
 
   if (loading) {
@@ -152,10 +250,10 @@ const ProductDetail = () => {
             </button>
             <h1 className="text-lg font-bold text-gray-900">Product Details</h1>
             <div className="flex items-center gap-2">
-              <button className="p-2 text-gray-600 hover:text-gray-800">
-                <span className="material-symbols-outlined text-xl">favorite_border</span>
-              </button>
-              <button className="p-2 text-gray-600 hover:text-gray-800">
+              <button 
+                onClick={handleShare}
+                className="p-2 text-gray-600 hover:text-gray-800"
+              >
                 <span className="material-symbols-outlined text-xl">share</span>
               </button>
             </div>
@@ -171,8 +269,27 @@ const ProductDetail = () => {
             <img
               src={product.images[selectedImage]}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover cursor-pointer"
+              onClick={handleImageClick}
             />
+            
+            {/* Navigation Buttons */}
+            {product.images.length > 1 && (
+              <>
+                <button
+                  onClick={() => handleImageNavigation('prev')}
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-black/20 hover:bg-black/40 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <span className="material-symbols-outlined text-xl">chevron_left</span>
+                </button>
+                <button
+                  onClick={() => handleImageNavigation('next')}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-black/20 hover:bg-black/40 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <span className="material-symbols-outlined text-xl">chevron_right</span>
+                </button>
+              </>
+            )}
             
             {/* Image Indicators */}
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
@@ -284,7 +401,11 @@ const ProductDetail = () => {
                 type="number"
                 value={quantity}
                 onChange={(e) => handleQuantityChange(e.target.value)}
-                className="w-20 text-center border border-gray-300 rounded-lg py-2 text-sm"
+                className={`w-20 text-center border rounded-lg py-2 text-sm ${
+                  quantityError 
+                    ? 'border-red-500 bg-red-50' 
+                    : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                }`}
                 min="1"
               />
               <button
@@ -295,15 +416,19 @@ const ProductDetail = () => {
               </button>
               <span className="text-sm text-gray-500 ml-2">tons</span>
             </div>
+            {quantityError && (
+              <p className="text-red-500 text-xs mt-1">{quantityError}</p>
+            )}
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-3">
             <button
-              onClick={() => setShowQuoteModal(true)}
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              onClick={handleAddToCart}
+              disabled={quantityError}
+              className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Request Quote
+              Savatga qo'shish
             </button>
             <button className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
               <span className="material-symbols-outlined text-xl">chat</span>
@@ -372,7 +497,11 @@ const ProductDetail = () => {
           <h2 className="text-lg font-semibold text-gray-900 mb-3">Related Products</h2>
           <div className="grid grid-cols-2 gap-3">
             {product.relatedProducts.map((relatedProduct) => (
-              <div key={relatedProduct.id} className="border border-gray-200 rounded-lg overflow-hidden">
+              <div 
+                key={relatedProduct.id} 
+                className="border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate(`/buyer/product/${relatedProduct.id}`)}
+              >
                 <div className="aspect-square bg-gray-100">
                   <img
                     src={relatedProduct.image}
@@ -395,15 +524,25 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Quote Modal */}
-      {showQuoteModal && (
+      {/* Add to Cart Success Toast */}
+      {showAddToCartSuccess && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
+            <span className="material-symbols-outlined text-lg">check_circle</span>
+            <span className="text-sm font-medium">Mahsulot savatga qo'shildi!</span>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end">
-          <div className="bg-white w-full max-w-md mx-auto rounded-t-2xl max-h-[80vh] overflow-y-auto">
+          <div className="bg-white w-full max-w-md mx-auto rounded-t-2xl">
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Request Quote</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Share Product</h3>
                 <button
-                  onClick={() => setShowQuoteModal(false)}
+                  onClick={() => setShowShareModal(false)}
                   className="p-2 text-gray-400 hover:text-gray-600"
                 >
                   <span className="material-symbols-outlined text-xl">close</span>
@@ -411,56 +550,93 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            <form onSubmit={handleQuoteSubmit} className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                <input
-                  type="number"
-                  value={quoteData.quantity}
-                  onChange={(e) => handleQuoteInputChange('quantity', parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  min="1"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Delivery Date</label>
-                <input
-                  type="date"
-                  value={quoteData.deliveryDate}
-                  onChange={(e) => handleQuoteInputChange('deliveryDate', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
-                <textarea
-                  value={quoteData.message}
-                  onChange={(e) => handleQuoteInputChange('message', e.target.value)}
-                  placeholder="Tell the supplier about your requirements..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-24 resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Special Requirements</label>
-                <textarea
-                  value={quoteData.specialRequirements}
-                  onChange={(e) => handleQuoteInputChange('specialRequirements', e.target.value)}
-                  placeholder="Any special requirements or specifications..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-20 resize-none"
-                />
-              </div>
-
+            <div className="p-4">
+              {/* Copy Link Button */}
               <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                onClick={handleCopyLink}
+                className="w-full flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors mb-4"
               >
-                Send Quote Request
+                <div className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center">
+                  <span className="material-symbols-outlined text-white text-lg">content_copy</span>
+                </div>
+                <span className="text-sm font-medium text-gray-900">Copy Link</span>
               </button>
-            </form>
+
+              {/* Social Media Options */}
+              <div className="grid grid-cols-2 gap-3">
+                {shareOptions.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSocialShare(option)}
+                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
+                      <img
+                        src={option.icon}
+                        alt={option.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none'
+                          e.target.nextSibling.style.display = 'flex'
+                        }}
+                      />
+                      <div className={`w-full h-full ${option.color} flex items-center justify-center`} style={{display: 'none'}}>
+                        <span className="material-symbols-outlined text-white text-lg">
+                          {option.name === 'Telegram' ? 'send' : 
+                           option.name === 'WhatsApp' ? 'chat' : 
+                           option.name === 'Facebook' ? 'facebook' : 'photo_camera'}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">{option.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {showImageModal && (
+        <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+          <div className="relative w-full h-full flex items-center justify-center">
+            <img
+              src={product.images[selectedImage]}
+              alt={product.name}
+              className="max-w-full max-h-full object-contain"
+            />
+            
+            {/* Close Button */}
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+            >
+              <span className="material-symbols-outlined text-xl">close</span>
+            </button>
+
+            {/* Navigation Buttons */}
+            {product.images.length > 1 && (
+              <>
+                <button
+                  onClick={() => handleImageNavigation('prev')}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <span className="material-symbols-outlined text-2xl">chevron_left</span>
+                </button>
+                <button
+                  onClick={() => handleImageNavigation('next')}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <span className="material-symbols-outlined text-2xl">chevron_right</span>
+                </button>
+              </>
+            )}
+
+            {/* Image Counter */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+              {selectedImage + 1} / {product.images.length}
+            </div>
           </div>
         </div>
       )}

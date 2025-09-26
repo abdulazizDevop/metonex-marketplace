@@ -7,9 +7,21 @@ import BuyerLayout from './components/BuyerLayout'
 import BuyerHome from './pages/buyer/BuyerHome'
 import BuyerOrders from './pages/buyer/BuyerOrders'
 import BuyerRegistration from './pages/buyer/BuyerRegistration'
-import BuyerDashboard from './pages/buyer/BuyerDashboard'
-import BuyerProducts from './pages/buyer/BuyerProducts'
 import ProductDetail from './pages/buyer/ProductDetail'
+import RFQDetail from './pages/buyer/RFQDetail'
+import OfferDetail from './pages/buyer/OfferDetail'
+import OrderDetail from './pages/buyer/OrderDetail'
+import BuyerProfile from './pages/buyer/BuyerProfile'
+import BuyerEditProfile from './pages/buyer/BuyerEditProfile'
+import BuyerEditCompany from './pages/buyer/BuyerEditCompany'
+import BuyerUploadDocuments from './pages/buyer/BuyerUploadDocuments'
+import CompanyPage from './pages/buyer/CompanyPage'
+import BuyerDashboard from './pages/buyer/BuyerDashboard'
+import AvailableProducts from './pages/buyer/AvailableProducts'
+import CategorySelection from './pages/buyer/CategorySelection'
+import RFQForm from './pages/buyer/RFQForm'
+import RequestSentConfirmation from './pages/buyer/RequestSentConfirmation'
+
 
 // Seller Pages
 import SellerDashboard from './pages/seller/SellerDashboard'
@@ -25,7 +37,6 @@ import SupplierAddProduct from './pages/seller/SupplierAddProduct'
 import SupplierMyRequests from './pages/seller/SupplierMyRequests'
 import SupplierAcceptance from './pages/seller/SupplierAcceptance'
 import AllSupplierOffers from './pages/seller/AllSupplierOffers'
-import AvailableSuppliers from './pages/seller/AvailableSuppliers'
 import ConfirmDelivery from './pages/seller/ConfirmDelivery'
 import CounterOffer from './pages/seller/CounterOffer'
 import FullOrderDetails from './pages/seller/FullOrderDetails'
@@ -38,10 +49,6 @@ import UploadPaymentProof from './pages/common/UploadPaymentProof'
 import FirstPaymentSuccess from './pages/common/FirstPaymentSuccess'
 import FollowingPaymentsSuccess from './pages/common/FollowingPaymentsSuccess'
 import FirstOrderCongratulations from './pages/common/FirstOrderCongratulations'
-import RequestSentConfirmation from './pages/common/RequestSentConfirmation'
-import ManualOrderRequestForm from './pages/buyer/ManualOrderRequestForm'
-import CategorySelection from './pages/buyer/CategorySelection'
-import ChooseOrderMethod from './pages/buyer/ChooseOrderMethod'
 import PreparingShipment1 from './pages/common/PreparingShipment1'
 import PreparingShipment2 from './pages/common/PreparingShipment2'
 import DocumentGenerationProgress from './pages/common/DocumentGenerationProgress'
@@ -98,17 +105,47 @@ function App() {
         } />
         <Route path="/buyer/products" element={
           <BuyerLayout>
-            <BuyerProducts />
+            <AvailableProducts />
           </BuyerLayout>
         } />
-        <Route path="/buyer/product/:id" element={
+        <Route path="/buyer/category-selection" element={
           <BuyerLayout>
-            <ProductDetail />
+            <CategorySelection />
           </BuyerLayout>
         } />
+        <Route path="/buyer/rfq-form" element={
+          <BuyerLayout>
+            <RFQForm />
+          </BuyerLayout>
+        } />
+            <Route path="/buyer/product/:id" element={
+              <BuyerLayout>
+                <ProductDetail />
+              </BuyerLayout>
+            } />
+            <Route path="/buyer/rfq/:id" element={
+              <BuyerLayout>
+                <RFQDetail />
+              </BuyerLayout>
+            } />
+            <Route path="/buyer/offer/:id" element={
+              <BuyerLayout>
+                <OfferDetail />
+              </BuyerLayout>
+            } />
+            <Route path="/buyer/order/:id" element={
+              <BuyerLayout>
+                <OrderDetail />
+              </BuyerLayout>
+            } />
         <Route path="/buyer/orders" element={
           <BuyerLayout>
             <BuyerOrders />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/request-confirmed" element={
+          <BuyerLayout>
+            <RequestSentConfirmation />
           </BuyerLayout>
         } />
         <Route path="/buyer/counter-offers" element={
@@ -121,12 +158,33 @@ function App() {
             <BuyerOrders />
           </BuyerLayout>
         } />
-        <Route path="/buyer/my-company" element={
+
+        <Route path="/buyer/profile" element={
           <BuyerLayout>
-            <BuyerDashboard />
+            <BuyerProfile />
           </BuyerLayout>
         } />
-        <Route path="/buyer/profile" element={
+        <Route path="/buyer/edit-profile" element={
+          <BuyerLayout>
+            <BuyerEditProfile />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/edit-company" element={
+          <BuyerLayout>
+            <BuyerEditCompany />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/upload-documents" element={
+          <BuyerLayout>
+            <BuyerUploadDocuments />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/company" element={
+          <BuyerLayout>
+            <CompanyPage />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/dashboard" element={
           <BuyerLayout>
             <BuyerDashboard />
           </BuyerLayout>
@@ -247,26 +305,7 @@ function App() {
             <FirstOrderCongratulations />
           </Layout>
         } />
-        <Route path="/request-sent-confirmation" element={
-          <Layout>
-            <RequestSentConfirmation />
-          </Layout>
-        } />
-        <Route path="/manual-order-request-form" element={
-          <Layout>
-            <ManualOrderRequestForm />
-          </Layout>
-        } />
-        <Route path="/category-selection" element={
-          <Layout>
-            <CategorySelection />
-          </Layout>
-        } />
-        <Route path="/choose-order-method" element={
-          <Layout>
-            <ChooseOrderMethod />
-          </Layout>
-        } />
+
         <Route path="/full-order-details" element={
           <Layout>
             <FullOrderDetails />
@@ -350,11 +389,6 @@ function App() {
         <Route path="/manage-team-members" element={
           <Layout>
             <ManageTeamMembers />
-          </Layout>
-        } />
-        <Route path="/available-suppliers" element={
-          <Layout>
-            <AvailableSuppliers />
           </Layout>
         } />
         <Route path="/all-supplier-offers" element={

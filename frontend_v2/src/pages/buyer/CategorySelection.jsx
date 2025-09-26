@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 const CategorySelection = () => {
   const navigate = useNavigate()
-  const [selectedCategory, setSelectedCategory] = useState('Cement')
+  const [selectedCategories, setSelectedCategories] = useState([])
 
   const categories = [
     {
@@ -29,12 +29,24 @@ const CategorySelection = () => {
   ]
 
   const handleCategorySelect = (category) => {
-    setSelectedCategory(category)
+    setSelectedCategories(prev => {
+      if (prev.includes(category)) {
+        return prev.filter(c => c !== category)
+      } else {
+        return [...prev, category]
+      }
+    })
   }
 
   const handleNext = () => {
-    console.log(`Selected category: ${selectedCategory}`)
-    navigate('/buyer/choose-order-method')
+    if (selectedCategories.length === 0) {
+      alert('Iltimos, kamida bitta kategoriya tanlang')
+      return
+    }
+    console.log(`Selected categories: ${selectedCategories.join(', ')}`)
+    navigate('/buyer/products', { 
+      state: { selectedCategories } 
+    })
   }
 
   const handleBack = () => {
@@ -65,13 +77,17 @@ const CategorySelection = () => {
               key={category.id}
               onClick={() => handleCategorySelect(category.label)}
               className={`flex flex-col items-center justify-center gap-4 p-6 bg-white rounded-2xl border-2 transition-all duration-200 cursor-pointer hover:shadow-lg ${
-                selectedCategory === category.label
-                  ? 'border-purple-600 shadow-lg shadow-purple-600/30'
-                  : 'border-transparent hover:border-purple-300'
+                selectedCategories.includes(category.label)
+                  ? 'border-blue-600 shadow-lg shadow-blue-600/30'
+                  : 'border-transparent hover:border-blue-600/30'
               }`}
               tabIndex="0"
             >
-              <div className="flex items-center justify-center size-16 bg-purple-600 rounded-full text-white">
+              <div className={`flex items-center justify-center size-16 rounded-full text-white ${
+                selectedCategories.includes(category.label)
+                  ? 'bg-blue-600'
+                  : 'bg-gray-400'
+              }`}>
                 <span className="material-symbols-outlined text-3xl">{category.icon}</span>
               </div>
               <span className="text-base font-semibold text-gray-900">{category.label}</span>
@@ -81,10 +97,10 @@ const CategorySelection = () => {
       </main>
 
       {/* Footer */}
-      <footer className="sticky bottom-0 bg-white p-4 pb-8">
+      <footer className="sticky bottom-0 bg-white p-4 pb-20">
         <button 
           onClick={handleNext}
-          className="flex w-full cursor-pointer items-center justify-center rounded-xl h-14 bg-purple-600 text-white text-lg font-bold leading-normal tracking-wide shadow-lg shadow-purple-600/39 hover:bg-opacity-90 transition-all duration-200"
+          className="flex w-full cursor-pointer items-center justify-center rounded-xl h-14 bg-blue-600 text-white text-lg font-bold leading-normal tracking-wide shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-all duration-200"
         >
           <span className="truncate">Next</span>
         </button>

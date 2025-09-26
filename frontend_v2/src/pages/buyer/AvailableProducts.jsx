@@ -1,136 +1,146 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const AvailableSuppliers = () => {
+const AvailableProducts = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
   const [loading, setLoading] = useState(true);
-  const [suppliers, setSuppliers] = useState([]);
-  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('rating'); // rating, price, eta
   const [error, setError] = useState(null);
-  const [requestData, setRequestData] = useState(null);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
-  // URL dan request ID ni olish
-  const requestId = location.state?.requestId || new URLSearchParams(location.search).get('id');
-
-  useEffect(() => {
-    if (requestId) {
-      fetchRequestAndSuppliers();
-    }
-  }, [requestId]);
+  // URL dan selected categories ni olish
+  const categories = location.state?.selectedCategories || [];
 
   useEffect(() => {
-    filterAndSortSuppliers();
-  }, [suppliers, searchTerm, sortBy]);
+    setSelectedCategories(categories);
+    fetchProducts();
+  }, [categories.length, categories.join(',')]);
 
-  const fetchRequestAndSuppliers = async () => {
+  useEffect(() => {
+    filterAndSortProducts();
+  }, [products, searchTerm, sortBy]);
+
+  const fetchProducts = async () => {
     try {
       setLoading(true);
       
-      // Fetch request details
-      // const requestResponse = await api.get(`/buyer/requests/${requestId}`);
-      // setRequestData(requestResponse.data);
+      // Fetch products based on selected categories
+      // const productsResponse = await api.get(`/products?categories=${categories.join(',')}`);
+      // setProducts(productsResponse.data);
       
-      // Mock request data
-      setRequestData({
-        id: requestId,
-        title: 'Concrete Mix',
-        quantity: '50 tons',
-        deadline: '2024-08-15',
-        specifications: 'High-grade concrete mix for foundation work'
-      });
-
-      // Fetch available suppliers
-      // const suppliersResponse = await api.get(`/buyer/requests/${requestId}/available-suppliers`);
-      // setSuppliers(suppliersResponse.data);
-      
-      // Mock suppliers data
-      setSuppliers([
+      // Mock products data based on selected categories
+      const mockProducts = [
         {
-          id: '12345',
-          name: 'Toshkent Qurilish Materiallari',
+          id: 'prod-001',
+          name: 'Armatura Ø12mm',
+          category: 'Metal',
           rating: 4.5,
           reviewCount: 123,
-          price: 1000000,
-          eta: 2,
+          price: 850000,
+          unit: 'ton',
           image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCdryttP_hZ1aOk38j1UfJbfA5OebrlBiw7thSPbx4WDN_QlLxeRQsUiZIFcpFdPHV1nu3Cl_xIr4U_0IMAPPzq7zpQGl8B0RJ-JhAMsg-PLY89sC-RmC-bVGaeWzpeh9vVg288XDJF5LSe0FECkk9ty51y8vugWrV9lz4d81ssqiPFji-6HftEipidgx88QMxwEw3TkWjldEBY1I1ueKZOdSs7ccgfrJRYkM_iBfzZf9EW6nnDKo6PwSDhZ0kL6e907xx5QbLaqx4',
-          specialties: ['Concrete', 'Cement', 'Rebar'],
+          supplier: 'Toshkent Qurilish Materiallari',
           location: 'Toshkent',
           verified: true,
-          responseTime: '2 hours',
-          minOrder: 10
+          minOrder: 5,
+          inStock: true
         },
         {
-          id: '67890',
-          name: 'Samarqand Qurilish',
+          id: 'prod-002',
+          name: 'Cement M400',
+          category: 'Cement',
           rating: 4.2,
           reviewCount: 87,
-          price: 1200000,
-          eta: 3,
+          price: 450000,
+          unit: 'ton',
           image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI31wkO9eVTgkFGDmhiqMjizara4ZdYNgG-Z3MXS94iBWSvxJDMLoBgWamNgXoj3DITxVkODWU9VFueaT0sqIjtNkT7M8dr7RSoutdGntzCkQ3mnJbkmr27OoTC7nH4RjaRsg6WEwTSh_keao6_VLbdM_jHpOD-MxYMX-047JoL1P-DFBMIikBJzFrtdEZPK9YaPzc552WF_VZAm24OJ38RyEFwMjyi6w64ygzK-GQWpO6aURFHamnDz8FUwOqXMKeejzG-jZOAaA',
-          specialties: ['Concrete', 'Steel', 'Lumber'],
+          supplier: 'Samarqand Qurilish',
           location: 'Samarqand',
           verified: true,
-          responseTime: '4 hours',
-          minOrder: 20
+          minOrder: 10,
+          inStock: true
         },
         {
-          id: '11223',
-          name: 'Premium Materials Co.',
+          id: 'prod-003',
+          name: 'Concrete Mix C25',
+          category: 'Concrete',
           rating: 4.8,
           reviewCount: 200,
-          price: 900000,
-          eta: 1,
+          price: 120000,
+          unit: 'm³',
           image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBgPuS-UHMaMPZ0EBlleg_Yhd0_WnBfMKNAkrutiOKwCZXntW5hHvsiJjAkHxsgiQ6eOjJ9QTPHaPGPOlfVX4Au-KfblMpXZ5RJq5DpHDO0ILM-c4qAK6c755SjLX3HNRFF64YWSdds5wcwPPzKwwOO5OFTOQpF1_FCsAIZ6YzXlUotOYx8gUV6DVuBKnm5x9w4hreHfG_2ZfsMTBXP1fm6-8qk8-NqqVdfduYRIymfaDCZpI9hf4mrB5EmCIC0fnBjSNRYLwW8CXA',
-          specialties: ['Concrete', 'Premium Materials'],
+          supplier: 'Premium Materials Co.',
           location: 'Toshkent',
           verified: true,
-          responseTime: '1 hour',
-          minOrder: 5
+          minOrder: 1,
+          inStock: true
+        },
+        {
+          id: 'prod-004',
+          name: 'Interior Paint White',
+          category: 'Paint',
+          rating: 4.3,
+          reviewCount: 156,
+          price: 85000,
+          unit: 'liter',
+          image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCdryttP_hZ1aOk38j1UfJbfA5OebrlBiw7thSPbx4WDN_QlLxeRQsUiZIFcpFdPHV1nu3Cl_xIr4U_0IMAPPzq7zpQGl8B0RJ-JhAMsg-PLY89sC-RmC-bVGaeWzpeh9vVg288XDJF5LSe0FECkk9ty51y8vugWrV9lz4d81ssqiPFji-6HftEipidgx88QMxwEw3TkWjldEBY1I1ueKZOdSs7ccgfrJRYkM_iBfzZf9EW6nnDKo6PwSDhZ0kL6e907xx5QbLaqx4',
+          supplier: 'Paint Solutions Ltd',
+          location: 'Toshkent',
+          verified: true,
+          minOrder: 20,
+          inStock: true
         }
-      ]);
+      ];
+
+      // Filter products based on selected categories
+      const filteredProducts = categories.length > 0 
+        ? mockProducts.filter(product => categories.includes(product.category))
+        : mockProducts;
+      
+      setProducts(filteredProducts);
       
       setError(null);
     } catch (error) {
-      console.error('Error fetching suppliers:', error);
-      setError('Yetkazib beruvchilarni yuklashda xatolik yuz berdi');
+      console.error('Error fetching products:', error);
+      setError('Mahsulotlarni yuklashda xatolik yuz berdi');
     } finally {
       setLoading(false);
     }
   };
 
-  const filterAndSortSuppliers = () => {
-    let filtered = [...suppliers];
+  const filterAndSortProducts = () => {
+    let filtered = [...products];
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(supplier =>
-        supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        supplier.specialties.some(specialty => 
-          specialty.toLowerCase().includes(searchTerm.toLowerCase())
-        ) ||
-        supplier.location.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.location.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Sort suppliers
+    // Sort products
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'rating':
           return b.rating - a.rating;
         case 'price':
           return a.price - b.price;
-        case 'eta':
-          return a.eta - b.eta;
+        case 'name':
+          return a.name.localeCompare(b.name);
         default:
           return 0;
       }
     });
 
-    setFilteredSuppliers(filtered);
+    setFilteredProducts(filtered);
   };
 
   const handleSearch = (e) => {
@@ -141,29 +151,26 @@ const AvailableSuppliers = () => {
     setSortBy(newSortBy);
   };
 
-  const handleHelpMeChoose = () => {
-    // AI-powered supplier recommendation
-    navigate(`/buyer/ai-supplier-matcher/${requestId}`, {
-      state: { requestData, suppliers }
-    });
-  };
-
-  const handleViewSupplier = (supplierId) => {
-    navigate(`/buyer/supplier-profile/${supplierId}`, {
+  const handleViewProduct = (productId) => {
+    navigate(`/buyer/product/${productId}`, {
       state: { 
-        requestData,
-        fromAvailableSuppliers: true
+        selectedCategories,
+        fromAvailableProducts: true
       }
     });
   };
 
-  const handleOrderFromSupplier = (supplierId) => {
-    navigate(`/buyer/create-order/${requestId}`, {
-      state: { 
-        requestData,
-        selectedSupplier: suppliers.find(s => s.id === supplierId)
-      }
-    });
+  const handleRequestQuote = (productId) => {
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      // Navigate to RFQ form with product data
+      navigate('/buyer/rfq-form', { 
+        state: { 
+          product: product,
+          selectedCategories: categories 
+        } 
+      });
+    }
   };
 
   const handleBack = () => {
@@ -228,29 +235,29 @@ const AvailableSuppliers = () => {
             </svg>
           </button>
           <h1 className="text-gray-900 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">
-            Mavjud yetkazib beruvchilar
+            Mahsulotlar
           </h1>
         </header>
 
-        {/* AI Help Button */}
-        <div className="flex px-6 py-4 justify-start">
-          <button 
-            onClick={handleHelpMeChoose}
-            className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-xl h-11 px-5 bg-blue-600 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-blue-700 transition-colors"
-          >
-            <span className="material-symbols-outlined">
-              auto_fix_high
-            </span>
-            <span className="truncate">Yordam berish</span>
-          </button>
-        </div>
+        {/* Selected Categories */}
+        {selectedCategories.length > 0 && (
+          <div className="px-4 py-2">
+            <div className="flex flex-wrap gap-2">
+              {selectedCategories.map((category) => (
+                <span key={category} className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">
+                  {category}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Search and Filter */}
         <div className="px-4 pb-4">
           <div className="relative mb-4">
             <input
               type="text"
-              placeholder="Yetkazib beruvchini qidirish..."
+              placeholder="Mahsulot qidirish..."
               value={searchTerm}
               onChange={handleSearch}
               className="w-full px-4 py-3 pl-10 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -274,77 +281,83 @@ const AvailableSuppliers = () => {
               Narx
             </button>
             <button 
-              onClick={() => handleSortChange('eta')}
-              className={getSortButtonClass('eta')}
+              onClick={() => handleSortChange('name')}
+              className={getSortButtonClass('name')}
             >
-              Yetkazib berish
+              Nomi
             </button>
           </div>
         </div>
 
-        {/* Suppliers List */}
+        {/* Products List */}
         <div className="flex flex-col gap-4 p-4 pt-0">
-          {filteredSuppliers.length === 0 ? (
+          {filteredProducts.length === 0 ? (
             <div className="text-center py-8">
               <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">
                 search_off
               </span>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Yetkazib beruvchilar topilmadi
-              </h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Mahsulotlar topilmadi
+                </h3>
               <p className="text-gray-600">
                 Qidiruv so'zingizni o'zgartiring yoki boshqa filtrlarni sinab ko'ring.
               </p>
             </div>
           ) : (
-            filteredSuppliers.map((supplier) => (
-              <div key={supplier.id} className="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm">
+            filteredProducts.map((product) => (
+              <div key={product.id} className="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex flex-col gap-2">
                     <p className="text-sm font-medium text-gray-500">
-                      Yetkazib beruvchi ID: {supplier.id}
+                      {product.category}
                     </p>
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {product.name}
+                    </h3>
                     <div className="flex items-center gap-1">
                       <span className="material-symbols-outlined text-yellow-400 text-xl">star</span>
                       <p className="text-base font-bold text-gray-900">
-                        {supplier.rating} <span className="font-normal text-gray-500">({supplier.reviewCount})</span>
+                        {product.rating} <span className="font-normal text-gray-500">({product.reviewCount})</span>
                       </p>
                     </div>
                     <p className="text-sm font-medium text-gray-500">
-                      Narx: {formatCurrency(supplier.price)} • ETA: {supplier.eta} kun
+                      Narx: {formatCurrency(product.price)} / {product.unit}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                        {supplier.location}
+                        {product.location}
                       </span>
-                      {supplier.verified && (
+                      {product.verified && (
                         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                           Tasdiqlangan
                         </span>
                       )}
                     </div>
                     <p className="text-xs text-gray-500">
-                      Javob vaqti: {supplier.responseTime}
+                      Yetkazib beruvchi: {product.supplier}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Minimal buyurtma: {product.minOrder} {product.unit}
                     </p>
                   </div>
                   <div 
                     className="h-20 w-20 flex-shrink-0 rounded-lg bg-cover bg-center bg-no-repeat"
-                    style={{backgroundImage: `url("${supplier.image}")`}}
+                    style={{backgroundImage: `url("${product.image}")`}}
                   ></div>
                 </div>
                 
                 <div className="flex items-center gap-3">
                   <button 
-                    onClick={() => handleViewSupplier(supplier.id)}
+                    onClick={() => handleViewProduct(product.id)}
                     className="flex h-11 flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-gray-100 text-sm font-bold leading-normal text-gray-900 hover:bg-gray-200 transition-colors"
                   >
                     <span className="truncate">Haqida</span>
                   </button>
                   <button 
-                    onClick={() => handleOrderFromSupplier(supplier.id)}
+                    onClick={() => handleRequestQuote(product.id)}
                     className="flex h-11 flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-blue-600 text-sm font-bold leading-normal text-white hover:bg-blue-700 transition-colors"
                   >
-                    <span className="truncate">Buyurtma</span>
+                    <span className="truncate">So'rov yuborish</span>
                   </button>
                 </div>
               </div>
@@ -352,42 +365,8 @@ const AvailableSuppliers = () => {
           )}
         </div>
       </div>
-
-      {/* Footer Navigation */}
-      <footer className="sticky bottom-0 border-t border-gray-200 bg-white/80 backdrop-blur-sm">
-        <nav className="flex items-center justify-around px-4 pt-2 pb-5">
-          <button 
-            onClick={() => navigate('/buyer/dashboard')}
-            className="flex flex-1 flex-col items-center justify-end gap-1 text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            <span className="material-symbols-outlined text-2xl">home</span>
-            <p className="text-xs font-medium leading-normal">Bosh sahifa</p>
-          </button>
-          <button 
-            onClick={() => navigate('/buyer/requests')}
-            className="flex flex-1 flex-col items-center justify-end gap-1 text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            <span className="material-symbols-outlined text-2xl">list_alt</span>
-            <p className="text-xs font-medium leading-normal">So'rovlar</p>
-          </button>
-          <button 
-            onClick={() => navigate('/buyer/analytics')}
-            className="flex flex-1 flex-col items-center justify-end gap-1 text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            <span className="material-symbols-outlined text-2xl">bar_chart</span>
-            <p className="text-xs font-medium leading-normal">Tahlil</p>
-          </button>
-          <button 
-            onClick={() => navigate('/buyer/profile')}
-            className="flex flex-1 flex-col items-center justify-end gap-1 text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            <span className="material-symbols-outlined text-2xl">person</span>
-            <p className="text-xs font-medium leading-normal">Profil</p>
-          </button>
-        </nav>
-      </footer>
     </div>
   );
 };
 
-export default AvailableSuppliers;
+export default AvailableProducts;

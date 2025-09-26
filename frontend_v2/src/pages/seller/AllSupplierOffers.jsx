@@ -18,36 +18,28 @@ const AllSupplierOffers = () => {
   const requestId = location.state?.requestId || new URLSearchParams(location.search).get('id');
 
   useEffect(() => {
-    if (requestId) {
-      fetchRequestAndOffers();
-    }
+    // Har doim mock ma'lumotlarni yuklaymiz
+    fetchRequestAndOffers();
   }, [requestId]);
 
   useEffect(() => {
     filterOffers();
   }, [offers, filter]);
 
-  const fetchRequestAndOffers = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch request details
-      // const requestResponse = await api.get(`/buyer/requests/${requestId}`);
-      // setRequestData(requestResponse.data);
-      
+  const fetchRequestAndOffers = () => {
+    setLoading(true);
+    
+    // Simulate loading delay
+    setTimeout(() => {
       // Mock request data
       setRequestData({
-        id: requestId,
+        id: requestId || 'REQ-001',
         title: 'Concrete Mix',
         quantity: '50 tons',
         deadline: '2024-08-15',
         specifications: 'High-grade concrete mix for foundation work'
       });
 
-      // Fetch supplier offers
-      // const offersResponse = await api.get(`/buyer/requests/${requestId}/offers`);
-      // setOffers(offersResponse.data);
-      
       // Mock offers data
       setOffers([
         {
@@ -101,12 +93,8 @@ const AllSupplierOffers = () => {
       ]);
       
       setError(null);
-    } catch (error) {
-      console.error('Error fetching offers:', error);
-      setError('Takliflarni yuklashda xatolik yuz berdi');
-    } finally {
       setLoading(false);
-    }
+    }, 1000); // 1 second loading simulation
   };
 
   const filterOffers = () => {
@@ -136,7 +124,7 @@ const AllSupplierOffers = () => {
     setFilter(newFilter);
   };
 
-  const handlePayOffer = async (offerId) => {
+  const handlePayOffer = (offerId) => {
     const offer = offers.find(o => o.id === offerId);
     if (offer) {
       navigate(`/buyer/offer-payment/${offerId}`, {
@@ -148,7 +136,7 @@ const AllSupplierOffers = () => {
     }
   };
 
-  const handleRejectOffer = async (offerId) => {
+  const handleRejectOffer = (offerId) => {
     const offer = offers.find(o => o.id === offerId);
     if (offer?.isBestPrice) {
       setSelectedOffer(offer);
@@ -156,26 +144,15 @@ const AllSupplierOffers = () => {
       return;
     }
 
-    try {
-      setLoading(true);
-      // Real API call
-      // await api.post(`/buyer/offers/${offerId}/reject`);
-      
-      // Mock success
-      setOffers(prev => prev.map(o => 
-        o.id === offerId 
-          ? { ...o, status: 'rejected', statusText: 'Rad etilgan' }
-          : o
-      ));
-    } catch (error) {
-      console.error('Error rejecting offer:', error);
-      setError('Taklifni rad etishda xatolik yuz berdi');
-    } finally {
-      setLoading(false);
-    }
+    // Mock success
+    setOffers(prev => prev.map(o => 
+      o.id === offerId 
+        ? { ...o, status: 'rejected', statusText: 'Rad etilgan' }
+        : o
+    ));
   };
 
-  const handleAcceptCounterOffer = async (offerId) => {
+  const handleAcceptCounterOffer = (offerId) => {
     const offer = offers.find(o => o.id === offerId);
     if (offer) {
       navigate(`/buyer/accept-counter-offer/${offerId}`, {
@@ -187,27 +164,16 @@ const AllSupplierOffers = () => {
     }
   };
 
-  const handleRejectCounterOffer = async (offerId) => {
-    try {
-      setLoading(true);
-      // Real API call
-      // await api.post(`/buyer/offers/${offerId}/reject-counter-offer`);
-      
-      // Mock success - auto-send to next supplier
-      setOffers(prev => prev.map(o => 
-        o.id === offerId 
-          ? { ...o, status: 'rejected', statusText: 'Rad etilgan' }
-          : o
-      ));
-    } catch (error) {
-      console.error('Error rejecting counter offer:', error);
-      setError('Qarshi taklifni rad etishda xatolik yuz berdi');
-    } finally {
-      setLoading(false);
-    }
+  const handleRejectCounterOffer = (offerId) => {
+    // Mock success - auto-send to next supplier
+    setOffers(prev => prev.map(o => 
+      o.id === offerId 
+        ? { ...o, status: 'rejected', statusText: 'Rad etilgan' }
+        : o
+    ));
   };
 
-  const handleSendToAlternativeSupplier = async (offerId) => {
+  const handleSendToAlternativeSupplier = (offerId) => {
     const offer = offers.find(o => o.id === offerId);
     if (offer?.alternativeSuppliers?.length > 0) {
       navigate(`/buyer/send-to-alternative-supplier/${offerId}`, {
@@ -220,9 +186,9 @@ const AllSupplierOffers = () => {
     }
   };
 
-  const handleConfirmReject = async () => {
+  const handleConfirmReject = () => {
     if (selectedOffer) {
-      await handleRejectOffer(selectedOffer.id);
+      handleRejectOffer(selectedOffer.id);
     }
     setShowBestPriceAlert(false);
     setSelectedOffer(null);
@@ -478,37 +444,6 @@ const AllSupplierOffers = () => {
           ))
         )}
       </main>
-
-      {/* Footer Navigation */}
-      <footer className="sticky bottom-0 bg-white/90 backdrop-blur-sm border-t border-gray-200">
-        <nav className="flex justify-around items-center px-4 py-2">
-          <button 
-            onClick={() => navigate('/buyer/dashboard')}
-            className="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-600 transition-colors"
-          >
-            <span className="material-symbols-outlined">home</span>
-            <p className="text-xs font-medium">Bosh sahifa</p>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-purple-600">
-            <span className="material-symbols-outlined">list_alt</span>
-            <p className="text-xs font-bold">Takliflar</p>
-          </button>
-          <button 
-            onClick={() => navigate('/buyer/analytics')}
-            className="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-600 transition-colors"
-          >
-            <span className="material-symbols-outlined">bar_chart</span>
-            <p className="text-xs font-medium">Tahlil</p>
-          </button>
-          <button 
-            onClick={() => navigate('/buyer/profile')}
-            className="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-600 transition-colors"
-          >
-            <span className="material-symbols-outlined">person</span>
-            <p className="text-xs font-medium">Profil</p>
-          </button>
-        </nav>
-      </footer>
 
       {/* Best Price Alert Modal */}
       {showBestPriceAlert && (

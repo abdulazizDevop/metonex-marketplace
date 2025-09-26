@@ -6,9 +6,9 @@ const BuyerBottomNavigation = () => {
 
   const navItems = [
     { path: '/buyer/home', icon: 'home', label: 'Home' },
-    { path: '/buyer/products', icon: 'storefront', label: 'Products' },
-    { path: '/buyer/orders', icon: 'list_alt', label: 'Orders' },
     { path: '/buyer/dashboard', icon: 'bar_chart', label: 'Dashboard' },
+    { path: '/buyer/orders', icon: 'list_alt', label: 'Orders' },
+    { path: '/buyer/company', icon: 'business', label: 'Company' },
     { path: '/buyer/profile', icon: 'person', label: 'Profile' }
   ]
 
