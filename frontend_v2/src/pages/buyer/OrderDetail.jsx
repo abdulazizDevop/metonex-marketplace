@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { documentApi, documentValidation, documentTypes } from '../../utils/documentApi'
+import DocumentTestPanel from '../../components/DocumentTestPanel'
 
 const OrderDetail = () => {
   const { id } = useParams()
@@ -7,8 +9,23 @@ const OrderDetail = () => {
   const location = useLocation()
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(true)
+  
+  // Document upload states
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [uploadType, setUploadType] = useState('contract') // contract, invoice, ttn
+  const [uploadForm, setUploadForm] = useState({
+    title: '',
+    file: null
+  })
+  const [uploading, setUploading] = useState(false)
+  const [documents, setDocuments] = useState([])
+  const [userRole, setUserRole] = useState('buyer') // buyer or supplier
 
   useEffect(() => {
+    // Check user role from localStorage
+    const storedRole = localStorage.getItem('userRole') || 'buyer'
+    setUserRole(storedRole)
+
     // Simulate API call to fetch order details
     const fetchOrderDetails = async () => {
       try {
@@ -92,6 +109,10 @@ const OrderDetail = () => {
         }
 
         setOrder(mockOrder)
+        
+        // Load order documents from API
+        await loadOrderDocuments(parseInt(id))
+        
       } catch (error) {
         console.error('Error fetching order details:', error)
       } finally {
@@ -101,6 +122,39 @@ const OrderDetail = () => {
 
     fetchOrderDetails()
   }, [id])
+
+  // Load order documents
+  const loadOrderDocuments = async (orderId) => {
+    try {
+      const response = await documentApi.getOrderDocuments(orderId)
+      setDocuments(response.data || response)
+    } catch (error) {
+      console.error('Error loading order documents:', error)
+      // Keep mock data on error for development
+      setDocuments([
+        {
+          id: 1,
+          title: 'Asosiy shartnoma',
+          type: 'contract',
+          file_name: 'contract_ord_001.pdf',
+          human_readable_size: '2.3 MB',
+          created_at: '2024-01-18',
+          user_info: { role: 'supplier' },
+          status: 'verified'
+        },
+        {
+          id: 2,
+          title: 'Hisob-faktura #001',
+          type: 'invoice',
+          file_name: 'invoice_001.pdf',
+          human_readable_size: '1.8 MB',
+          created_at: '2024-01-19',
+          user_info: { role: 'supplier' },
+          status: 'pending'
+        }
+      ])
+    }
+  }
 
   const getStatusBadgeColor = (status) => {
     switch (status) {
@@ -204,6 +258,132 @@ const OrderDetail = () => {
     console.log('Contacting supplier:', order.supplier.id)
     // In real app, this would open contact form or chat
     alert('Sotuvchi bilan aloqa...')
+  }
+
+  // Document upload handlers
+  const handleUploadDocument = (type) => {
+    setUploadType(type)
+    const typeLabels = {
+      'contract': 'Shartnoma',
+      'invoice': 'Hisob-faktura', 
+      'ttn': 'TTN (Transport hujjati)'
+    }
+    setUploadForm({
+      title: typeLabels[type],
+      file: null
+    })
+    setShowUploadModal(true)
+  }
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      // Validate file
+      const validation = documentValidation.validateFile(file)
+      if (!validation.isValid) {
+        alert(`Fayl validatsiya xatosi:\n${validation.errors.join('\n')}`)
+        return
+      }
+      setUploadForm(prev => ({ ...prev, file }))
+    }
+  }
+
+  const handleUploadSubmit = async () => {
+    if (!uploadForm.file || !uploadForm.title) {
+      alert('Iltimos, barcha maydonlarni to\'ldiring')
+      return
+    }
+
+    setUploading(true)
+    
+    try {
+      const documentData = {
+        title: uploadForm.title,
+        type: uploadType,
+        orderId: parseInt(id),
+        description: `${documentTypes.getLabel(uploadType)} for order ${order?.orderNumber}`
+      }
+
+      const response = await documentApi.uploadDocument(documentData, uploadForm.file)
+      
+      // Reload documents list
+      await loadOrderDocuments(parseInt(id))
+      
+      setShowUploadModal(false)
+      setUploadForm({ title: '', file: null })
+      alert('Hujjat muvaffaqiyatli yuklandi!')
+      
+    } catch (error) {
+      console.error('Upload error:', error)
+      alert('Hujjat yuklashda xatolik yuz berdi: ' + (error.message || 'Noma\'lum xatolik'))
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleDownloadDocument = async (doc) => {
+    try {
+      await documentApi.downloadDocument(doc.id)
+    } catch (error) {
+      console.error('Download error:', error)
+      alert('Hujjat yuklab olishda xatolik yuz berdi')
+    }
+  }
+
+  const handleDeleteDocument = async (docId) => {
+    if (confirm('Hujjatni o\'chirishni tasdiqlaysizmi?')) {
+      try {
+        await documentApi.deleteDocument(docId)
+        await loadOrderDocuments(parseInt(id))
+        alert('Hujjat o\'chirildi')
+      } catch (error) {
+        console.error('Delete error:', error)
+        alert('Hujjat o\'chirishda xatolik yuz berdi')
+      }
+    }
+  }
+
+  const getDocumentTypeLabel = (type) => {
+    return documentTypes.getLabel(type)
+  }
+
+  const getDocumentStatusBadge = (status) => {
+    switch (status) {
+      case 'verified':
+        return 'bg-green-100 text-green-800'
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'rejected':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getDocumentStatusText = (status) => {
+    const statuses = {
+      'verified': 'Tasdiqlangan',
+      'pending': 'Kutilmoqda',
+      'rejected': 'Rad etilgan'
+    }
+    return statuses[status] || status
+  }
+
+  const canUploadDocument = (type) => {
+    // Check if user has permission to upload this document type
+    if (userRole === 'supplier') {
+      return true // Suppliers can upload all document types
+    } else if (userRole === 'buyer') {
+      return false // Buyers typically can't upload order documents
+    }
+    return false
+  }
+
+  const canDeleteDocument = (doc) => {
+    // User can delete their own uploaded documents that are not verified
+    const uploadedByCurrentUser = doc.uploadedBy === userRole || 
+                                  (doc.user_info && doc.user_info.role === userRole)
+    return uploadedByCurrentUser && doc.status !== 'verified'
   }
 
   if (loading) {
@@ -412,43 +592,91 @@ const OrderDetail = () => {
 
         {/* Documents */}
         <div className="bg-white p-4 mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Hujjatlar</h3>
-          
-          <div className="space-y-3">
-            {order.contractUrl && (
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-gray-600">description</span>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Shartnoma</p>
-                    <p className="text-xs text-gray-500">PDF hujjat</p>
-                  </div>
-                </div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-gray-900">Hujjatlar</h3>
+            {userRole === 'supplier' && (
+              <div className="flex gap-2">
                 <button
-                  onClick={handleDownloadContract}
-                  className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                  onClick={() => handleUploadDocument('contract')}
+                  className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 flex items-center gap-1"
                 >
-                  Yuklab olish
+                  <span className="material-symbols-outlined text-xs">add</span>
+                  Shartnoma
+                </button>
+                <button
+                  onClick={() => handleUploadDocument('invoice')}
+                  className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-xs">add</span>
+                  Hisob-faktura
+                </button>
+                <button
+                  onClick={() => handleUploadDocument('ttn')}
+                  className="px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-xs">add</span>
+                  TTN
                 </button>
               </div>
             )}
-
-            {order.invoiceUrl && (
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-gray-600">receipt</span>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Hisob-faktura</p>
-                    <p className="text-xs text-gray-500">PDF hujjat</p>
+          </div>
+          
+          <div className="space-y-3">
+            {documents.length === 0 ? (
+              <div className="text-center py-6">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="material-symbols-outlined text-gray-400">description</span>
+                </div>
+                <p className="text-gray-500 text-sm">Hech qanday hujjat yuklanmagan</p>
+                {userRole === 'supplier' && (
+                  <p className="text-gray-400 text-xs mt-1">Hujjat yuklash uchun yuqoridagi tugmalardan foydalaning</p>
+                )}
+              </div>
+            ) : (
+              documents.map((doc) => (
+                <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <span className="material-symbols-outlined text-blue-600 text-lg">
+                        {documentTypes.getIcon(doc.document_type || doc.type)}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{doc.title}</p>
+                      <p className="text-xs text-gray-500">
+                        {getDocumentTypeLabel(doc.document_type || doc.type)} • {doc.human_readable_size || doc.fileSize}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getDocumentStatusBadge(doc.status)}`}>
+                          {getDocumentStatusText(doc.status)}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {(doc.user_info?.role || doc.uploadedBy) === 'supplier' ? 'Sotuvchi' : 'Xaridor'} • 
+                          {doc.created_at?.split('T')[0] || doc.uploadDate}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleDownloadDocument(doc)}
+                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                      title="Yuklab olish"
+                    >
+                      <span className="material-symbols-outlined text-lg">download</span>
+                    </button>
+                    {canDeleteDocument(doc) && (
+                      <button
+                        onClick={() => handleDeleteDocument(doc.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="O'chirish"
+                      >
+                        <span className="material-symbols-outlined text-lg">delete</span>
+                      </button>
+                    )}
                   </div>
                 </div>
-                <button
-                  onClick={handleDownloadInvoice}
-                  className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
-                >
-                  Yuklab olish
-                </button>
-              </div>
+              ))
             )}
           </div>
         </div>
@@ -479,6 +707,107 @@ const OrderDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Upload Document Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-lg">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {getDocumentTypeLabel(uploadType)} yuklash
+              </h3>
+              <button 
+                onClick={() => {
+                  setShowUploadModal(false)
+                  setUploadForm({ title: '', file: null })
+                }}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <div className="p-4 space-y-4">
+              {/* Document Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hujjat nomi
+                </label>
+                <input
+                  type="text"
+                  value={uploadForm.title}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Hujjat nomini kiriting"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              {/* Order Info */}
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm font-medium text-gray-900">Buyurtma: {order?.orderNumber}</p>
+                <p className="text-xs text-gray-500">{order?.rfqTitle}</p>
+              </div>
+              
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fayl
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                  <input
+                    type="file"
+                    onChange={handleFileSelect}
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    className="hidden"
+                    id="file-upload-order"
+                  />
+                  <label htmlFor="file-upload-order" className="cursor-pointer">
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="material-symbols-outlined text-3xl text-gray-400">cloud_upload</span>
+                      <span className="text-sm text-gray-600">
+                        {uploadForm.file ? uploadForm.file.name : 'Faylni tanlang yoki sudrab tashlang'}
+                      </span>
+                      <span className="text-xs text-gray-500">PDF, JPG, PNG, DOC (max 10MB)</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 p-4 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setShowUploadModal(false)
+                  setUploadForm({ title: '', file: null })
+                }}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={uploading}
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleUploadSubmit}
+                disabled={!uploadForm.title || !uploadForm.file || uploading}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {uploading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Yuklanmoqda...
+                  </div>
+                ) : (
+                  'Yuklash'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Test Panel - Development only */}
+      {import.meta.env?.DEV && (
+        <DocumentTestPanel orderId={parseInt(id)} />
+      )}
     </div>
   )
 }

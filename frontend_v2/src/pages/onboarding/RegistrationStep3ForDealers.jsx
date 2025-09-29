@@ -11,19 +11,29 @@ const RegistrationStep3ForDealers = () => {
   ])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  
+  // Dealer ma'lumotlarini localStorage'dan olish
+  const [dealerData, setDealerData] = useState(null)
+  
+  React.useEffect(() => {
+    const storedData = localStorage.getItem('dealerRegistrationData')
+    if (storedData) {
+      setDealerData(JSON.parse(storedData))
+    }
+  }, [])
 
   const handleBack = () => {
-    navigate('/registration/step-2')
+    navigate('/seller/registration')
   }
 
   const handleAddFactory = () => {
     if (!factoryName.trim()) {
-      setError('Please enter a factory name')
+      setError('Iltimos, zavod nomini kiriting')
       return
     }
 
     if (factories.includes(factoryName.trim())) {
-      setError('This factory is already added')
+      setError('Bu zavod allaqachon qo\'shilgan')
       return
     }
 
@@ -44,7 +54,12 @@ const RegistrationStep3ForDealers = () => {
 
   const handleFinishRegistration = async () => {
     if (factories.length === 0) {
-      setError('Please add at least one factory')
+      setError('Iltimos, kamida bitta zavod qo\'shing')
+      return
+    }
+
+    if (!dealerData) {
+      setError('Dealer ma\'lumotlari topilmadi. Qaytadan ro\'yxatdan o\'ting.')
       return
     }
 
@@ -54,19 +69,32 @@ const RegistrationStep3ForDealers = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000))
       
-      // Store registration data
+      // To'liq registration ma'lumotlarini yig'ish
       const registrationData = {
-        factories,
-        userType: 'dealer',
+        user: {
+          phone: dealerData.phone,
+          password: dealerData.password,
+          role: 'supplier',
+          supplier_type: dealerData.supplierType
+        },
+        company: {
+          name: dealerData.companyName,
+          inn_stir: dealerData.innStir,
+          factories: factories
+        },
         completedAt: new Date().toISOString()
       }
       
-      localStorage.setItem('registrationData', JSON.stringify(registrationData))
+      localStorage.setItem('sellerRegistrationData', JSON.stringify(registrationData))
+      localStorage.setItem('userRole', 'supplier')
+      
+      // Dealer ma'lumotlarini tozalash
+      localStorage.removeItem('dealerRegistrationData')
       
       // Navigate to dashboard
       navigate('/seller/dashboard')
     } catch (err) {
-      setError('Registration failed. Please try again.')
+      setError('Ro\'yxatdan o\'tishda xatolik yuz berdi. Qaytadan urinib ko\'ring.')
     } finally {
       setIsLoading(false)
     }
@@ -91,7 +119,7 @@ const RegistrationStep3ForDealers = () => {
         {/* Main Content */}
         <main className="p-4 pt-8">
           <h1 className="text-gray-900 text-3xl font-bold tracking-tight">
-            Supplied factories
+            Yetkazib beruvchi zavodlar
           </h1>
 
           {/* Factory Input */}
@@ -110,7 +138,7 @@ const RegistrationStep3ForDealers = () => {
                   setError('')
                 }}
                 onKeyPress={handleKeyPress}
-                placeholder="e.g. Steel Mill Inc."
+                placeholder="masalan: Temir Zavod MChJ"
                 className="form-input block w-full rounded-lg border-gray-300 bg-gray-50 p-4 text-base text-gray-900 focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
               />
               <button 
@@ -147,24 +175,24 @@ const RegistrationStep3ForDealers = () => {
           {/* Info Message */}
           <div className="mt-4 flex items-start gap-3 rounded-lg bg-orange-100 p-3">
             <span className="material-symbols-outlined text-orange-500 mt-0.5">info</span>
-            <p className="text-sm text-orange-800">You can add more factories later.</p>
+            <p className="text-sm text-orange-800">Keyinroq ko'proq zavodlar qo'shishingiz mumkin.</p>
           </div>
 
           {/* Registration Progress */}
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="text-sm font-semibold text-blue-900 mb-2">Registration Progress</h3>
+            <h3 className="text-sm font-semibold text-blue-900 mb-2">Ro'yxatdan o'tish jarayoni</h3>
             <div className="space-y-2 text-sm text-blue-700">
               <div className="flex items-center">
                 <span className="material-symbols-outlined text-green-500 mr-2">check_circle</span>
-                Phone verification completed
+                Telefon raqam tasdiqlandi
               </div>
               <div className="flex items-center">
                 <span className="material-symbols-outlined text-green-500 mr-2">check_circle</span>
-                Basic information provided
+                Asosiy ma'lumotlar kiritildi
               </div>
               <div className="flex items-center">
                 <span className="material-symbols-outlined text-blue-500 mr-2">radio_button_unchecked</span>
-                Factory information (current step)
+                Zavod ma'lumotlari (joriy qadam)
               </div>
             </div>
           </div>
@@ -181,10 +209,10 @@ const RegistrationStep3ForDealers = () => {
           {isLoading ? (
             <div className="flex items-center justify-center">
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-              Finishing...
+              Yakunlanmoqda...
             </div>
           ) : (
-            'Finish registration'
+            'Ro\'yxatdan o\'tishni yakunlash'
           )}
         </button>
       </div>

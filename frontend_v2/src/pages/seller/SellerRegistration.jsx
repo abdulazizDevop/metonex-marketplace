@@ -80,17 +80,32 @@ const SellerRegistration = () => {
 
     // Validation
     if (!formData.phone.trim() || !formData.password.trim() || !formData.companyName.trim() || !formData.innStir.trim()) {
-      setError('Please fill in all required fields')
+      setError('Iltimos, barcha majburiy maydonlarni to\'ldiring')
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
+      setError('Parollar mos kelmaydi')
       return
     }
 
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long')
+      setError('Parol kamida 8 ta belgidan iborat bo\'lishi kerak')
+      return
+    }
+
+    // Agar dealer tanlangan bo'lsa, step-3 ga o'tish
+    if (formData.supplierType === 'dealer') {
+      // Dealer uchun asosiy ma'lumotlarni saqlash
+      const dealerData = {
+        phone: formData.phone,
+        password: formData.password,
+        supplierType: formData.supplierType,
+        companyName: formData.companyName,
+        innStir: formData.innStir
+      }
+      localStorage.setItem('dealerRegistrationData', JSON.stringify(dealerData))
+      navigate('/registration/step-3')
       return
     }
 
@@ -133,7 +148,7 @@ const SellerRegistration = () => {
       // Navigate to seller dashboard
       navigate('/seller/dashboard')
     } catch (err) {
-      setError('Registration failed. Please try again.')
+      setError('Ro\'yxatdan o\'tishda xatolik yuz berdi. Qaytadan urinib ko\'ring.')
     } finally {
       setIsLoading(false)
     }

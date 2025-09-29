@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BottomNavigation from '../../components/BottomNavigation';
 
 const SellerProfile = () => {
   const navigate = useNavigate();
@@ -7,6 +8,43 @@ const SellerProfile = () => {
   const [showReviewsModal, setShowReviewsModal] = useState(false);
   const [selectedRating, setSelectedRating] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
+  
+  // Documents state
+  const [documents, setDocuments] = useState([
+    {
+      id: 1,
+      title: 'Kompaniya litsenziyasi',
+      type: 'company_license',
+      status: 'verified',
+      uploadDate: '2024-08-15',
+      fileSize: '2.5 MB',
+      fileName: 'license.pdf'
+    },
+    {
+      id: 2,
+      title: 'Soliq guvohnomasi',
+      type: 'tax_certificate',
+      status: 'pending',
+      uploadDate: '2024-08-20',
+      fileSize: '1.8 MB',
+      fileName: 'tax_cert.pdf'
+    },
+    {
+      id: 3,
+      title: 'Transport TTN shakli',
+      type: 'ttn',
+      status: 'verified',
+      uploadDate: '2024-08-18',
+      fileSize: '3.2 MB',
+      fileName: 'ttn_template.pdf'
+    }
+  ]);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadForm, setUploadForm] = useState({
+    title: '',
+    type: 'contract',
+    file: null
+  });
   
   const [profileData] = useState({
     companyName: 'BuildRight Supplies',
@@ -111,6 +149,74 @@ const SellerProfile = () => {
     window.open(`mailto:${email}`);
   };
 
+  // Document handlers
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setUploadForm(prev => ({ ...prev, file }));
+    }
+  };
+
+  const handleUploadSubmit = () => {
+    if (!uploadForm.title || !uploadForm.file) {
+      alert('Iltimos, barcha maydonlarni to\'ldiring');
+      return;
+    }
+
+    const newDocument = {
+      id: documents.length + 1,
+      title: uploadForm.title,
+      type: uploadForm.type,
+      status: 'pending',
+      uploadDate: new Date().toISOString().split('T')[0],
+      fileSize: `${(uploadForm.file.size / (1024 * 1024)).toFixed(1)} MB`,
+      fileName: uploadForm.file.name
+    };
+
+    setDocuments(prev => [...prev, newDocument]);
+    setUploadForm({ title: '', type: 'contract', file: null });
+    setShowUploadModal(false);
+  };
+
+  const handleDeleteDocument = (docId) => {
+    setDocuments(prev => prev.filter(doc => doc.id !== docId));
+  };
+
+  const getDocumentTypeLabel = (type) => {
+    const types = {
+      'company_license': 'Kompaniya litsenziyasi',
+      'tax_certificate': 'Soliq guvohnomasi',
+      'contract': 'Shartnoma',
+      'invoice': 'Hisob-faktura',
+      'ttn': 'TTN (Transport hujjati)',
+      'certificate': 'Sertifikat',
+      'other': 'Boshqa'
+    };
+    return types[type] || type;
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'verified':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status) => {
+    const statuses = {
+      'verified': 'Tasdiqlangan',
+      'pending': 'Kutilmoqda',
+      'rejected': 'Rad etilgan'
+    };
+    return statuses[status] || status;
+  };
+
   const handleReviewFilter = (rating) => {
     setSelectedRating(rating);
   };
@@ -195,21 +301,6 @@ const SellerProfile = () => {
                 ))}
               </div>
             </section>
-
-            {/* Certifications */}
-            <section>
-              <h2 className="text-lg font-bold text-[#140e1b]">Certifications</h2>
-              <div className="mt-3 space-y-3">
-                {profileData.certifications.map((cert, index) => (
-                  <div key={index} className="flex items-center gap-3 rounded-lg border border-gray-100 p-3">
-                    <div className="flex size-10 items-center justify-center rounded-full bg-[#ede8f3] text-[#735095]">
-                      <span className="material-symbols-outlined">{cert.icon}</span>
-                    </div>
-                    <p className="flex-1 font-medium text-[#140e1b]">{cert.name}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
           </div>
         );
 
@@ -286,6 +377,89 @@ const SellerProfile = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            </section>
+          </div>
+        );
+
+      case 'documents':
+        return (
+          <div className="space-y-6">
+            {/* Documents Header */}
+            <section>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-[#140e1b]">Hujjatlar</h2>
+                <button 
+                  onClick={() => setShowUploadModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#6C4FFF] text-white text-sm font-medium rounded-lg hover:bg-[#5A3FE6] transition-colors"
+                >
+                  <span className="material-symbols-outlined text-base">add</span>
+                  Yuklash
+                </button>
+              </div>
+              
+              {/* Documents List */}
+              <div className="mt-4 space-y-3">
+                {documents.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        <span className="material-symbols-outlined text-gray-400 text-2xl">description</span>
+                      </div>
+                      <p className="text-gray-500">Hech qanday hujjat yuklanmagan</p>
+                      <button 
+                        onClick={() => setShowUploadModal(true)}
+                        className="text-[#6C4FFF] text-sm font-medium hover:underline"
+                      >
+                        Birinchi hujjatni yuklang
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg">
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-[#6C4FFF]/10 rounded-lg flex items-center justify-center">
+                          <span className="material-symbols-outlined text-[#6C4FFF]">description</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-[#140e1b] truncate">{doc.title}</h3>
+                        <p className="text-sm text-gray-500">{getDocumentTypeLabel(doc.type)}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(doc.status)}`}>
+                            {getStatusText(doc.status)}
+                          </span>
+                          <span className="text-xs text-gray-400">•</span>
+                          <span className="text-xs text-gray-500">{doc.fileSize}</span>
+                          <span className="text-xs text-gray-400">•</span>
+                          <span className="text-xs text-gray-500">{doc.uploadDate}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => {
+                            // Mock download
+                            alert(`${doc.fileName} yuklab olinmoqda...`);
+                          }}
+                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          title="Yuklab olish"
+                        >
+                          <span className="material-symbols-outlined text-xl">download</span>
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteDocument(doc.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="O'chirish"
+                        >
+                          <span className="material-symbols-outlined text-xl">delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           </div>
@@ -380,6 +554,7 @@ const SellerProfile = () => {
           {[
             { id: 'overview', label: 'Overview', icon: 'dashboard' },
             { id: 'reviews', label: 'Reviews', icon: 'star' },
+            { id: 'documents', label: 'Documents', icon: 'description' },
             { id: 'team', label: 'Team', icon: 'group' }
           ].map((tab) => (
             <button
@@ -387,7 +562,7 @@ const SellerProfile = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'border-b-2 border-[#a35ee8] text-[#a35ee8]'
+                  ? 'border-b-2 border-[#6C4FFF] text-[#6C4FFF]'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -408,40 +583,114 @@ const SellerProfile = () => {
         <div className="flex flex-col gap-4 p-4">
           <button 
             onClick={handleEditProfile}
-            className="flex h-12 w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-[#a35ee8] text-base font-bold text-white shadow-lg shadow-[#a35ee8]/30 hover:bg-[#8e4dd1] transition-colors"
+            className="flex h-12 w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-[#6C4FFF] text-base font-bold text-white shadow-lg shadow-[#6C4FFF]/30 hover:bg-[#5A3FE6] transition-colors"
           >
             <span className="truncate">Edit Profile</span>
           </button>
         </div>
         
-        <nav className="flex justify-around border-t border-gray-200 py-2">
-          <button 
-            onClick={() => navigate('/seller/dashboard')}
-            className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#a35ee8] transition-colors"
-          >
-            <span className="material-symbols-outlined">home</span>
-            <span className="text-xs font-medium">Home</span>
-          </button>
-          <button 
-            onClick={() => navigate('/seller/requests')}
-            className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#a35ee8] transition-colors"
-          >
-            <span className="material-symbols-outlined">list_alt</span>
-            <span className="text-xs font-medium">Requests</span>
-          </button>
-          <button 
-            onClick={() => navigate('/seller/products')}
-            className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#a35ee8] transition-colors"
-          >
-            <span className="material-symbols-outlined">grid_view</span>
-            <span className="text-xs font-medium">Products</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-[#a35ee8]">
-            <span className="material-symbols-outlined">person</span>
-            <span className="text-xs font-bold">Profile</span>
-          </button>
-        </nav>
+        <BottomNavigation />
       </footer>
+
+      {/* Upload Document Modal */}
+      {showUploadModal && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-lg">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-[#140e1b]">Hujjat yuklash</h3>
+              <button 
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setUploadForm({ title: '', type: 'contract', file: null });
+                }}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <div className="p-4 space-y-4">
+              {/* Document Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hujjat nomi
+                </label>
+                <input
+                  type="text"
+                  value={uploadForm.title}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Hujjat nomini kiriting"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6C4FFF] focus:border-transparent"
+                />
+              </div>
+              
+              {/* Document Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hujjat turi
+                </label>
+                <select
+                  value={uploadForm.type}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, type: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6C4FFF] focus:border-transparent"
+                >
+                  <option value="contract">Shartnoma</option>
+                  <option value="invoice">Hisob-faktura</option>
+                  <option value="ttn">TTN (Transport hujjati)</option>
+                  <option value="company_license">Kompaniya litsenziyasi</option>
+                  <option value="tax_certificate">Soliq guvohnomasi</option>
+                  <option value="certificate">Sertifikat</option>
+                  <option value="other">Boshqa</option>
+                </select>
+              </div>
+              
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fayl
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#a35ee8] transition-colors">
+                  <input
+                    type="file"
+                    onChange={handleFileUpload}
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label htmlFor="file-upload" className="cursor-pointer">
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="material-symbols-outlined text-3xl text-gray-400">cloud_upload</span>
+                      <span className="text-sm text-gray-600">
+                        {uploadForm.file ? uploadForm.file.name : 'Faylni tanlang yoki sudrab tashlang'}
+                      </span>
+                      <span className="text-xs text-gray-500">PDF, JPG, PNG, DOC (max 10MB)</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 p-4 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setUploadForm({ title: '', type: 'contract', file: null });
+                }}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleUploadSubmit}
+                disabled={!uploadForm.title || !uploadForm.file}
+                className="flex-1 px-4 py-2 bg-[#6C4FFF] text-white rounded-lg hover:bg-[#5A3FE6] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                Yuklash
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Reviews Modal */}
       {showReviewsModal && (
@@ -462,7 +711,7 @@ const SellerProfile = () => {
                 onClick={() => handleReviewFilter('all')}
                 className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
                   selectedRating === 'all' 
-                    ? 'border-transparent bg-[#a35ee8] text-white' 
+                    ? 'border-transparent bg-[#6C4FFF] text-white' 
                     : 'border-gray-300 bg-white text-gray-700'
                 }`}
               >
@@ -475,7 +724,7 @@ const SellerProfile = () => {
                   onClick={() => handleReviewFilter(rating.toString())}
                   className={`flex items-center gap-1 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                     selectedRating === rating.toString()
-                      ? 'border-[#a35ee8] bg-[#a35ee8] text-white'
+                      ? 'border-[#6C4FFF] bg-[#6C4FFF] text-white'
                       : 'border-gray-300 bg-white text-gray-700'
                   }`}
                 >
@@ -515,11 +764,11 @@ const SellerProfile = () => {
                       </div>
                       <p className="mt-2 text-sm text-gray-700">{review.comment}</p>
                       <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
-                        <button className="flex items-center gap-1.5 font-medium text-[#735095] hover:text-[#8e4dd1] transition-colors">
+                        <button className="flex items-center gap-1.5 font-medium text-[#6C4FFF] hover:text-[#5A3FE6] transition-colors">
                           <span className="material-symbols-outlined text-lg">thumb_up</span>
                           <span>Helpful ({review.helpful})</span>
                         </button>
-                        <button className="flex items-center gap-1.5 font-medium text-gray-500 hover:text-[#735095] transition-colors">
+                        <button className="flex items-center gap-1.5 font-medium text-gray-500 hover:text-[#6C4FFF] transition-colors">
                           <span className="material-symbols-outlined text-lg">chat_bubble_outline</span>
                           <span>Comment</span>
                         </button>

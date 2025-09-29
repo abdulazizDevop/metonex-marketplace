@@ -235,7 +235,7 @@ const AllSupplierOffers = () => {
   const getFilterButtonClass = (filterType) => {
     return `px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
       filter === filterType
-        ? 'bg-purple-600 text-white'
+        ? 'bg-[#6C4FFF] text-white'
         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
     }`;
   };
@@ -243,7 +243,7 @@ const AllSupplierOffers = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#6C4FFF]"></div>
       </div>
     );
   }
@@ -259,7 +259,7 @@ const AllSupplierOffers = () => {
           <p className="text-gray-600 mb-4">{error}</p>
           <button 
             onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            className="px-4 py-2 bg-[#6C4FFF] text-white rounded-lg hover:bg-[#5A3FE6]"
           >
             Orqaga qaytish
           </button>
@@ -401,7 +401,7 @@ const AllSupplierOffers = () => {
                   <div className="mt-4 space-y-2">
                     <button 
                       onClick={() => handlePayOffer(offer.id)}
-                      className="w-full py-3 text-base font-semibold text-white bg-purple-600 rounded-xl hover:bg-purple-700 transition-colors"
+                      className="w-full py-3 text-base font-semibold text-white bg-[#6C4FFF] rounded-xl hover:bg-[#5A3FE6] transition-colors"
                     >
                       To'lash
                     </button>
@@ -418,7 +418,7 @@ const AllSupplierOffers = () => {
                   <div className="mt-4 space-y-3">
                     <button 
                       onClick={() => handleAcceptCounterOffer(offer.id)}
-                      className="w-full py-3 text-base font-semibold text-white bg-purple-600 rounded-xl hover:bg-purple-700 transition-colors"
+                      className="w-full py-3 text-base font-semibold text-white bg-[#6C4FFF] rounded-xl hover:bg-[#5A3FE6] transition-colors"
                     >
                       Qabul qilish
                     </button>
@@ -434,7 +434,7 @@ const AllSupplierOffers = () => {
                 {offer.status === 'rejected' && offer.alternativeSuppliers?.length > 0 && (
                   <button 
                     onClick={() => handleSendToAlternativeSupplier(offer.id)}
-                    className="w-full py-3 mt-4 text-base font-semibold text-white bg-purple-600 rounded-xl hover:bg-purple-700 transition-colors"
+                    className="w-full py-3 mt-4 text-base font-semibold text-white bg-[#6C4FFF] rounded-xl hover:bg-[#5A3FE6] transition-colors"
                   >
                     {offer.alternativeSuppliers.length} ta alternativ yetkazib beruvchiga yuborish
                   </button>

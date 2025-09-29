@@ -346,7 +346,7 @@ const BuyerProfile = () => {
                 <h2 className="text-lg font-bold text-[#140e1b]">Dashboard</h2>
                 <button 
                   onClick={() => navigate('/buyer/dashboard')}
-                  className="px-3 py-1.5 bg-[#a35ee8] text-white rounded-lg hover:bg-[#8e4dd1] transition-colors text-sm"
+                  className="px-3 py-1.5 bg-[#6C4FFF] text-white rounded-lg hover:bg-[#5A3FE6] transition-colors text-sm"
                 >
                   View Details
                 </button>
@@ -383,25 +383,25 @@ const BuyerProfile = () => {
                 >
                   <div className="flex size-10 items-center justify-center rounded-full bg-[#ede8f3] text-[#735095]">
                     <span className="material-symbols-outlined">analytics</span>
-                  </div>
+              </div>
                   <div className="text-left">
                     <p className="text-sm font-medium text-[#140e1b]">Full Dashboard</p>
                     <p className="text-xs text-gray-500">View analytics</p>
-                  </div>
+              </div>
                 </button>
                 
                 <button 
                   onClick={() => navigate('/buyer/orders?tab=offers')}
                   className="flex items-center gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex size-10 items-center justify-center rounded-full bg-[#ede8f3] text-[#735095]">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-[#ede8f3] text-[#735095]">
                     <span className="material-symbols-outlined">local_offer</span>
-                  </div>
+                    </div>
                   <div className="text-left">
                     <p className="text-sm font-medium text-[#140e1b]">Pending Offers</p>
                     <p className="text-xs text-gray-500">5 new offers</p>
-                  </div>
-                </button>
+                    </div>
+                      </button>
               </div>
             </section>
           </div>

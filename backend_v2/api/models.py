@@ -1,7 +1,9 @@
 from django.db import models
 from django.utils import timezone
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, FileExtensionValidator
 from django.contrib.auth.models import AbstractUser
+import os
+import uuid
 
 
 class User(AbstractUser):
@@ -1001,3 +1003,335 @@ class Notification(models.Model):
     def is_failed(self):
         """Notification muvaffaqiyatsizmi tekshirish"""
         return self.failed_at is not None
+
+
+def document_upload_path(instance, filename):
+    """
+    Moslashuvchan fayl yuklash yo'li
+    Format: documents/{user_id}/{document_type}/{year}/{month}/{filename}
+    """
+    ext = filename.split('.')[-1]
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    
+    date_path = timezone.now().strftime('%Y/%m')
+    return f"documents/{instance.user.id}/{instance.document_type}/{date_path}/{filename}"
+
+
+class Document(models.Model):
+    """
+    Universal Document model - moslashuvchan hujjat tizimi
+    Didox integratsiya uchun ham tayyor
+    """
+    class DocumentType(models.TextChoices):
+        # Kompaniya hujjatlari
+        COMPANY_LICENSE = 'company_license', 'Kompaniya litsenziyasi'
+        TAX_CERTIFICATE = 'tax_certificate', 'Soliq guvohnomasi'
+        BANK_STATEMENT = 'bank_statement', 'Bank ma\'lumotnomasi'
+        
+        # Buyurtma hujjatlari
+        CONTRACT = 'contract', 'Shartnoma'
+        INVOICE = 'invoice', 'Hisob-faktura'
+        TTN = 'ttn', 'TTN (Transport hujjati)'
+        RECEIPT = 'receipt', 'Qabul qilish hujjati'
+        
+        # Mahsulot hujjatlari
+        CERTIFICATE = 'certificate', 'Sertifikat'
+        SPECIFICATION = 'specification', 'Texnik xususiyatlar'
+        WARRANTY = 'warranty', 'Kafolat hujjati'
+        
+        # Didox integration types
+        DIDOX_CONTRACT = 'didox_contract', 'Didox Shartnoma'
+        DIDOX_INVOICE = 'didox_invoice', 'Didox Hisob-faktura'
+        DIDOX_STATEMENT = 'didox_statement', 'Didox Ma\'lumotnoma'
+        
+        # Boshqa
+        OTHER = 'other', 'Boshqa hujjat'
+
+    class DocumentStatus(models.TextChoices):
+        PENDING = 'pending', 'Kutilmoqda'
+        PROCESSING = 'processing', 'Qayta ishlanmoqda'
+        VERIFIED = 'verified', 'Tasdiqlangan'
+        REJECTED = 'rejected', 'Rad etilgan'
+        EXPIRED = 'expired', 'Muddati tugagan'
+
+    class DocumentSource(models.TextChoices):
+        MANUAL_UPLOAD = 'manual_upload', 'Qo\'lda yuklangan'
+        AUTO_GENERATED = 'auto_generated', 'Avtomatik yaratilgan'
+        DIDOX_INTEGRATION = 'didox_integration', 'Didox integratsiya'
+        API_IMPORT = 'api_import', 'API orqali import'
+
+    id = models.AutoField(primary_key=True)
+    
+    # Asosiy bog'lanishlar
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents')
+    order = models.ForeignKey(
+        'Order', 
+        on_delete=models.CASCADE, 
+        related_name='new_documents',
+        null=True, 
+        blank=True,
+        help_text='Buyurtma bilan bog\'liq hujjatlar uchun'
+    )
+    company = models.ForeignKey(
+        'Company',
+        on_delete=models.CASCADE,
+        related_name='documents',
+        null=True,
+        blank=True,
+        help_text='Kompaniya hujjatlari uchun'
+    )
+    
+    # Hujjat ma'lumotlari
+    document_type = models.CharField(
+        max_length=50, 
+        choices=DocumentType.choices,
+        verbose_name='Hujjat turi'
+    )
+    title = models.CharField(
+        max_length=255,
+        verbose_name='Hujjat nomi',
+        help_text='Foydalanuvchi tomonidan berilgan nom'
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name='Tavsif',
+        help_text='Hujjat haqida qo\'shimcha ma\'lumot'
+    )
+    
+    # Fayl ma'lumotlari
+    file = models.FileField(
+        upload_to=document_upload_path,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx']
+            )
+        ],
+        verbose_name='Fayl'
+    )
+    file_name = models.CharField(
+        max_length=255,
+        verbose_name='Asl fayl nomi'
+    )
+    file_size = models.BigIntegerField(
+        verbose_name='Fayl hajmi (bytes)'
+    )
+    content_type = models.CharField(
+        max_length=100,
+        verbose_name='Fayl turi'
+    )
+    
+    # Status va verificatsiya
+    status = models.CharField(
+        max_length=20,
+        choices=DocumentStatus.choices,
+        default=DocumentStatus.PENDING,
+        verbose_name='Holat'
+    )
+    source = models.CharField(
+        max_length=30,
+        choices=DocumentSource.choices,
+        default=DocumentSource.MANUAL_UPLOAD,
+        verbose_name='Manba'
+    )
+    
+    # Didox integration fields
+    didox_document_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name='Didox hujjat ID',
+        help_text='Didox tizimidagi hujjat identifikatori'
+    )
+    didox_metadata = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name='Didox metadata',
+        help_text='Didox dan kelgan qo\'shimcha ma\'lumotlar'
+    )
+    
+    # Verificatsiya ma'lumotlari
+    verified_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='verified_documents',
+        verbose_name='Tasdiqlagan shaxs'
+    )
+    verified_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Tasdiqlash vaqti'
+    )
+    rejection_reason = models.TextField(
+        blank=True,
+        verbose_name='Rad etish sababi'
+    )
+    
+    # Muddatlar
+    expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Amal qilish muddati'
+    )
+    
+    # Qo'shimcha metadata
+    metadata = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name='Qo\'shimcha ma\'lumotlar',
+        help_text='Flexible data storage for future integrations'
+    )
+    
+    # Vaqt belgilari
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'documents'
+        verbose_name = 'Hujjat'
+        verbose_name_plural = 'Hujjatlar'
+        indexes = [
+            models.Index(fields=['user', 'document_type']),
+            models.Index(fields=['order', 'document_type']),
+            models.Index(fields=['company', 'document_type']),
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['didox_document_id']),
+            models.Index(fields=['expires_at']),
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} - {self.get_document_type_display()}"
+
+    def save(self, *args, **kwargs):
+        """Custom save method"""
+        if self.file:
+            self.file_name = self.file.name
+            self.file_size = self.file.size
+            # Content type will be set by the view
+        super().save(*args, **kwargs)
+
+    @property
+    def is_expired(self):
+        """Hujjat muddati tugaganmi tekshirish"""
+        if self.expires_at:
+            return timezone.now() > self.expires_at
+        return False
+
+    @property
+    def file_extension(self):
+        """Fayl kengaytmasini olish"""
+        if self.file_name:
+            return self.file_name.split('.')[-1].lower()
+        return None
+
+    @property
+    def is_image(self):
+        """Rasm faylimi tekshirish"""
+        image_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+        return self.file_extension in image_extensions
+
+    @property
+    def is_pdf(self):
+        """PDF faylimi tekshirish"""
+        return self.file_extension == 'pdf'
+
+    @property
+    def human_readable_size(self):
+        """Fayl hajmini o'qish oson formatda qaytarish"""
+        if self.file_size < 1024:
+            return f"{self.file_size} B"
+        elif self.file_size < 1024 * 1024:
+            return f"{self.file_size / 1024:.1f} KB"
+        else:
+            return f"{self.file_size / (1024 * 1024):.1f} MB"
+
+    def can_be_deleted_by(self, user):
+        """Foydalanuvchi hujjatni o'chira oladimi"""
+        return (
+            self.user == user or 
+            user.is_staff or 
+            (self.order and (self.order.buyer == user or self.order.supplier == user))
+        )
+
+    def can_be_viewed_by(self, user):
+        """Foydalanuvchi hujjatni ko'ra oladimi"""
+        return (
+            self.user == user or 
+            user.is_staff or 
+            (self.order and (self.order.buyer == user or self.order.supplier == user)) or
+            (self.company and self.company.user == user)
+        )
+
+    def mark_as_verified(self, verified_by_user, commit=True):
+        """Hujjatni tasdiqlangan deb belgilash"""
+        self.status = self.DocumentStatus.VERIFIED
+        self.verified_by = verified_by_user
+        self.verified_at = timezone.now()
+        if commit:
+            self.save(update_fields=['status', 'verified_by', 'verified_at'])
+
+    def mark_as_rejected(self, reason, rejected_by_user, commit=True):
+        """Hujjatni rad etilgan deb belgilash"""
+        self.status = self.DocumentStatus.REJECTED
+        self.rejection_reason = reason
+        self.verified_by = rejected_by_user
+        self.verified_at = timezone.now()
+        if commit:
+            self.save(update_fields=['status', 'rejection_reason', 'verified_by', 'verified_at'])
+
+
+class DocumentShare(models.Model):
+    """
+    Hujjatlarni boshqa foydalanuvchilar bilan ulashish
+    """
+    class ShareType(models.TextChoices):
+        VIEW_ONLY = 'view_only', 'Faqat ko\'rish'
+        DOWNLOAD = 'download', 'Yuklab olish'
+        COMMENT = 'comment', 'Izoh qoldirish'
+
+    id = models.AutoField(primary_key=True)
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='shares')
+    shared_with = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shared_documents')
+    shared_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents_shared')
+    
+    share_type = models.CharField(
+        max_length=20,
+        choices=ShareType.choices,
+        default=ShareType.VIEW_ONLY
+    )
+    
+    expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='Ulashish muddati'
+    )
+    
+    is_active = models.BooleanField(default=True)
+    accessed_at = models.DateTimeField(null=True, blank=True)
+    access_count = models.IntegerField(default=0)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'document_shares'
+        verbose_name = 'Hujjat ulashish'
+        verbose_name_plural = 'Hujjat ulashishlar'
+        unique_together = ['document', 'shared_with']
+
+    def __str__(self):
+        return f"{self.document.title} shared with {self.shared_with.get_full_name()}"
+
+    @property
+    def is_expired(self):
+        """Ulashish muddati tugaganmi"""
+        if self.expires_at:
+            return timezone.now() > self.expires_at
+        return False
+
+    def mark_accessed(self):
+        """Kirish vaqtini belgilash"""
+        self.accessed_at = timezone.now()
+        self.access_count += 1
+        self.save(update_fields=['accessed_at', 'access_count'])

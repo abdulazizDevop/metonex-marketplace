@@ -212,7 +212,7 @@ const AvailableProducts = () => {
           <p className="text-gray-600 mb-4">{error}</p>
           <button 
             onClick={handleBack}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-[#6C4FFF] text-white rounded-lg hover:bg-[#5A3FE6]"
           >
             Orqaga qaytish
           </button>
@@ -244,7 +244,7 @@ const AvailableProducts = () => {
           <div className="px-4 py-2">
             <div className="flex flex-wrap gap-2">
               {selectedCategories.map((category) => (
-                <span key={category} className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">
+                <span key={category} className="px-3 py-1 bg-[#6C4FFF] text-white text-sm rounded-full">
                   {category}
                 </span>
               ))}
@@ -328,7 +328,7 @@ const AvailableProducts = () => {
                         {product.location}
                       </span>
                       {product.verified && (
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                        <span className="text-xs bg-[#6C4FFF]/10 text-[#6C4FFF] px-2 py-1 rounded-full">
                           Tasdiqlangan
                         </span>
                       )}
@@ -355,7 +355,7 @@ const AvailableProducts = () => {
                   </button>
                   <button 
                     onClick={() => handleRequestQuote(product.id)}
-                    className="flex h-11 flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-blue-600 text-sm font-bold leading-normal text-white hover:bg-blue-700 transition-colors"
+                    className="flex h-11 flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-[#6C4FFF] text-sm font-bold leading-normal text-white hover:bg-[#5A3FE6] transition-colors"
                   >
                     <span className="truncate">So'rov yuborish</span>
                   </button>

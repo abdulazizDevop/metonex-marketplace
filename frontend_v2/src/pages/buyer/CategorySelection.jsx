@@ -78,14 +78,14 @@ const CategorySelection = () => {
               onClick={() => handleCategorySelect(category.label)}
               className={`flex flex-col items-center justify-center gap-4 p-6 bg-white rounded-2xl border-2 transition-all duration-200 cursor-pointer hover:shadow-lg ${
                 selectedCategories.includes(category.label)
-                  ? 'border-blue-600 shadow-lg shadow-blue-600/30'
-                  : 'border-transparent hover:border-blue-600/30'
+                  ? 'border-[#6C4FFF] shadow-lg shadow-[#6C4FFF]/30'
+                  : 'border-transparent hover:border-[#6C4FFF]/30'
               }`}
               tabIndex="0"
             >
               <div className={`flex items-center justify-center size-16 rounded-full text-white ${
                 selectedCategories.includes(category.label)
-                  ? 'bg-blue-600'
+                  ? 'bg-[#6C4FFF]'
                   : 'bg-gray-400'
               }`}>
                 <span className="material-symbols-outlined text-3xl">{category.icon}</span>
@@ -100,7 +100,7 @@ const CategorySelection = () => {
       <footer className="sticky bottom-0 bg-white p-4 pb-20">
         <button 
           onClick={handleNext}
-          className="flex w-full cursor-pointer items-center justify-center rounded-xl h-14 bg-blue-600 text-white text-lg font-bold leading-normal tracking-wide shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-all duration-200"
+          className="flex w-full cursor-pointer items-center justify-center rounded-xl h-14 bg-[#6C4FFF] text-white text-lg font-bold leading-normal tracking-wide shadow-lg shadow-[#6C4FFF]/30 hover:bg-[#5A3FE6] transition-all duration-200"
         >
           <span className="truncate">Next</span>
         </button>

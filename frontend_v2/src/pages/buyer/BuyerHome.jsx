@@ -154,11 +154,11 @@ const BuyerHome = () => {
                     onClick={() => handleMethodSelect(method)}
                     className={`bg-white rounded-xl p-4 flex items-center gap-4 border-2 transition-all duration-300 cursor-pointer ${
                       selectedMethod?.id === method.id
-                        ? 'border-blue-600 shadow-lg shadow-blue-600/20'
-                        : 'border-gray-200 hover:border-blue-600/50'
+                        ? 'border-[#6C4FFF] shadow-lg shadow-[#6C4FFF]/20'
+                        : 'border-gray-200 hover:border-[#6C4FFF]/50'
                     }`}
                   >
-                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-[#6C4FFF] rounded-full flex items-center justify-center">
                       <span className="material-symbols-outlined text-white text-xl">
                         {method.icon}
                       </span>
@@ -168,7 +168,7 @@ const BuyerHome = () => {
                       <p className="text-sm text-gray-500 mt-1">{method.subtitle}</p>
                     </div>
                     {selectedMethod?.id === method.id && (
-                      <span className="material-symbols-outlined text-blue-600">check_circle</span>
+                      <span className="material-symbols-outlined text-[#6C4FFF]">check_circle</span>
                     )}
                   </div>
                 ))}
@@ -181,7 +181,7 @@ const BuyerHome = () => {
                   disabled={!selectedMethod}
                   className={`w-full h-12 text-white font-bold rounded-xl transition-all duration-300 ${
                     selectedMethod
-                      ? 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/30'
+                      ? 'bg-[#6C4FFF] hover:bg-[#5A3FE6] shadow-lg shadow-[#6C4FFF]/30'
                       : 'bg-gray-300 cursor-not-allowed'
                   }`}
                 >
@@ -219,7 +219,7 @@ const BuyerHome = () => {
           <div className="mt-8 w-full">
             <button 
               onClick={handleCreateRequest}
-              className="w-full bg-blue-600 text-white font-semibold py-4 px-6 rounded-xl text-lg hover:opacity-90 transition-opacity"
+              className="w-full bg-[#6C4FFF] text-white font-semibold py-4 px-6 rounded-xl text-lg hover:opacity-90 transition-opacity"
             >
               Create New Request
             </button>
@@ -270,11 +270,11 @@ const BuyerHome = () => {
                   onClick={() => handleMethodSelect(method)}
                   className={`bg-white rounded-xl p-4 flex items-center gap-4 border-2 transition-all duration-300 cursor-pointer ${
                     selectedMethod?.id === method.id
-                      ? 'border-blue-600 shadow-lg shadow-blue-600/20'
-                      : 'border-gray-200 hover:border-blue-600/50'
+                      ? 'border-[#6C4FFF] shadow-lg shadow-[#6C4FFF]/20'
+                      : 'border-gray-200 hover:border-[#6C4FFF]/50'
                   }`}
                 >
-                  <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 bg-[#6C4FFF] rounded-full flex items-center justify-center">
                     <span className="material-symbols-outlined text-white text-xl">
                       {method.icon}
                     </span>
@@ -284,7 +284,7 @@ const BuyerHome = () => {
                     <p className="text-sm text-gray-500 mt-1">{method.subtitle}</p>
                   </div>
                   {selectedMethod?.id === method.id && (
-                    <span className="material-symbols-outlined text-blue-600">check_circle</span>
+                    <span className="material-symbols-outlined text-[#6C4FFF]">check_circle</span>
                   )}
                 </div>
               ))}
@@ -297,7 +297,7 @@ const BuyerHome = () => {
                 disabled={!selectedMethod}
                 className={`w-full h-12 text-white font-bold rounded-xl transition-all duration-300 ${
                   selectedMethod
-                    ? 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/30'
+                    ? 'bg-[#6C4FFF] hover:bg-[#5A3FE6] shadow-lg shadow-[#6C4FFF]/30'
                     : 'bg-gray-300 cursor-not-allowed'
                 }`}
               >
@@ -314,7 +314,7 @@ const BuyerHome = () => {
           <div className="flex justify-between items-center py-3">
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Hi, BuildCo 👋</h1>
-              <p className="text-sm text-gray-600">You have <span className="font-semibold text-blue-600">{activeOrdersCount} active orders</span> today.</p>
+              <p className="text-sm text-gray-600">You have <span className="font-semibold text-[#6C4FFF]">{activeOrdersCount} active orders</span> today.</p>
             </div>
             <button className="relative">
               <span className="material-symbols-outlined text-2xl">notifications</span>
@@ -336,7 +336,7 @@ const BuyerHome = () => {
                   <div className="flex justify-between items-start">
                     <h3 className="text-lg font-semibold text-gray-900">{offer.title}</h3>
                     {offer.hasNewOffers && (
-                      <div className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full animate-pulse">
+                      <div className="px-3 py-1 bg-[#6C4FFF] text-white text-xs font-semibold rounded-full animate-pulse">
                         NEW OFFERS
                       </div>
                     )}
@@ -350,13 +350,13 @@ const BuyerHome = () => {
                 <div className="p-4 bg-gray-50 border-t border-gray-100">
                   <button 
                     onClick={() => handleViewOffers(offer.id)}
-                    className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors"
+                    className="w-full bg-[#6C4FFF] text-white font-semibold py-3 px-4 rounded-xl hover:bg-[#5A3FE6] transition-colors"
                   >
                     View Offers
                   </button>
                   <button 
                     onClick={() => handleRemindSuppliers(offer.id)}
-                    className="w-full mt-3 text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors"
+                    className="w-full mt-3 text-sm font-medium text-gray-500 hover:text-[#6C4FFF] transition-colors"
                   >
                     Remind suppliers
                   </button>
@@ -371,7 +371,7 @@ const BuyerHome = () => {
           <div className="grid grid-cols-1 gap-3">
             <button 
               onClick={handleCreateRequest}
-              className="w-full flex items-center justify-center py-4 px-5 bg-blue-600 text-white rounded-xl shadow-md hover:opacity-90 transition-opacity"
+              className="w-full flex items-center justify-center py-4 px-5 bg-[#6C4FFF] text-white rounded-xl shadow-md hover:opacity-90 transition-opacity"
             >
               <span className="text-lg font-semibold">New Request</span>
               <span className="material-symbols-outlined ml-2">add</span>
@@ -381,14 +381,14 @@ const BuyerHome = () => {
               onClick={handleUploadEstimate}
               className="bg-white p-3 rounded-xl shadow-sm flex flex-col items-start gap-1 hover:bg-gray-50 transition-colors"
             >
-              <span className="material-symbols-outlined text-blue-500">upload_file</span>
+              <span className="material-symbols-outlined text-[#6C4FFF]">upload_file</span>
               <span className="text-sm font-semibold">Upload Estimate</span>
             </button>
               <button 
                 onClick={() => navigate('/buyer/orders')}
                 className="bg-white p-3 rounded-xl shadow-sm flex flex-col items-start gap-1 hover:bg-gray-50 transition-colors"
               >
-                <span className="material-symbols-outlined text-green-500">local_shipping</span>
+                <span className="material-symbols-outlined text-[#6C4FFF]">local_shipping</span>
                 <span className="text-sm font-semibold">Track Orders</span>
               </button>
             </div>

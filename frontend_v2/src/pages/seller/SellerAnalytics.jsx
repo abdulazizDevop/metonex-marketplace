@@ -473,37 +473,6 @@ const SellerAnalytics = () => {
           {renderSectionContent()}
         </main>
       </div>
-
-      {/* Bottom Navigation */}
-      <nav className="sticky bottom-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm">
-        <div className="flex justify-around py-2">
-          <button 
-            onClick={() => navigate('/seller/dashboard')}
-            className="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-600 transition-colors"
-          >
-            <span className="material-symbols-outlined">home</span>
-            <span className="text-xs font-medium">Home</span>
-          </button>
-          <button 
-            onClick={() => navigate('/seller/requests')}
-            className="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-600 transition-colors"
-          >
-            <span className="material-symbols-outlined">list_alt</span>
-            <span className="text-xs font-medium">Requests</span>
-          </button>
-          <button 
-            onClick={() => navigate('/seller/products')}
-            className="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-600 transition-colors"
-          >
-            <span className="material-symbols-outlined">grid_view</span>
-            <span className="text-xs font-medium">Products</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-purple-600">
-            <span className="material-symbols-outlined">analytics</span>
-            <span className="text-xs font-bold">Analytics</span>
-          </button>
-        </div>
-      </nav>
     </div>
   );
 };

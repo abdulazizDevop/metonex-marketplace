@@ -9,7 +9,7 @@ const SupplierMyRequests = () => {
     {
       id: 1,
       status: 'New Request',
-      statusColor: 'bg-blue-100 text-blue-800',
+      statusColor: 'bg-[#6C4FFF]/10 text-[#6C4FFF]',
       title: 'Concrete Mix',
       quantity: '50 cubic yards',
       buyerId: '12345',
@@ -120,7 +120,7 @@ const SupplierMyRequests = () => {
         <div className="mt-4">
           <div className="flex h-10 w-full items-center justify-center rounded-lg bg-gray-100 p-1">
             {tabs.map((tab) => (
-              <label key={tab} className="flex h-full flex-1 cursor-pointer items-center justify-center rounded-md px-2 text-sm font-medium text-gray-500 has-[:checked]:bg-white has-[:checked]:text-purple-600 has-[:checked]:shadow-sm">
+                <label key={tab} className="flex h-full flex-1 cursor-pointer items-center justify-center rounded-md px-2 text-sm font-medium text-gray-500 has-[:checked]:bg-white has-[:checked]:text-[#6C4FFF] has-[:checked]:shadow-sm">
                 <span className="truncate">{tab}</span>
                 <input 
                   className="sr-only" 
@@ -169,7 +169,7 @@ const SupplierMyRequests = () => {
               <div className="flex gap-2 border-t border-gray-200 p-4">
                 <button 
                   onClick={() => handlePrimaryAction(request)}
-                  className="flex-1 rounded-lg bg-purple-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-purple-700 transition-colors"
+                  className="flex-1 rounded-lg bg-[#6C4FFF] px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-[#5A3FE6] transition-colors"
                 >
                   {getButtonText(request.status)}
                 </button>

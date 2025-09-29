@@ -17,6 +17,7 @@ from .offer_urls import offer_urlpatterns
 from .order_urls import order_urlpatterns
 from .payment_urls import payment_urlpatterns
 from .notification_urls import notification_urlpatterns
+from .document_urls import urlpatterns as document_urlpatterns
 
 # Main router for API v1
 router = DefaultRouter()
@@ -57,6 +58,9 @@ urlpatterns = [
         
         # Notification management
         path('notifications/', include(notification_urlpatterns)),
+        
+        # Document management
+        path('', include(document_urlpatterns)),
     ])),
     
     # Router URLs
@@ -76,4 +80,5 @@ __all__ = [
     'order_urlpatterns',
     'payment_urlpatterns',
     'notification_urlpatterns',
+    'document_urlpatterns',
 ]

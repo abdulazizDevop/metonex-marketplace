@@ -69,9 +69,9 @@ const RFQForm = () => {
     setFormData(prev => ({
       ...prev,
       category: product.category || 'Construction Materials',
-      brand: product.name.split(' ')[0] || '',
-      grade: product.name.split(' ').slice(1).join(' ') || '',
-      volume: product.minOrder || '',
+      brand: product.brand || product.name?.split(' ')[0] || '',
+      grade: product.grade || product.name?.split(' ').slice(1).join(' ') || '',
+      volume: product.min_order_quantity || product.minOrder || '',
       unit: product.unit || 'tons'
     }))
   }, [product, navigate])

@@ -26,6 +26,9 @@ import RequestSentConfirmation from './pages/buyer/RequestSentConfirmation'
 // Seller Pages
 import SellerDashboard from './pages/seller/SellerDashboard'
 import SellerOrders from './pages/seller/SellerOrders'
+import SellerRequestDetail from './pages/seller/SellerRequestDetail'
+import SellerOfferDetail from './pages/seller/SellerOfferDetail'
+import SellerOrderDetail from './pages/seller/SellerOrderDetail'
 import SellerProfile from './pages/seller/SellerProfile'
 import SellerNotifications from './pages/seller/SellerNotifications'
 import SellerAnalytics from './pages/seller/SellerAnalytics'
@@ -34,17 +37,18 @@ import SellerEditProfile from './pages/seller/SellerEditProfile'
 import SellerSettingsPanel from './pages/seller/SellerSettingsPanel'
 import SellerRegistration from './pages/seller/SellerRegistration'
 import SupplierAddProduct from './pages/seller/SupplierAddProduct'
+import SellerProducts from './pages/seller/SellerProducts'
+import SellerProductDetail from './pages/seller/SellerProductDetail'
 import SupplierMyRequests from './pages/seller/SupplierMyRequests'
 import SupplierAcceptance from './pages/seller/SupplierAcceptance'
-import AllSupplierOffers from './pages/seller/AllSupplierOffers'
-import ConfirmDelivery from './pages/seller/ConfirmDelivery'
+import ConfirmDelivery from './pages/buyer/ConfirmDelivery'
 import CounterOffer from './pages/seller/CounterOffer'
 import FullOrderDetails from './pages/seller/FullOrderDetails'
 import OfferAcceptancePayment from './pages/seller/OfferAcceptancePayment'
 
 // Common Pages
 import PaymentConfirmed from './pages/common/PaymentConfirmed'
-import DeliveryFeedback from './pages/common/DeliveryFeedback'
+import DeliveryFeedback from './pages/buyer/DeliveryFeedback'
 import UploadPaymentProof from './pages/common/UploadPaymentProof'
 import FirstPaymentSuccess from './pages/common/FirstPaymentSuccess'
 import FollowingPaymentsSuccess from './pages/common/FollowingPaymentsSuccess'
@@ -194,21 +198,10 @@ function App() {
             <BuyerRegistration />
           </BuyerLayout>
         } />
-
         {/* Seller Routes */}
         <Route path="/seller/dashboard" element={
           <Layout>
             <SellerDashboard />
-          </Layout>
-        } />
-        <Route path="/seller/requests" element={
-          <Layout>
-            <SupplierMyRequests />
-          </Layout>
-        } />
-        <Route path="/seller/offers" element={
-          <Layout>
-            <AllSupplierOffers />
           </Layout>
         } />
         <Route path="/seller/orders" element={
@@ -216,9 +209,34 @@ function App() {
             <SellerOrders />
           </Layout>
         } />
+        <Route path="/seller/request-details/:id" element={
+          <Layout>
+            <SellerRequestDetail />
+          </Layout>
+        } />
+        <Route path="/seller/offer-details/:id" element={
+          <Layout>
+            <SellerOfferDetail />
+          </Layout>
+        } />
+        <Route path="/seller/order-details/:id" element={
+          <Layout>
+            <SellerOrderDetail />
+          </Layout>
+        } />
         <Route path="/seller/products" element={
           <Layout>
+            <SellerProducts />
+          </Layout>
+        } />
+        <Route path="/seller/products/add" element={
+          <Layout>
             <SupplierAddProduct />
+          </Layout>
+        } />
+        <Route path="/seller/product/:id" element={
+          <Layout>
+            <SellerProductDetail />
           </Layout>
         } />
         <Route path="/seller/analytics" element={
@@ -275,12 +293,12 @@ function App() {
             <CounterOffer />
           </Layout>
         } />
-        <Route path="/confirm-delivery" element={
+        <Route path="/buyer/confirm-delivery" element={
           <Layout>
             <ConfirmDelivery />
           </Layout>
         } />
-        <Route path="/delivery-feedback" element={
+        <Route path="/buyer/delivery-feedback" element={
           <Layout>
             <DeliveryFeedback />
           </Layout>
@@ -391,11 +409,6 @@ function App() {
             <ManageTeamMembers />
           </Layout>
         } />
-        <Route path="/all-supplier-offers" element={
-          <Layout>
-            <AllSupplierOffers />
-          </Layout>
-        } />
         <Route path="/all-metrics-dynamic-view" element={
           <Layout>
             <AllMetricsDynamicView />
@@ -444,18 +457,6 @@ function App() {
         <Route path="/supplier-delivery-process" element={
           <Layout>
             <SupplierDeliveryProcess />
-          </Layout>
-        } />
-
-        {/* Onboarding Routes */}
-        <Route path="/onboarding/welcome-1" element={
-          <Layout>
-            <OnboardingWelcome1 />
-          </Layout>
-        } />
-        <Route path="/onboarding/welcome-2" element={
-          <Layout>
-            <OnboardingWelcome2 />
           </Layout>
         } />
         <Route path="/registration/step-1" element={

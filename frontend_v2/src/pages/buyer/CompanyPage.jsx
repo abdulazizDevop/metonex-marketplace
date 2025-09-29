@@ -73,7 +73,7 @@ const CompanyPage = () => {
             </div>
             <button
               onClick={handleEditCompany}
-              className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              className="px-3 py-1.5 bg-[#6C4FFF] text-white rounded-lg hover:bg-[#5A3FE6] transition-colors text-sm"
             >
               Edit
             </button>
@@ -113,7 +113,7 @@ const CompanyPage = () => {
             <h3 className="text-lg font-semibold text-gray-900">Company Information</h3>
             <button 
               onClick={handleEditCompany}
-              className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              className="px-3 py-1.5 bg-[#6C4FFF] text-white rounded-lg hover:bg-[#5A3FE6] transition-colors text-sm"
             >
               Edit
             </button>
@@ -147,7 +147,7 @@ const CompanyPage = () => {
             <h3 className="text-lg font-semibold text-gray-900">Bank Details</h3>
             <button 
               onClick={handleEditCompany}
-              className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              className="px-3 py-1.5 bg-[#6C4FFF] text-white rounded-lg hover:bg-[#5A3FE6] transition-colors text-sm"
             >
               Edit
             </button>
@@ -178,7 +178,7 @@ const CompanyPage = () => {
             <h3 className="text-lg font-semibold text-gray-900">Accountant Contact</h3>
             <button 
               onClick={handleEditCompany}
-              className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              className="px-3 py-1.5 bg-[#6C4FFF] text-white rounded-lg hover:bg-[#5A3FE6] transition-colors text-sm"
             >
               Edit
             </button>
@@ -209,7 +209,7 @@ const CompanyPage = () => {
             <h3 className="text-lg font-semibold text-gray-900">Verification Documents</h3>
             <button 
               onClick={handleUploadDocuments}
-              className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              className="px-3 py-1.5 bg-[#6C4FFF] text-white rounded-lg hover:bg-[#5A3FE6] transition-colors text-sm"
             >
               Upload
             </button>
@@ -217,7 +217,7 @@ const CompanyPage = () => {
           <div className="space-y-3">
             {documents.map((doc, index) => (
               <div key={index} className="flex items-center gap-3 rounded-lg border border-gray-100 p-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-purple-100 text-purple-600">
+                <div className="flex size-10 items-center justify-center rounded-full bg-[#6C4FFF]/10 text-[#6C4FFF]">
                   <span className="material-symbols-outlined">description</span>
                 </div>
                 <div className="flex-1">
@@ -228,13 +228,13 @@ const CompanyPage = () => {
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => handleViewDocument(doc.file)}
-                    className="p-1.5 text-gray-500 hover:text-purple-600 transition-colors"
+                    className="p-1.5 text-gray-500 hover:text-[#6C4FFF] transition-colors"
                   >
                     <span className="material-symbols-outlined text-sm">visibility</span>
                   </button>
                   <button 
                     onClick={() => handleDownloadDocument(doc.file)}
-                    className="p-1.5 text-gray-500 hover:text-purple-600 transition-colors"
+                    className="p-1.5 text-gray-500 hover:text-[#6C4FFF] transition-colors"
                   >
                     <span className="material-symbols-outlined text-sm">download</span>
                   </button>

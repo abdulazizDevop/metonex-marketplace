@@ -348,7 +348,7 @@ const BuyerOrders = () => {
       case 'active':
         return 'bg-green-100 text-green-800'
       case 'completed':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
       case 'cancelled':
         return 'bg-red-100 text-red-800'
       case 'expired':
@@ -362,13 +362,13 @@ const BuyerOrders = () => {
       case 'rejected':
         return 'bg-red-100 text-red-800'
       case 'counter_offered':
-        return 'bg-purple-100 text-purple-800'
+        return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
       
       // Order statuses
       case 'created':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
       case 'contract_generated':
-        return 'bg-indigo-100 text-indigo-800'
+        return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
       case 'awaiting_payment':
         return 'bg-yellow-100 text-yellow-800'
       case 'payment_received':
@@ -376,9 +376,9 @@ const BuyerOrders = () => {
       case 'in_preparation':
         return 'bg-orange-100 text-orange-800'
       case 'in_transit':
-        return 'bg-purple-100 text-purple-800'
+        return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
       case 'delivered':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
       case 'confirmed':
         return 'bg-green-100 text-green-800'
       case 'completed':
@@ -505,7 +505,7 @@ const BuyerOrders = () => {
                 onClick={() => setSelectedCategory(category.id)}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                   selectedCategory === category.id
-                    ? 'bg-blue-100 text-blue-700'
+                    ? 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -525,7 +525,7 @@ const BuyerOrders = () => {
                 onClick={() => setActiveSubTab(subTab.id)}
                 className={`px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
                   activeSubTab === subTab.id
-                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    ? 'text-[#6C4FFF] border-b-2 border-[#6C4FFF]'
                     : 'text-gray-600 hover:text-gray-800'
                 }`}
               >
@@ -622,7 +622,7 @@ const BuyerOrders = () => {
                           )}
                           <button 
                             onClick={() => navigate(`/buyer/offer/${item.id}?returnTab=offers`)}
-                            className="text-blue-600 text-xs font-medium hover:text-blue-800"
+                            className="text-[#6C4FFF] text-xs font-medium hover:text-[#5A3FE6]"
                           >
                             Ko'rish
                           </button>
@@ -662,7 +662,7 @@ const BuyerOrders = () => {
                         </div>
                         <button 
                           onClick={() => navigate(`/buyer/order/${item.id}?returnTab=orders`)}
-                          className="text-blue-600 text-xs font-medium hover:text-blue-800"
+                          className="text-[#6C4FFF] text-xs font-medium hover:text-[#5A3FE6]"
                         >
                           Batafsil
                         </button>

@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from ..models import (
     User, VerificationCode, UserSession, Company, Unit, Category, SubCategory, 
     Factory, Product, RFQ, Offer, CounterOffer, Order, OrderDocument, 
-    OrderStatusHistory, Payment, Notification
+    OrderStatusHistory, Payment, Notification, Document, DocumentShare
 )
 
 # Custom Admin Site
@@ -32,6 +32,7 @@ from .offer_admin import OfferAdmin, CounterOfferAdmin
 from .order_admin import OrderAdmin, OrderDocumentAdmin, OrderStatusHistoryAdmin
 from .payment_admin import PaymentAdmin
 from .notification_admin import NotificationAdmin
+from .document_admin import DocumentAdmin, DocumentShareAdmin
 
 # Register all models
 admin_site.register(User, UserAdmin)
@@ -51,6 +52,8 @@ admin_site.register(OrderDocument, OrderDocumentAdmin)
 admin_site.register(OrderStatusHistory, OrderStatusHistoryAdmin)
 admin_site.register(Payment, PaymentAdmin)
 admin_site.register(Notification, NotificationAdmin)
+admin_site.register(Document, DocumentAdmin)
+admin_site.register(DocumentShare, DocumentShareAdmin)
 
 __all__ = [
     'admin_site',
@@ -71,4 +74,6 @@ __all__ = [
     'OrderStatusHistoryAdmin',
     'PaymentAdmin',
     'NotificationAdmin',
+    'DocumentAdmin',
+    'DocumentShareAdmin',
 ]

@@ -107,7 +107,7 @@ const BuyerDashboard = () => {
                 onClick={() => setViewMode('category')}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   viewMode === 'category' 
-                    ? 'bg-purple-600 text-white' 
+                    ? 'bg-[#6C4FFF] text-white' 
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
@@ -117,7 +117,7 @@ const BuyerDashboard = () => {
                 onClick={() => setViewMode('supplier')}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   viewMode === 'supplier' 
-                    ? 'bg-purple-600 text-white' 
+                    ? 'bg-[#6C4FFF] text-white' 
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
@@ -275,7 +275,7 @@ const BuyerDashboard = () => {
                     <p className="font-bold text-purple-600">${offer.amount.toLocaleString()}</p>
                     <button 
                       onClick={() => handleViewOffer(offer.id)}
-                      className="text-sm text-purple-600 hover:text-purple-800 transition-colors"
+                      className="text-sm text-[#6C4FFF] hover:text-[#5A3FE6] transition-colors"
                     >
                       Ko'rish
                     </button>
@@ -292,7 +292,7 @@ const BuyerDashboard = () => {
             <h2 className="text-lg font-bold text-gray-900">Bildirishnomalar</h2>
             <button 
               onClick={handleGoToNotifications}
-              className="text-sm font-medium text-gray-600 hover:text-purple-600 transition-colors"
+              className="text-sm font-medium text-gray-600 hover:text-[#6C4FFF] transition-colors"
             >
               Barchasini ko'rish
             </button>
@@ -303,9 +303,9 @@ const BuyerDashboard = () => {
               <div key={notification.id} className="bg-white rounded-2xl shadow-sm p-4">
                 <div className="flex items-start gap-3">
                   <div className={`flex size-8 items-center justify-center rounded-full ${
-                    notification.type === 'order' ? 'bg-blue-100 text-blue-600' :
-                    notification.type === 'offer' ? 'bg-green-100 text-green-600' :
-                    'bg-purple-100 text-purple-600'
+                    notification.type === 'order' ? 'bg-[#6C4FFF]/10 text-[#6C4FFF]' :
+                    notification.type === 'offer' ? 'bg-[#6C4FFF]/10 text-[#6C4FFF]' :
+                    'bg-[#6C4FFF]/10 text-[#6C4FFF]'
                   }`}>
                     <span className="material-symbols-outlined text-sm">
                       {notification.type === 'order' ? 'shopping_cart' :

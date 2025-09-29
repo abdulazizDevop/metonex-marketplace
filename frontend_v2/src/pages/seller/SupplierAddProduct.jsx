@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import BottomNavigation from '../../components/BottomNavigation';
 
 const SupplierAddProduct = () => {
   const navigate = useNavigate();
@@ -132,7 +133,7 @@ const SupplierAddProduct = () => {
                 <line x1="6" x2="18" y1="6" y2="18"></line>
               </svg>
             </button>
-            <h1 className="flex-1 text-center text-xl font-semibold text-gray-900">Add Product</h1>
+            <h1 className="flex-1 text-center text-xl font-semibold text-gray-900">Mahsulot qo'shish</h1>
             <div className="w-6"></div>
           </div>
           <div className="h-px bg-gray-200"></div>
@@ -141,7 +142,7 @@ const SupplierAddProduct = () => {
         <main className="px-4 py-6">
           <form onSubmit={handleSubmit} className="space-y-8">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Step 1: Choose Category</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">1-qadam: Kategoriya tanlash</h2>
               <div className="grid grid-cols-2 gap-3">
                 {categories.map((category) => (
                   <label 
@@ -369,18 +370,21 @@ const SupplierAddProduct = () => {
         <button 
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="flex w-full cursor-pointer items-center justify-center rounded-lg h-12 px-5 bg-blue-600 text-white text-base font-bold leading-normal tracking-wide shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex w-full cursor-pointer items-center justify-center rounded-lg h-12 px-5 bg-[#6C4FFF] text-white text-base font-bold leading-normal tracking-wide shadow-sm hover:bg-[#5A3FE6] focus:outline-none focus:ring-2 focus:ring-[#6C4FFF] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSubmitting ? (
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Saving...</span>
+              <span>Saqlanmoqda...</span>
             </div>
           ) : (
-            <span>Save</span>
+            <span>Saqlash</span>
           )}
         </button>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation />
 
     </div>
   );

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import BottomNavigation from '../../components/BottomNavigation'
 
-const ProductDetail = () => {
+const SellerProductDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
-  const [quantity, setQuantity] = useState(1)
   const [showShareModal, setShowShareModal] = useState(false)
   const [showImageModal, setShowImageModal] = useState(false)
-  const [quantityError, setQuantityError] = useState('')
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   // Sample product data (in real app, this would come from API)
   const sampleProducts = {
@@ -50,35 +51,11 @@ const ProductDetail = () => {
       delivery_locations: ['Tashkent', 'Samarkand', 'Bukhara'],
       is_active: true,
       is_featured: true,
-      supplierInfo: {
-        name: 'SteelCorp Ltd',
-        rating: 4.9,
-        reviews: 1250,
-        verified: true,
-        location: 'Tashkent',
-        established: '2015',
-        specialties: ['Steel Products', 'Construction Materials', 'Metal Fabrication']
-      },
-      relatedProducts: [
-        {
-          id: 7,
-          brand: 'SteelCorp',
-          grade: 'I-200',
-          base_price: 120000,
-          currency: 'UZS',
-          unit: 'piece',
-          photos: ['https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=200&h=200&fit=crop']
-        },
-        {
-          id: 9,
-          brand: 'SteelCorp',
-          grade: '10mm',
-          base_price: 95000,
-          currency: 'UZS',
-          unit: 'sqm',
-          photos: ['https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=200&h=200&fit=crop']
-        }
-      ]
+      created_at: '2024-01-15T10:30:00Z',
+      updated_at: '2024-01-20T14:45:00Z',
+      orders_count: 50,
+      total_sales: 35500000,
+      last_order_date: '2024-01-18T09:15:00Z'
     }
   }
 
@@ -87,25 +64,9 @@ const ProductDetail = () => {
     setTimeout(() => {
       const productData = sampleProducts[id] || sampleProducts[1]
       setProduct(productData)
-      setQuantity(productData.min_order_quantity || 1)
       setLoading(false)
     }, 1000)
   }, [id])
-
-
-  const handleQuantityChange = (value) => {
-    const numValue = parseInt(value) || 1
-    const minOrder = product ? product.min_order_quantity : 1
-    
-    setQuantity(numValue)
-    
-    // Validate minimum order
-    if (numValue < minOrder) {
-      setQuantityError(`Minimal buyurtma ${minOrder} ${product.unit}`)
-    } else {
-      setQuantityError('')
-    }
-  }
 
   const handleShare = () => {
     setShowShareModal(true)
@@ -115,10 +76,10 @@ const ProductDetail = () => {
     try {
       const url = window.location.href
       await navigator.clipboard.writeText(url)
-      alert('Link copied to clipboard!')
+      alert('Havola nusxalandi!')
     } catch (err) {
       console.error('Failed to copy URL:', err)
-      alert('Failed to copy link')
+      alert('Havolani nusxalashda xatolik')
     }
   }
 
@@ -140,6 +101,21 @@ const ProductDetail = () => {
     setShowImageModal(true)
   }
 
+  const handleEdit = () => {
+    setShowEditModal(true)
+  }
+
+  const handleDelete = () => {
+    setShowDeleteModal(true)
+  }
+
+  const confirmDelete = () => {
+    console.log('Delete product:', product.id)
+    // TODO: Implement delete functionality
+    setShowDeleteModal(false)
+    navigate('/seller/products')
+  }
+
   const shareOptions = [
     { 
       name: 'Telegram', 
@@ -158,36 +134,15 @@ const ProductDetail = () => {
       icon: 'https://facebook.com/favicon.ico',
       url: 'https://www.facebook.com/sharer/sharer.php?u=',
       color: 'bg-blue-600' 
-    },
-    { 
-      name: 'Instagram', 
-      icon: 'https://instagram.com/favicon.ico',
-      url: 'https://www.instagram.com/',
-      color: 'bg-pink-500' 
     }
   ]
-
-  const sendRequest = () => {
-    if (quantityError) {
-      return
-    }
-
-    // Navigate to RFQ form with product data
-    navigate('/buyer/rfq-form', { 
-      state: { 
-        product: product,
-        selectedCategories: [product.category]
-      } 
-    })
-  }
-
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 pb-20 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading product details...</p>
+          <p className="text-gray-600">Mahsulot ma'lumotlari yuklanmoqda...</p>
         </div>
       </div>
     )
@@ -198,13 +153,13 @@ const ProductDetail = () => {
       <div className="min-h-screen bg-gray-50 pb-20 flex items-center justify-center">
         <div className="text-center">
           <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">error</span>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Product not found</h3>
-          <p className="text-gray-500 mb-4">The product you're looking for doesn't exist</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Mahsulot topilmadi</h3>
+          <p className="text-gray-500 mb-4">Qidirilayotgan mahsulot mavjud emas</p>
           <button
-            onClick={() => navigate('/buyer/products')}
+            onClick={() => navigate('/seller/products')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Back to Products
+            Mahsulotlar sahifasiga qaytish
           </button>
         </div>
       </div>
@@ -223,7 +178,7 @@ const ProductDetail = () => {
             >
               <span className="material-symbols-outlined text-xl">arrow_back</span>
             </button>
-            <h1 className="text-lg font-bold text-gray-900">Product Details</h1>
+            <h1 className="text-lg font-bold text-gray-900">Mahsulot tafsilotlari</h1>
             <div className="flex items-center gap-2">
               <button 
                 onClick={handleShare}
@@ -279,7 +234,7 @@ const ProductDetail = () => {
               ))}
             </div>
 
-            {/* Badges */}
+            {/* Status Badges */}
             <div className="absolute top-4 left-4 flex flex-col gap-2">
               {product.is_featured && (
                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -292,29 +247,11 @@ const ProductDetail = () => {
                 {product.is_active ? 'Faol' : 'Nofaol'}
               </span>
             </div>
-
-            {/* Verified Badge */}
-            {product.supplierInfo?.verified && (
-              <div className="absolute top-4 right-4">
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  <span className="material-symbols-outlined text-xs mr-1">verified</span>
-                  Verified
-                </span>
-              </div>
-            )}
           </div>
         </div>
 
         {/* Product Info */}
         <div className="bg-white px-4 py-4 border-b border-gray-200">
-          {/* Supplier */}
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm text-gray-500">{product.supplier}</span>
-            {product.supplierInfo?.verified && (
-              <span className="material-symbols-outlined text-sm text-blue-600">verified</span>
-            )}
-          </div>
-
           {/* Product Name */}
           <h1 className="text-xl font-bold text-gray-900 mb-2">{product.brand} {product.grade}</h1>
 
@@ -364,53 +301,50 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Quantity Selector */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Miqdor</label>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => handleQuantityChange(quantity - 1)}
-                disabled={quantity <= 1}
-                className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="material-symbols-outlined text-sm">remove</span>
-              </button>
-              <input
-                type="number"
-                value={quantity}
-                onChange={(e) => handleQuantityChange(e.target.value)}
-                className={`w-20 text-center border rounded-lg py-2 text-sm ${
-                  quantityError 
-                    ? 'border-red-500 bg-red-50' 
-                    : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-                }`}
-                min="1"
-              />
-              <button
-                onClick={() => handleQuantityChange(quantity + 1)}
-                className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50"
-              >
-                <span className="material-symbols-outlined text-sm">add</span>
-              </button>
-              <span className="text-sm text-gray-500 ml-2">{product.unit}</span>
-            </div>
-            {quantityError && (
-              <p className="text-red-500 text-xs mt-1">{quantityError}</p>
-            )}
-          </div>
-
           {/* Action Buttons */}
           <div className="flex gap-3">
             <button
-              onClick={sendRequest}
-              disabled={quantityError}
-              className="flex-1 bg-[#6C4FFF] text-white py-3 rounded-lg font-medium hover:bg-[#5A3FE6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleEdit}
+              className="flex-1 bg-[#6C4FFF] text-white py-3 rounded-lg font-medium hover:bg-[#5A3FE6] transition-colors"
             >
-              Buyurtma berish
+              Tahrirlash
             </button>
-            <button className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-              <span className="material-symbols-outlined text-xl">chat</span>
+            <button 
+              onClick={handleDelete}
+              className="px-4 py-3 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              <span className="material-symbols-outlined text-xl">delete</span>
             </button>
+          </div>
+        </div>
+
+        {/* Analytics */}
+        <div className="bg-white px-4 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900 mb-3">Statistika</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-gray-900">{product.view_count}</div>
+              <div className="text-sm text-gray-600">Ko'rishlar</div>
+            </div>
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-gray-900">{product.orders_count}</div>
+              <div className="text-sm text-gray-600">Buyurtmalar</div>
+            </div>
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-gray-900">
+                {new Intl.NumberFormat('uz-UZ', {
+                  style: 'currency',
+                  currency: product.currency,
+                  minimumFractionDigits: 0,
+                  notation: 'compact'
+                }).format(product.total_sales)}
+              </div>
+              <div className="text-sm text-gray-600">Jami sotish</div>
+            </div>
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-gray-900">{product.rating}</div>
+              <div className="text-sm text-gray-600">Reyting</div>
+            </div>
           </div>
         </div>
 
@@ -426,6 +360,12 @@ const ProductDetail = () => {
             </p>
             <p className="text-gray-600 leading-relaxed">
               <strong>Kafolat muddati:</strong> {product.warranty_period} oy
+            </p>
+            <p className="text-gray-600 leading-relaxed">
+              <strong>Yaratilgan:</strong> {new Date(product.created_at).toLocaleDateString('uz-UZ')}
+            </p>
+            <p className="text-gray-600 leading-relaxed">
+              <strong>Yangilangan:</strong> {new Date(product.updated_at).toLocaleDateString('uz-UZ')}
             </p>
           </div>
         </div>
@@ -443,84 +383,26 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Supplier Info */}
-        <div className="bg-white px-4 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Yetkazib beruvchi ma'lumotlari</h2>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Kompaniya</span>
-              <span className="text-gray-900 font-medium">{product.supplierInfo?.name || product.supplier}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Reyting</span>
-              <div className="flex items-center gap-1">
-                <span className="text-yellow-400">★</span>
-                <span className="text-gray-900">{product.supplierInfo?.rating || product.rating}</span>
-                <span className="text-gray-500">({product.supplierInfo?.reviews || product.review_count})</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Manzil</span>
-              <span className="text-gray-900">{product.supplierInfo?.location || product.delivery_locations?.[0]}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Tashkil etilgan</span>
-              <span className="text-gray-900">{product.supplierInfo?.established || 'Noma\'lum'}</span>
-            </div>
-            <div>
-              <span className="text-gray-600 block mb-1">Ixtisosliklar</span>
-              <div className="flex flex-wrap gap-1">
-                {product.supplierInfo?.specialties?.map((specialty, index) => (
-                  <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
-                    {specialty}
-                  </span>
-                )) || (
-                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
-                    Qurilish materiallari
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Related Products */}
-        {product.relatedProducts && product.relatedProducts.length > 0 && (
-          <div className="bg-white px-4 py-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">O'xshash mahsulotlar</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {product.relatedProducts.map((relatedProduct) => (
-                <div 
-                  key={relatedProduct.id} 
-                  className="border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => navigate(`/buyer/product/${relatedProduct.id}`)}
-                >
-                  <div className="aspect-square bg-gray-100">
-                    <img
-                      src={relatedProduct.photos[0]}
-                      alt={`${relatedProduct.brand} ${relatedProduct.grade}`}
-                      className="w-full h-full object-cover"
-                    />
+        {/* Certificates */}
+        {product.certificates && product.certificates.length > 0 && (
+          <div className="bg-white px-4 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Sertifikatlar</h2>
+            <div className="space-y-2">
+              {product.certificates.map((cert, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-gray-600">description</span>
+                    <span className="text-sm text-gray-900">Sertifikat {index + 1}</span>
                   </div>
-                  <div className="p-3">
-                    <h3 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">{relatedProduct.brand} {relatedProduct.grade}</h3>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-gray-900">
-                        {new Intl.NumberFormat('uz-UZ', {
-                          style: 'currency',
-                          currency: relatedProduct.currency,
-                          minimumFractionDigits: 0
-                        }).format(relatedProduct.base_price)} / {relatedProduct.unit}
-                      </span>
-                    </div>
-                  </div>
+                  <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    Ko'rish
+                  </button>
                 </div>
               ))}
             </div>
           </div>
         )}
       </div>
-
 
       {/* Share Modal */}
       {showShareModal && (
@@ -571,8 +453,7 @@ const ProductDetail = () => {
                       <div className={`w-full h-full ${option.color} flex items-center justify-center`} style={{display: 'none'}}>
                         <span className="material-symbols-outlined text-white text-lg">
                           {option.name === 'Telegram' ? 'send' : 
-                           option.name === 'WhatsApp' ? 'chat' : 
-                           option.name === 'Facebook' ? 'facebook' : 'photo_camera'}
+                           option.name === 'WhatsApp' ? 'chat' : 'facebook'}
                         </span>
                       </div>
                     </div>
@@ -628,8 +509,39 @@ const ProductDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+            <div className="text-center">
+              <span className="material-symbols-outlined text-6xl text-red-500 mb-4">warning</span>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Mahsulotni o'chirish</h3>
+              <p className="text-gray-600 mb-6">
+                Bu mahsulotni o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  O'chirish
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <BottomNavigation />
     </div>
   )
 }
 
-export default ProductDetail
+export default SellerProductDetail

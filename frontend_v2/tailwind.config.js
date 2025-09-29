@@ -8,19 +8,19 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#5E5CE6',
-          dark: '#4A48D1',
-          light: '#7B79E8'
+          DEFAULT: '#6C4FFF',
+          dark: '#5A3FE6',
+          light: '#8A6FFF'
         },
         secondary: {
-          DEFAULT: '#1E90FF',
-          dark: '#0066CC',
-          light: '#4DA6FF'
+          DEFAULT: '#6C4FFF',
+          dark: '#5A3FE6',
+          light: '#8A6FFF'
         },
         accent: {
-          DEFAULT: '#007AFF',
-          dark: '#0056CC',
-          light: '#3399FF'
+          DEFAULT: '#6C4FFF',
+          dark: '#5A3FE6',
+          light: '#8A6FFF'
         },
         gray: {
           silver: '#8A8A8E',

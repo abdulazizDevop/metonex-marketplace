@@ -1,5 +1,5 @@
 // API utility functions
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env?.VITE_API_URL || 'http://localhost:8000/api';
 
 // Generic API request function
 const apiRequest = async (endpoint, options = {}) => {
@@ -67,6 +67,23 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
+  
+  // File upload request (FormData)
+  upload: (endpoint, formData, options = {}) => {
+    const uploadOptions = {
+      ...options,
+      method: 'POST',
+      body: formData,
+      headers: {
+        // Don't set Content-Type for FormData, let browser set it
+        ...options.headers,
+      },
+    };
+    // Remove Content-Type header for FormData
+    delete uploadOptions.headers['Content-Type'];
+    
+    return apiRequest(endpoint, uploadOptions);
+  },
 };
 
 // Specific API endpoints
@@ -148,6 +165,24 @@ export const endpoints = {
     detail: (id) => `/ratings/${id}/`,
     update: (id) => `/ratings/${id}/`,
     delete: (id) => `/ratings/${id}/`,
+  },
+  
+  // Documents
+  documents: {
+    list: '/v1/documents/',
+    create: '/v1/documents/',
+    detail: (id) => `/v1/documents/${id}/`,
+    update: (id) => `/v1/documents/${id}/`,
+    delete: (id) => `/v1/documents/${id}/`,
+    download: (id) => `/v1/documents/${id}/download/`,
+    verify: (id) => `/v1/documents/${id}/verify/`,
+    share: (id) => `/v1/documents/${id}/share/`,
+    myDocuments: '/v1/documents/my-documents/',
+    orderDocuments: (orderId) => `/v1/documents/order-documents/${orderId}/`,
+    companyDocuments: (companyId) => `/v1/documents/company-documents/${companyId}/`,
+    search: '/v1/documents/search/',
+    sharedWithMe: '/v1/documents/shared-with-me/',
+    sharedByMe: '/v1/documents/shared-by-me/',
   },
 };
 

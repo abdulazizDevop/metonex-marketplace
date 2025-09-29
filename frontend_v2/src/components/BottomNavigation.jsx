@@ -5,39 +5,39 @@ const BottomNavigation = () => {
   const location = useLocation()
 
   const navItems = [
-    { path: '/seller', icon: 'home', label: 'Home' },
-    { path: '/seller/my-requests', icon: 'article', label: 'Requests' },
-    { path: '/seller/add-product', icon: 'inventory_2', label: 'Products' },
-    { path: '/seller/profile-1', icon: 'person', label: 'Profile' }
+    { path: '/seller/dashboard', icon: 'home', label: 'Bosh sahifa' },
+    { path: '/seller/analytics', icon: 'analytics', label: 'Analitika' },
+    { path: '/seller/orders', icon: 'list_alt', label: 'Buyurtmalar' },
+    { path: '/seller/products', icon: 'grid_view', label: 'Mahsulotlar' },
+    { path: '/seller/profile', icon: 'person', label: 'Profil' }
   ]
 
   return (
-    <nav className="bg-white">
-      <div className="flex justify-around py-2">
+    <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200 z-50">
+      <nav className="flex justify-around py-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+              className={`flex flex-col items-center gap-1 transition-colors ${
                 isActive 
-                  ? 'text-primary' 
-                  : 'text-gray-500 hover:text-primary'
+                  ? 'text-[#6C4FFF]' 
+                  : 'text-gray-500 hover:text-[#6C4FFF]'
               }`}
             >
-              <span 
-                className="material-symbols-outlined text-3xl"
-                style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
-              >
+              <span className="material-symbols-outlined">
                 {item.icon}
               </span>
-              <span className="text-xs font-medium">{item.label}</span>
+              <span className={`text-xs ${isActive ? 'font-bold' : 'font-medium'}`}>
+                {item.label}
+              </span>
             </Link>
           )
         })}
-      </div>
-    </nav>
+      </nav>
+    </footer>
   )
 }
 
