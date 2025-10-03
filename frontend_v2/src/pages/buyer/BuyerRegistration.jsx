@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { authApi } from '../../utils/authApi'
 
 const BuyerRegistration = () => {
   const navigate = useNavigate()
@@ -79,33 +80,31 @@ const BuyerRegistration = () => {
 
     // Validation
     if (!formData.phone.trim() || !formData.password.trim() || !formData.companyName.trim() || !formData.innStir.trim()) {
-      setError('Please fill in all required fields')
+      setError('Barcha majburiy maydonlarni to\'ldiring')
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
+      setError('Parollar mos kelmaydi')
       return
     }
 
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long')
+      setError('Parol kamida 8 ta belgidan iborat bo\'lishi kerak')
       return
     }
 
     setIsLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Store registration data
+      // Prepare registration data
       const registrationData = {
-        user: {
-          phone: formData.phone,
-          password: formData.password,
-          role: 'buyer'
-        },
+        phone: formData.phone,
+        password: formData.password,
+        password_confirm: formData.confirmPassword,
+        role: 'buyer',
+        first_name: formData.companyName.split(' ')[0] || formData.companyName, // Company name dan first name olish
+        last_name: formData.companyName.split(' ').slice(1).join(' ') || '', // Qolgan qismi last name
         company: {
           name: formData.companyName,
           legal_address: formData.legalAddress,
@@ -122,16 +121,46 @@ const BuyerRegistration = () => {
             email: formData.accountantEmail
           },
           telegram_owner: formData.telegramOwner
-        },
-        completedAt: new Date().toISOString()
+        }
       }
       
-      localStorage.setItem('buyerRegistrationData', JSON.stringify(registrationData))
+      // Call registration API
+      const response = await authApi.register(registrationData)
+      
+      // Store user role
+      localStorage.setItem('userRole', 'buyer')
+      
+      // Store registration data locally
+      localStorage.setItem('buyerRegistrationData', JSON.stringify({
+        ...registrationData,
+        completedAt: new Date().toISOString()
+      }))
       
       // Navigate to buyer dashboard
       navigate('/buyer/home')
     } catch (err) {
-      setError('Registration failed. Please try again.')
+      console.error('Ro\'yxatdan o\'tishda xatolik:', err)
+      
+      // Handle specific error messages
+      if (err.message?.includes('400')) {
+        // Backend dan aniq xatolik ma'lumotini olish
+        try {
+          const errorResponse = await err.response?.json()
+          if (errorResponse?.phone) {
+            setError('Bu telefon raqami allaqachon ro\'yxatdan o\'tgan. Boshqa raqam yoki login qiling.')
+          } else {
+            setError('Ma\'lumotlar noto\'g\'ri. Qaytadan tekshiring')
+          }
+        } catch {
+          setError('Ma\'lumotlar noto\'g\'ri. Qaytadan tekshiring')
+        }
+      } else if (err.message?.includes('409')) {
+        setError('Bu telefon raqami allaqachon ro\'yxatdan o\'tgan')
+      } else if (err.message?.includes('Network')) {
+        setError('Internet aloqasi yo\'q. Qaytadan urinib ko\'ring')
+      } else {
+        setError('Ro\'yxatdan o\'tishda xatolik. Qaytadan urinib ko\'ring')
+      }
     } finally {
       setIsLoading(false)
     }

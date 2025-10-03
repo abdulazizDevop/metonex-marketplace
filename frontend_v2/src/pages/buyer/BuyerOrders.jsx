@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import userApi from '../../utils/userApi';
 
 const BuyerOrders = () => {
   const navigate = useNavigate();
@@ -17,275 +18,128 @@ const BuyerOrders = () => {
   const [activeSubTab, setActiveSubTab] = useState('all'); // 'all', 'active', 'pending', 'completed', 'cancelled'
   const [selectedCategory, setSelectedCategory] = useState('all'); // 'all', 'steel', 'concrete', 'electro'
   const [searchQuery, setSearchQuery] = useState('')
+  const [flowData, setFlowData] = useState({
+    fromConfirmation: false,
+    flowStep: null
+  })
+
+  // Dynamic data from backend
+  const [requestsData, setRequestsData] = useState([])
+  const [offersData, setOffersData] = useState([])
+  const [ordersData, setOrdersData] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  // Dynamic metadata from backend
+  const [categories, setCategories] = useState([])
+  const [orderStatuses, setOrderStatuses] = useState([])
+  const [rfqStatuses, setRFQStatuses] = useState([])
+  const [offerStatuses, setOfferStatuses] = useState([])
+
+  // Initialize flow data from location state
+  useEffect(() => {
+    if (location.state) {
+      setFlowData({
+        fromConfirmation: location.state.fromConfirmation || false,
+        flowStep: location.state.flowStep || null
+      });
+    }
+  }, [location.state]);
   
-  // Sample data for different tabs
-  const [requestsData] = useState([
-    {
-      id: 1,
-      title: 'Rebar Ø12, 20 tons',
-      status: 'active',
-      offersCount: 3,
-      lowestPrice: '$710/t',
-      fastestDelivery: '2 days',
-      hasNewOffers: true,
-      deadline: '2024-07-25',
-      category: 'steel',
-      quantity: '20 tons',
-      specifications: 'Grade 60, ASTM A615',
-      createdDate: '2024-01-10'
-    },
-    {
-      id: 2,
-      title: 'Concrete Mix C25, 50 m³',
-      status: 'pending',
-      offersCount: 1,
-      lowestPrice: '$85/m³',
-      fastestDelivery: '1 day',
-      hasNewOffers: false,
-      deadline: '2024-07-30',
-      category: 'concrete',
-      quantity: '50 m³',
-      specifications: 'C25/30, 28-day strength',
-      createdDate: '2024-01-12'
-    },
-    {
-      id: 3,
-      title: 'Steel Beams I-200, 10 pieces',
-      status: 'completed',
-      offersCount: 5,
-      lowestPrice: '$1,200/piece',
-      fastestDelivery: '3 days',
-      hasNewOffers: false,
-      deadline: '2024-01-15',
-      category: 'steel',
-      quantity: '10 pieces',
-      specifications: 'I-200, Grade S235',
-      createdDate: '2024-01-05',
-      completedDate: '2024-01-18'
-    },
-    {
-      id: 4,
-      title: 'Electrical Cables 3x2.5mm², 1000m',
-      status: 'active',
-      offersCount: 2,
-      lowestPrice: '$2.5/m',
-      fastestDelivery: '1 day',
-      hasNewOffers: true,
-      deadline: '2024-01-20',
-      category: 'electro',
-      quantity: '1000m',
-      specifications: 'Copper, PVC insulation',
-      createdDate: '2024-01-14'
-    },
-    {
-      id: 5,
-      title: 'Steel Rods Ø16, 5 tons',
-      status: 'expired',
-      offersCount: 0,
-      lowestPrice: '$700/t',
-      fastestDelivery: '3 days',
-      hasNewOffers: false,
-      deadline: '2024-01-10',
-      category: 'steel',
-      quantity: '5 tons',
-      specifications: 'Grade 60, ASTM A615',
-      createdDate: '2024-01-05'
-    },
-    {
-      id: 6,
-      title: 'Cement Bags 50kg, 200 pieces',
-      status: 'cancelled',
-      offersCount: 1,
-      lowestPrice: '$9/bag',
-      fastestDelivery: '2 days',
-      hasNewOffers: false,
-      deadline: '2024-01-12',
-      category: 'concrete',
-      quantity: '200 pieces',
-      specifications: 'Portland cement, 50kg bags',
-      createdDate: '2024-01-08'
+  // Load metadata from backend
+  const loadMetadata = async () => {
+    try {
+      const [categoriesRes, orderStatusesRes, rfqStatusesRes, offerStatusesRes] = await Promise.allSettled([
+        userApi.getCategories(),
+        userApi.getOrderStatuses(),
+        userApi.getRFQStatuses(), 
+        userApi.getOfferStatuses()
+      ])
+      
+
+      if (categoriesRes.status === 'fulfilled') {
+        const categoriesData = categoriesRes.value.results || categoriesRes.value || []
+        setCategories([
+          { id: 'all', name: 'Barchasi', icon: 'apps' },
+          ...categoriesData.map(cat => ({
+            id: cat.slug || cat.id,
+            name: cat.name,
+            icon: cat.icon || 'category'
+          }))
+        ])
+      } 
+
+      if (orderStatusesRes.status === 'fulfilled') {
+        setOrderStatuses(orderStatusesRes.value)
+      }
+
+      if (rfqStatusesRes.status === 'fulfilled') {
+        setRFQStatuses(rfqStatusesRes.value)
+      }
+
+      if (offerStatusesRes.status === 'fulfilled') {
+        setOfferStatuses(offerStatusesRes.value)
+      }
+    } catch (error) {
+      console.error('Metadata yuklashda xatolik:', error)
     }
-  ])
+  }
 
-  const [offersData] = useState([
-    {
-      id: 1,
-      requestId: 1,
-      requestTitle: 'Rebar Ø12, 20 tons',
-      supplier: 'SteelCorp Ltd',
-      price: '$710/t',
-      totalAmount: '$14,200',
-      deliveryDate: '2024-01-25',
-      status: 'pending',
-      category: 'steel',
-      message: 'High quality Grade 60 steel bars available',
-      createdDate: '2024-01-15'
-    },
-    {
-      id: 2,
-      requestId: 1,
-      requestTitle: 'Rebar Ø12, 20 tons',
-      supplier: 'MetalWorks Inc',
-      price: '$720/t',
-      totalAmount: '$14,400',
-      deliveryDate: '2024-01-27',
-      status: 'accepted',
-      category: 'steel',
-      message: 'Best price with fast delivery',
-      createdDate: '2024-01-16'
-    },
-    {
-      id: 3,
-      requestId: 4,
-      requestTitle: 'Electrical Cables 3x2.5mm², 1000m',
-      supplier: 'ElectroSupply Co',
-      price: '$2.5/m',
-      totalAmount: '$2,500',
-      deliveryDate: '2024-01-22',
-      status: 'pending',
-      category: 'electro',
-      message: 'Premium quality copper cables',
-      createdDate: '2024-01-17'
-    },
-    {
-      id: 4,
-      requestId: 1,
-      requestTitle: 'Rebar Ø12, 20 tons',
-      supplier: 'SteelMaster Ltd',
-      price: '$750/t',
-      totalAmount: '$15,000',
-      deliveryDate: '2024-01-30',
-      status: 'rejected',
-      category: 'steel',
-      message: 'Higher quality steel available',
-      createdDate: '2024-01-18'
-    },
-    {
-      id: 5,
-      requestId: 2,
-      requestTitle: 'Concrete Mix C25, 50 m³',
-      supplier: 'ConcretePro Ltd',
-      price: '$90/m³',
-      totalAmount: '$4,500',
-      deliveryDate: '2024-01-25',
-      status: 'counter_offered',
-      category: 'concrete',
-      message: 'Can offer better price for larger quantity',
-      createdDate: '2024-01-19'
+  // Load data from backend
+  const loadData = async () => {
+    setLoading(true)
+    try {
+      // Load data based on active tab
+      if (activeMainTab === 'requests') {
+        const response = await userApi.getRFQs()
+        setRequestsData(response.results || response || [])
+      } else if (activeMainTab === 'offers') {
+        const response = await userApi.getOffers()
+        setOffersData(response.results || response || [])
+      } else if (activeMainTab === 'orders') {
+        const response = await userApi.getOrders()
+        setOrdersData(response.results || response || [])
+      }
+    } catch (error) {
+      console.error('Ma\'lumotlarni yuklashda xatolik:', error)
+    } finally {
+      setLoading(false)
     }
-  ])
+  }
 
-  const [ordersData] = useState([
-    {
-      id: 1,
-      requestId: 3,
-      requestTitle: 'Steel Beams I-200, 10 pieces',
-      supplier: 'SteelCorp Ltd',
-      totalAmount: '$12,000',
-      status: 'delivered',
-      category: 'steel',
-      orderDate: '2024-01-18',
-      deliveryDate: '2024-01-20',
-      paymentStatus: 'paid',
-      trackingNumber: 'TRK001234'
-    },
-    {
-      id: 2,
-      requestId: 2,
-      requestTitle: 'Concrete Mix C25, 50 m³',
-      supplier: 'ConcretePlus Ltd',
-      totalAmount: '$4,250',
-      status: 'in_transit',
-      category: 'concrete',
-      orderDate: '2024-01-19',
-      deliveryDate: '2024-01-22',
-      paymentStatus: 'paid',
-      trackingNumber: 'TRK001235'
-    },
-    {
-      id: 3,
-      requestId: 4,
-      requestTitle: 'Electrical Cables 3x2.5mm², 1000m',
-      supplier: 'ElectroSupply Co',
-      totalAmount: '$2,500',
-      status: 'in_preparation',
-      category: 'electro',
-      orderDate: '2024-01-20',
-      deliveryDate: '2024-01-25',
-      paymentStatus: 'pending',
-      trackingNumber: 'TRK001236'
-    },
-    {
-      id: 4,
-      requestId: 5,
-      requestTitle: 'Steel Rods Ø16, 5 tons',
-      supplier: 'MetalWorks Inc',
-      totalAmount: '$3,500',
-      status: 'awaiting_payment',
-      category: 'steel',
-      orderDate: '2024-01-21',
-      deliveryDate: '2024-01-28',
-      paymentStatus: 'pending',
-      trackingNumber: 'TRK001237'
-    },
-    {
-      id: 5,
-      requestId: 6,
-      requestTitle: 'Cement Bags 50kg, 200 pieces',
-      supplier: 'CementPro Ltd',
-      totalAmount: '$1,800',
-      status: 'completed',
-      category: 'concrete',
-      orderDate: '2024-01-15',
-      deliveryDate: '2024-01-18',
-      paymentStatus: 'paid',
-      trackingNumber: 'TRK001238'
-    }
-  ])
+  // Load metadata on component mount
+  useEffect(() => {
+    loadMetadata()
+  }, [])
 
-  // Categories for filtering
-  const categories = [
-    { id: 'all', name: 'Barchasi', icon: 'apps' },
-    { id: 'steel', name: 'Steel', icon: 'build' },
-    { id: 'concrete', name: 'Concrete', icon: 'construction' },
-    { id: 'electro', name: 'Electro', icon: 'electrical_services' }
-  ]
+  // Load data when tab changes
+  useEffect(() => {
+    loadData()
+  }, [activeMainTab])
 
-  // Sub-tabs for each main tab (aligned with backend statuses)
+
+
+  // Sub-tabs for each main tab (dynamic from backend)
   const getSubTabs = () => {
+    const allTab = { id: 'all', name: 'Barchasi' }
+    
     switch (activeMainTab) {
       case 'requests':
-        return [
-          { id: 'all', name: 'Barchasi' },
-          { id: 'active', name: 'Faol' },
-          { id: 'completed', name: 'Yakunlangan' },
-          { id: 'cancelled', name: 'Bekor qilingan' },
-          { id: 'expired', name: 'Muddati tugagan' }
-        ]
+        return [allTab, ...rfqStatuses.map(status => ({
+          id: status.value || status.id,
+          name: status.label || status.name
+        }))]
       case 'offers':
-        return [
-          { id: 'all', name: 'Barchasi' },
-          { id: 'pending', name: 'Kutilmoqda' },
-          { id: 'accepted', name: 'Qabul qilingan' },
-          { id: 'rejected', name: 'Rad etilgan' },
-          { id: 'counter_offered', name: 'Qarshi taklif' }
-        ]
+        return [allTab, ...offerStatuses.map(status => ({
+          id: status.value || status.id,
+          name: status.label || status.name
+        }))]
       case 'orders':
-        return [
-          { id: 'all', name: 'Barchasi' },
-          { id: 'created', name: 'Yaratilgan' },
-          { id: 'contract_generated', name: 'Shartnoma yaratilgan' },
-          { id: 'awaiting_payment', name: 'To\'lov kutilmoqda' },
-          { id: 'payment_received', name: 'To\'lov qabul qilingan' },
-          { id: 'in_preparation', name: 'Tayyorlanmoqda' },
-          { id: 'in_transit', name: 'Yo\'lda' },
-          { id: 'delivered', name: 'Yetkazib berilgan' },
-          { id: 'confirmed', name: 'Tasdiqlangan' },
-          { id: 'completed', name: 'Yakunlangan' },
-          { id: 'cancelled', name: 'Bekor qilingan' }
-        ]
+        return [allTab, ...orderStatuses.map(status => ({
+          id: status.value || status.id,
+          name: status.label || status.name
+        }))]
       default:
-        return []
+        return [allTab]
     }
   }
 
@@ -537,7 +391,12 @@ const BuyerOrders = () => {
 
         {/* Content */}
         <div className="p-4">
-          {filteredData.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6C4FFF] mx-auto mb-4"></div>
+              <p className="text-gray-500">Ma'lumotlar yuklanmoqda...</p>
+            </div>
+          ) : filteredData.length === 0 ? (
             <div className="text-center py-12">
               <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">inbox</span>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Hech narsa topilmadi</h3>
@@ -577,8 +436,14 @@ const BuyerOrders = () => {
                           <span>Muddat: {item.deadline}</span>
                         </div>
                         <button 
-                          onClick={() => navigate(`/buyer/rfq/${item.id}?returnTab=requests`)}
-                          className="text-blue-600 text-xs font-medium hover:text-blue-800"
+                          onClick={() => navigate(`/buyer/rfq/${item.id}`, { 
+                            state: { 
+                              returnTab: 'requests',
+                              flowStep: 'rfq-detail',
+                              returnPath: '/buyer/orders?tab=requests'
+                            } 
+                          })}
+                          className="text-[#6C4FFF] text-xs font-medium hover:text-[#5A3FE6]"
                         >
                           Ko'rish
                         </button>
@@ -621,7 +486,13 @@ const BuyerOrders = () => {
                             </>
                           )}
                           <button 
-                            onClick={() => navigate(`/buyer/offer/${item.id}?returnTab=offers`)}
+                            onClick={() => navigate(`/buyer/offer/${item.id}`, { 
+                              state: { 
+                                returnTab: 'offers',
+                                flowStep: 'offer-detail',
+                                returnPath: '/buyer/orders?tab=offers'
+                              } 
+                            })}
                             className="text-[#6C4FFF] text-xs font-medium hover:text-[#5A3FE6]"
                           >
                             Ko'rish
@@ -661,7 +532,13 @@ const BuyerOrders = () => {
                           <span>Kuzatish: {item.trackingNumber}</span>
                         </div>
                         <button 
-                          onClick={() => navigate(`/buyer/order/${item.id}?returnTab=orders`)}
+                          onClick={() => navigate(`/buyer/order/${item.id}`, { 
+                            state: { 
+                              returnTab: 'orders',
+                              flowStep: 'order-detail',
+                              returnPath: '/buyer/orders?tab=orders'
+                            } 
+                          })}
                           className="text-[#6C4FFF] text-xs font-medium hover:text-[#5A3FE6]"
                         >
                           Batafsil

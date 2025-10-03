@@ -1,32 +1,67 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import userApi from '../../utils/userApi'
 
 const CategorySelection = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [selectedCategories, setSelectedCategories] = useState([])
+  const [flowData, setFlowData] = useState({
+    fromHome: false,
+    fromOrderMethod: false,
+    method: null,
+    flowStep: null,
+    returnPath: null
+  })
 
-  const categories = [
-    {
-      id: 'metal',
-      label: 'Metal',
-      icon: 'construction'
-    },
-    {
-      id: 'cement',
-      label: 'Cement',
-      icon: 'foundation'
-    },
-    {
-      id: 'concrete',
-      label: 'Concrete',
-      icon: 'blender'
-    },
-    {
-      id: 'paint',
-      label: 'Paint',
-      icon: 'format_paint'
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  // Load categories from backend
+  const loadCategories = async () => {
+    setLoading(true)
+    try {
+      const response = await userApi.getCategories()
+      const categoriesData = response.results || response || []
+      
+      // Transform backend data to match component format
+      const transformedCategories = categoriesData.map(cat => ({
+        id: cat.slug || cat.id,
+        label: cat.name,
+        icon: cat.icon || 'category' // Default icon if not provided
+      }))
+      
+      setCategories(transformedCategories)
+    } catch (error) {
+      console.error('Kategoriyalarni yuklashda xatolik:', error)
+      // Fallback categories
+      setCategories([
+        { id: 'metal', label: 'Metal', icon: 'construction' },
+        { id: 'cement', label: 'Cement', icon: 'foundation' },
+        { id: 'concrete', label: 'Concrete', icon: 'blender' },
+        { id: 'paint', label: 'Paint', icon: 'format_paint' }
+      ])
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  useEffect(() => {
+    loadCategories()
+  }, [])
+
+  // Initialize flow data from location state
+  useEffect(() => {
+    if (location.state) {
+      setFlowData({
+        fromHome: location.state.fromHome || false,
+        fromOrderMethod: location.state.fromOrderMethod || false,
+        method: location.state.method || null,
+        flowStep: location.state.flowStep || null,
+        returnPath: location.state.returnPath || null
+      });
+    }
+  }, [location.state]);
 
   const handleCategorySelect = (category) => {
     setSelectedCategories(prev => {
@@ -44,13 +79,24 @@ const CategorySelection = () => {
       return
     }
     console.log(`Selected categories: ${selectedCategories.join(', ')}`)
+    
+    // Navigate to products with flow context
     navigate('/buyer/products', { 
-      state: { selectedCategories } 
+      state: { 
+        selectedCategories,
+        flowData,
+        flowStep: 'product-browsing',
+        returnPath: '/buyer/category-selection'
+      } 
     })
   }
 
   const handleBack = () => {
-    navigate(-1)
+    if (flowData.returnPath) {
+      navigate(flowData.returnPath)
+    } else {
+      navigate('/buyer/home')
+    }
   }
 
   return (
@@ -71,7 +117,13 @@ const CategorySelection = () => {
 
       {/* Main Content */}
       <main className="flex-1 px-4 py-6">
-        <div className="grid grid-cols-2 gap-4">
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6C4FFF] mx-auto mb-4"></div>
+            <p className="text-gray-500">Kategoriyalar yuklanmoqda...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
           {categories.map((category) => (
             <div 
               key={category.id}
@@ -93,7 +145,8 @@ const CategorySelection = () => {
               <span className="text-base font-semibold text-gray-900">{category.label}</span>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </main>
 
       {/* Footer */}

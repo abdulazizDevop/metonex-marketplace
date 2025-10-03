@@ -50,19 +50,48 @@ const SellerOfferDetail = () => {
     ]
   });
 
+  const [flowData, setFlowData] = useState({
+    flowStep: null,
+    returnPath: null
+  });
+
+  // Initialize flow data from location state
+  React.useEffect(() => {
+    if (location.state) {
+      setFlowData({
+        flowStep: location.state.flowStep || null,
+        returnPath: location.state.returnPath || `/seller/orders?tab=${returnTab}`
+      });
+    }
+  }, [location.state, returnTab]);
+
   const handleBack = () => {
-    navigate(`/seller/orders?tab=${returnTab}`);
+    if (flowData.returnPath) {
+      navigate(flowData.returnPath);
+    } else {
+      navigate(`/seller/orders?tab=${returnTab}`);
+    }
   };
 
   const handleEditOffer = () => {
-    navigate(`/seller/edit-offer/${id}`, {
-      state: { returnTab, offerData }
+    // Navigate to offer edit page (we'll create this)
+    navigate(`/seller/offer-details/${id}/edit`, {
+      state: { 
+        returnTab, 
+        offerData,
+        flowStep: 'offer-edit',
+        returnPath: `/seller/offer-details/${id}`
+      }
     });
   };
 
   const handleViewRequest = () => {
     navigate(`/seller/request-details/${offerData.requestId}`, {
-      state: { returnTab }
+      state: { 
+        returnTab,
+        flowStep: 'request-detail',
+        returnPath: `/seller/offer-details/${id}`
+      }
     });
   };
 

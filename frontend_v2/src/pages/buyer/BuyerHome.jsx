@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import userApi from '../../utils/userApi'
 
 const BuyerHome = () => {
   const navigate = useNavigate()
@@ -7,40 +8,67 @@ const BuyerHome = () => {
   const [selectedMethod, setSelectedMethod] = useState(null)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   
-  // Mock data - in real app this would come from API
-  const [hasOrders] = useState(true) // Change to true to see screen 2
-  const [activeOrdersCount] = useState(5)
-  
-  // Mock offers data
-  const [newOffers] = useState([
-    {
-      id: 1,
-      title: 'Rebar Ø12, 20 tons',
-      status: '3 offers received',
-      lowestPrice: '$710/t',
-      fastestDelivery: '2 days',
-      hasNewOffers: true
-    },
-    {
-      id: 2,
-      title: 'Concrete Mix C25, 50 tons',
-      status: '2 offers received',
-      lowestPrice: '$45/t',
-      fastestDelivery: '1 day',
-      hasNewOffers: true
-    },
-    {
-      id: 3,
-      title: 'Steel Beams I-200, 10 tons',
-      status: '1 offer received',
-      lowestPrice: '$850/t',
-      fastestDelivery: '3 days',
-      hasNewOffers: false
+  // Dynamic data from backend
+  const [hasOrders, setHasOrders] = useState(true)
+  const [activeOrdersCount, setActiveOrdersCount] = useState(0)
+  const [newOffers, setNewOffers] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  // Load home page data
+  const loadHomeData = async () => {
+    setLoading(true)
+    try {
+      // Load orders and RFQs in parallel
+      const [ordersRes, rfqsRes] = await Promise.allSettled([
+        userApi.getOrders(),
+        userApi.getRFQs()
+      ])
+
+      // Process orders
+      if (ordersRes.status === 'fulfilled') {
+        const orders = ordersRes.value || []
+        setHasOrders(orders.length > 0)
+        setActiveOrdersCount(orders.filter(order => 
+          ['created', 'awaiting_payment', 'payment_confirmed', 'in_preparation', 'in_transit'].includes(order.status)
+        ).length)
+      }
+
+      // Process RFQs to get offers data
+      if (rfqsRes.status === 'fulfilled') {
+        const rfqs = rfqsRes.value || []
+        
+        // Transform RFQs to offers format for display
+        const offersData = rfqs.map(rfq => ({
+          id: rfq.id,
+          title: `${rfq.product_name || 'Product'}, ${rfq.quantity} ${rfq.unit || 'pcs'}`,
+          status: `${rfq.offers_count || 0} offers received`,
+          lowestPrice: rfq.lowest_price ? `$${rfq.lowest_price}/${rfq.unit || 'pcs'}` : 'No offers',
+          fastestDelivery: rfq.fastest_delivery ? `${rfq.fastest_delivery} days` : 'No offers',
+          hasNewOffers: rfq.has_new_offers || false
+        }))
+        
+        setNewOffers(offersData.slice(0, 3)) // Show only first 3
+      }
+
+    } catch (error) {
+      console.error('Home ma\'lumotlarini yuklashda xatolik:', error)
+    } finally {
+      setLoading(false)
     }
-  ])
+  }
+
+  useEffect(() => {
+    loadHomeData()
+  }, [])
 
   const handleGoToProducts = () => {
-    navigate('/buyer/category-selection')
+    navigate('/buyer/category-selection', { 
+      state: { 
+        fromHome: true,
+        flowStep: 'product-discovery',
+        returnPath: '/buyer/home'
+      } 
+    })
   }
 
   const handleCreateRequest = () => {
@@ -85,7 +113,14 @@ const BuyerHome = () => {
   const handleNext = () => {
     if (selectedMethod) {
       if (selectedMethod.id === 'quick-order') {
-        navigate('/buyer/category-selection')
+        navigate('/buyer/category-selection', { 
+          state: { 
+            fromOrderMethod: true,
+            method: selectedMethod,
+            flowStep: 'quick-order-flow',
+            returnPath: '/buyer/home'
+          } 
+        })
       } else {
         // Show temporary message for other methods
         setShowSuccessMessage(true)
@@ -110,6 +145,16 @@ const BuyerHome = () => {
   const handleRemindSuppliers = (offerId) => {
     console.log('Remind suppliers for offer:', offerId)
     // In real app, this would send reminder notifications
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6C4FFF] mb-4"></div>
+        <p className="text-gray-500">Ma'lumotlar yuklanmoqda...</p>
+      </div>
+    )
   }
 
   // Screen 1: No orders yet

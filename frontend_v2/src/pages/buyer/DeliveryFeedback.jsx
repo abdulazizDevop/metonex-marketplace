@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 const DeliveryFeedback = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [feedback, setFeedback] = useState({
     overallRating: 0,
     productQuality: 0,
@@ -14,8 +15,26 @@ const DeliveryFeedback = () => {
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [orderData, setOrderData] = useState(null)
+  const [flowData, setFlowData] = useState({
+    fromDelivery: false,
+    fromCongratulations: false,
+    returnPath: null
+  })
 
-  const orderDetails = {
+  // Initialize order data and flow context
+  useEffect(() => {
+    if (location.state) {
+      setOrderData(location.state.orderData || null)
+      setFlowData({
+        fromDelivery: location.state.fromDelivery || false,
+        fromCongratulations: location.state.fromCongratulations || false,
+        returnPath: location.state.returnPath || null
+      })
+    }
+  }, [location.state])
+
+  const orderDetails = orderData || {
     orderId: 'ORD-2024-001',
     product: 'Concrete Mix M300',
     supplier: 'Metro Construction Supplies',
@@ -53,12 +72,39 @@ const DeliveryFeedback = () => {
     setTimeout(() => {
       console.log('Feedback submitted:', feedback)
       setIsSubmitting(false)
-      navigate('/buyer/dashboard-1')
+      
+      // Navigate based on flow context
+      if (flowData.fromCongratulations) {
+        navigate('/buyer/home', {
+          state: {
+            message: 'Sharh muvaffaqiyatli qoldirildi!',
+            type: 'success'
+          }
+        })
+      } else if (flowData.returnPath) {
+        navigate(flowData.returnPath, {
+          state: {
+            message: 'Sharh muvaffaqiyatli qoldirildi!',
+            type: 'success'
+          }
+        })
+      } else {
+        navigate('/buyer/home', {
+          state: {
+            message: 'Sharh muvaffaqiyatli qoldirildi!',
+            type: 'success'
+          }
+        })
+      }
     }, 2000)
   }
 
   const handleBack = () => {
-    navigate(-1)
+    if (flowData.returnPath) {
+      navigate(flowData.returnPath)
+    } else {
+      navigate(-1)
+    }
   }
 
   const isFormValid = () => {

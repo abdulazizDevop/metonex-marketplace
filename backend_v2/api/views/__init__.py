@@ -29,6 +29,8 @@ from .company_views import (
     CompanyUpdateView
 )
 
+from .company_member_views import CompanyMemberViewSet
+
 from .catalog_views import (
     UnitViewSet,
     CategoryViewSet,
@@ -132,6 +134,9 @@ __all__ = [
     'CompanyListView',
     'CompanyCreateView',
     'CompanyUpdateView',
+    
+    # Company member views
+    'CompanyMemberViewSet',
     
     # Catalog views
     'UnitViewSet',

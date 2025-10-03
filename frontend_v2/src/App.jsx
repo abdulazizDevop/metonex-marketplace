@@ -21,7 +21,15 @@ import AvailableProducts from './pages/buyer/AvailableProducts'
 import CategorySelection from './pages/buyer/CategorySelection'
 import RFQForm from './pages/buyer/RFQForm'
 import RequestSentConfirmation from './pages/buyer/RequestSentConfirmation'
-
+import UploadPaymentProof from './pages/buyer/UploadPaymentProof'
+import FollowingPaymentsSuccess from './pages/buyer/FollowingPaymentsSuccess'
+import FirstOrderCongratulations from './pages/buyer/FirstOrderCongratulations'
+import BuyerOrderTracking from './pages/buyer/BuyerOrderTracking'
+import ContractSent from './pages/buyer/ContractSent'
+import ContractView from './pages/buyer/ContractView'
+import SupplierProfileView from './pages/buyer/SupplierProfileView'
+import ConfirmDelivery from './pages/buyer/ConfirmDelivery'
+import DeliveryFeedback from './pages/buyer/DeliveryFeedback'
 
 // Seller Pages
 import SellerDashboard from './pages/seller/SellerDashboard'
@@ -29,6 +37,8 @@ import SellerOrders from './pages/seller/SellerOrders'
 import SellerRequestDetail from './pages/seller/SellerRequestDetail'
 import SellerOfferDetail from './pages/seller/SellerOfferDetail'
 import SellerOrderDetail from './pages/seller/SellerOrderDetail'
+import SellerOrderTracking from './pages/seller/SellerOrderTracking'
+import SellerDocumentUpload from './pages/seller/SellerDocumentUpload'
 import SellerProfile from './pages/seller/SellerProfile'
 import SellerNotifications from './pages/seller/SellerNotifications'
 import SellerAnalytics from './pages/seller/SellerAnalytics'
@@ -36,49 +46,35 @@ import SellerCompany from './pages/seller/SellerCompany'
 import SellerEditProfile from './pages/seller/SellerEditProfile'
 import SellerSettingsPanel from './pages/seller/SellerSettingsPanel'
 import SellerRegistration from './pages/seller/SellerRegistration'
-import SupplierAddProduct from './pages/seller/SupplierAddProduct'
+import SellerAddProduct from './pages/seller/SellerAddProduct'
 import SellerProducts from './pages/seller/SellerProducts'
 import SellerProductDetail from './pages/seller/SellerProductDetail'
-import SupplierMyRequests from './pages/seller/SupplierMyRequests'
-import SupplierAcceptance from './pages/seller/SupplierAcceptance'
-import ConfirmDelivery from './pages/buyer/ConfirmDelivery'
 import CounterOffer from './pages/seller/CounterOffer'
-import FullOrderDetails from './pages/seller/FullOrderDetails'
-import OfferAcceptancePayment from './pages/seller/OfferAcceptancePayment'
+import SellerWaitingForBuyerPayment from './pages/seller/SellerWaitingForBuyerPayment'
+import SellerWaitingForBuyerConfirmation from './pages/seller/SellerWaitingForBuyerConfirmation'
+import SellerDeliveryConfirmedEscrowRelease from './pages/seller/SellerDeliveryConfirmedEscrowRelease'
+import SellerEscrowPayoutCompleted from './pages/seller/SellerEscrowPayoutCompleted'
+import SellerDeliveryTracking from './pages/seller/SellerDeliveryTracking'
+import SellerDeliveryProcess from './pages/seller/SellerDeliveryProcess'
+import SellerDeclineRequestWithReason from './pages/seller/SellerDeclineRequestWithReason'
+import SellerSkuRevenueDetails from './pages/seller/SellerSkuRevenueDetails'
+import SellerProductCertificateUpload from './pages/seller/SellerProductCertificateUpload'
+import OfferDeclineConfirmation from './pages/seller/OfferDeclineConfirmation'
 
 // Common Pages
 import PaymentConfirmed from './pages/common/PaymentConfirmed'
-import DeliveryFeedback from './pages/buyer/DeliveryFeedback'
-import UploadPaymentProof from './pages/common/UploadPaymentProof'
-import FirstPaymentSuccess from './pages/common/FirstPaymentSuccess'
-import FollowingPaymentsSuccess from './pages/common/FollowingPaymentsSuccess'
-import FirstOrderCongratulations from './pages/common/FirstOrderCongratulations'
-import PreparingShipment1 from './pages/common/PreparingShipment1'
-import PreparingShipment2 from './pages/common/PreparingShipment2'
+// import FirstPaymentSuccess from './pages/common/FirstPaymentSuccess'
 import DocumentGenerationProgress from './pages/common/DocumentGenerationProgress'
-import DocumentsReadyForPayment from './pages/common/DocumentsReadyForPayment'
+// import DocumentsReadyForPayment from './pages/common/DocumentsReadyForPayment'
 import PdfDocumentPreview from './pages/common/PdfDocumentPreview'
 import DigitalTtnModal from './pages/common/DigitalTtnModal'
-import ContractGenerationStart from './pages/common/ContractGenerationStart'
-import UploadInvoice from './pages/common/UploadInvoice'
-import ManageProductListings from './pages/common/ManageProductListings'
-import WaitingForBuyerPayment from './pages/common/WaitingForBuyerPayment'
-import WaitingForBuyerConfirmation from './pages/common/WaitingForBuyerConfirmation'
-import DeliveryTrackingSupplier from './pages/common/DeliveryTrackingSupplier'
-import DeliveryConfirmedEscrowRelease from './pages/common/DeliveryConfirmedEscrowRelease'
-import PayoutInProgress from './pages/common/PayoutInProgress'
-import EscrowPayoutCompleted from './pages/common/EscrowPayoutCompleted'
-import ManageTeamMembers from './pages/common/ManageTeamMembers'
+// import ContractGenerationStart from './pages/common/ContractGenerationStart'
+// import PayoutInProgress from './pages/common/PayoutInProgress'
 import AllMetricsDynamicView from './pages/common/AllMetricsDynamicView'
-import AnonymizedSupplierProfile from './pages/common/AnonymizedSupplierProfile'
-import AiSupplierMatcher from './pages/common/AiSupplierMatcher'
-import AiConsultantChat from './pages/common/AiConsultantChat'
-import DeclineRequestWithReason from './pages/common/DeclineRequestWithReason'
-import SendToAlternativeSupplier from './pages/common/SendToAlternativeSupplier'
-import SkuRevenueDetails from './pages/common/SkuRevenueDetails'
-import ReviewFilterSort from './pages/common/ReviewFilterSort'
-import DashboardSettingsPanel from './pages/common/DashboardSettingsPanel'
-import SupplierDeliveryProcess from './pages/common/SupplierDeliveryProcess'
+// import AiSupplierMatcher from './pages/common/AiSupplierMatcher'
+// import AiConsultantChat from './pages/common/AiConsultantChat'
+// import SendToAlternativeSupplier from './pages/common/SendToAlternativeSupplier'
+// import DashboardSettingsPanel from './pages/common/DashboardSettingsPanel'
 
 // Onboarding
 import OnboardingWelcome1 from './pages/onboarding/OnboardingWelcome1'
@@ -90,12 +86,6 @@ import BothRegistration from './pages/common/BothRegistration'
 
 // Auth
 import Login from './pages/auth/Login'
-
-// Product
-import ProductCertificateUpload from './pages/product/ProductCertificateUpload'
-
-// Offer
-import OfferDeclineConfirmation from './pages/offer/OfferDeclineConfirmation'
 
 function App() {
   return (
@@ -125,26 +115,61 @@ function App() {
             <Route path="/buyer/product/:id" element={
               <BuyerLayout>
                 <ProductDetail />
-              </BuyerLayout>
-            } />
-            <Route path="/buyer/rfq/:id" element={
-              <BuyerLayout>
-                <RFQDetail />
-              </BuyerLayout>
-            } />
-            <Route path="/buyer/offer/:id" element={
-              <BuyerLayout>
-                <OfferDetail />
-              </BuyerLayout>
-            } />
-            <Route path="/buyer/order/:id" element={
-              <BuyerLayout>
-                <OrderDetail />
-              </BuyerLayout>
-            } />
+        </BuyerLayout>
+        } />
+        <Route path="/buyer/rfq/:id" element={
+        <BuyerLayout>
+          <RFQDetail />
+        </BuyerLayout>
+        } />
+        <Route path="/buyer/offer/:id" element={
+          <BuyerLayout>
+            <OfferDetail />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/order/:id" element={
+          <BuyerLayout>
+            <OrderDetail />
+          </BuyerLayout>
+        } />
         <Route path="/buyer/orders" element={
           <BuyerLayout>
             <BuyerOrders />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/upload-payment-proof" element={
+          <BuyerLayout>
+            <UploadPaymentProof />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/following-payments-success" element={
+          <BuyerLayout>
+            <FollowingPaymentsSuccess />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/first-order-congratulations" element={
+          <BuyerLayout>
+            <FirstOrderCongratulations />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/order-tracking/:id" element={
+          <BuyerLayout>
+            <BuyerOrderTracking />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/contract-sent" element={
+          <BuyerLayout>
+            <ContractSent />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/contract-view" element={
+          <BuyerLayout>
+            <ContractView />
+          </BuyerLayout>
+        } />
+        <Route path="/buyer/supplier-profile/:id" element={
+          <BuyerLayout>
+            <SupplierProfileView />
           </BuyerLayout>
         } />
         <Route path="/buyer/request-confirmed" element={
@@ -224,6 +249,16 @@ function App() {
             <SellerOrderDetail />
           </Layout>
         } />
+        <Route path="/seller/order-tracking/:id" element={
+          <Layout>
+            <SellerOrderTracking />
+          </Layout>
+        } />
+        <Route path="/seller/upload-document/:id" element={
+          <Layout>
+            <SellerDocumentUpload />
+          </Layout>
+        } />
         <Route path="/seller/products" element={
           <Layout>
             <SellerProducts />
@@ -231,7 +266,7 @@ function App() {
         } />
         <Route path="/seller/products/add" element={
           <Layout>
-            <SupplierAddProduct />
+            <SellerAddProduct />
           </Layout>
         } />
         <Route path="/seller/product/:id" element={
@@ -269,7 +304,56 @@ function App() {
             <SellerRegistration />
           </Layout>
         } />
-
+        <Route path="/seller/waiting-for-buyer-payment" element={
+          <Layout>
+            <SellerWaitingForBuyerPayment />
+          </Layout>
+        } />
+        <Route path="/seller/waiting-for-buyer-confirmation" element={
+          <Layout>
+            <SellerWaitingForBuyerConfirmation />
+          </Layout>
+        } />
+        <Route path="/seller/delivery-confirmed-escrow-release" element={
+          <Layout>
+            <SellerDeliveryConfirmedEscrowRelease />
+          </Layout>
+        } />
+        <Route path="/seller/escrow-payout-completed" element={
+          <Layout>
+            <SellerEscrowPayoutCompleted />
+          </Layout>
+        } />
+        <Route path="/seller/delivery-tracking/:id" element={
+          <Layout>
+            <SellerDeliveryTracking />
+          </Layout>
+        } />
+        <Route path="/seller/delivery-process/:id" element={
+          <Layout>
+            <SellerDeliveryProcess />
+          </Layout>
+        } />
+        <Route path="/seller/decline-request/:id" element={
+          <Layout>
+            <SellerDeclineRequestWithReason />
+          </Layout>
+        } />
+        <Route path="/seller/sku-revenue-details" element={
+          <Layout>
+            <SellerSkuRevenueDetails />
+          </Layout>
+        } />
+        <Route path="/seller/product-certificate-upload/:id" element={
+          <Layout>
+            <SellerProductCertificateUpload />
+          </Layout>
+        } />
+        <Route path="/offer/decline-confirmation/:id" element={
+          <Layout>
+            <OfferDeclineConfirmation />
+          </Layout>
+        } />
         {/* Both Role Routes */}
         <Route path="/both/registration" element={
           <Layout>
@@ -283,70 +367,24 @@ function App() {
             <PaymentConfirmed />
           </Layout>
         } />
-        <Route path="/offer-acceptance-payment" element={
-          <Layout>
-            <OfferAcceptancePayment />
-          </Layout>
-        } />
-        <Route path="/counter-offer" element={
-          <Layout>
-            <CounterOffer />
-          </Layout>
-        } />
         <Route path="/buyer/confirm-delivery" element={
-          <Layout>
+          <BuyerLayout>
             <ConfirmDelivery />
-          </Layout>
+          </BuyerLayout>
         } />
         <Route path="/buyer/delivery-feedback" element={
-          <Layout>
+          <BuyerLayout>
             <DeliveryFeedback />
-          </Layout>
+          </BuyerLayout>
         } />
-        <Route path="/upload-payment-proof" element={
-          <Layout>
-            <UploadPaymentProof />
-          </Layout>
-        } />
-        <Route path="/first-payment-success" element={
+        {/* <Route path="/first-payment-success" element={
           <Layout>
             <FirstPaymentSuccess />
           </Layout>
-        } />
-        <Route path="/following-payments-success" element={
-          <Layout>
-            <FollowingPaymentsSuccess />
-          </Layout>
-        } />
-        <Route path="/first-order-congratulations" element={
-          <Layout>
-            <FirstOrderCongratulations />
-          </Layout>
-        } />
-
-        <Route path="/full-order-details" element={
-          <Layout>
-            <FullOrderDetails />
-          </Layout>
-        } />
-        <Route path="/preparing-shipment-1" element={
-          <Layout>
-            <PreparingShipment1 />
-          </Layout>
-        } />
-        <Route path="/preparing-shipment-2" element={
-          <Layout>
-            <PreparingShipment2 />
-          </Layout>
-        } />
+        } /> */}
         <Route path="/document-generation-progress" element={
           <Layout>
             <DocumentGenerationProgress />
-          </Layout>
-        } />
-        <Route path="/documents-ready-for-payment" element={
-          <Layout>
-            <DocumentsReadyForPayment />
           </Layout>
         } />
         <Route path="/pdf-document-preview" element={
@@ -359,106 +397,41 @@ function App() {
             <DigitalTtnModal />
           </Layout>
         } />
-        <Route path="/contract-generation-start" element={
+        {/* <Route path="/contract-generation-start" element={
           <Layout>
             <ContractGenerationStart />
           </Layout>
-        } />
-        <Route path="/upload-invoice" element={
-          <Layout>
-            <UploadInvoice />
-          </Layout>
-        } />
-        <Route path="/manage-product-listings" element={
-          <Layout>
-            <ManageProductListings />
-          </Layout>
-        } />
-        <Route path="/waiting-for-buyer-payment" element={
-          <Layout>
-            <WaitingForBuyerPayment />
-          </Layout>
-        } />
-        <Route path="/waiting-for-buyer-confirmation" element={
-          <Layout>
-            <WaitingForBuyerConfirmation />
-          </Layout>
-        } />
-        <Route path="/delivery-tracking-supplier" element={
-          <Layout>
-            <DeliveryTrackingSupplier />
-          </Layout>
-        } />
-        <Route path="/delivery-confirmed-escrow-release" element={
-          <Layout>
-            <DeliveryConfirmedEscrowRelease />
-          </Layout>
-        } />
-        <Route path="/payout-in-progress" element={
+        } /> */}
+        {/* <Route path="/payout-in-progress" element={
           <Layout>
             <PayoutInProgress />
           </Layout>
-        } />
-        <Route path="/escrow-payout-completed" element={
-          <Layout>
-            <EscrowPayoutCompleted />
-          </Layout>
-        } />
-        <Route path="/manage-team-members" element={
-          <Layout>
-            <ManageTeamMembers />
-          </Layout>
-        } />
+        } /> */}
         <Route path="/all-metrics-dynamic-view" element={
           <Layout>
             <AllMetricsDynamicView />
           </Layout>
         } />
-        <Route path="/anonymized-supplier-profile" element={
-          <Layout>
-            <AnonymizedSupplierProfile />
-          </Layout>
-        } />
-        <Route path="/ai-supplier-matcher" element={
+        {/* <Route path="/ai-supplier-matcher" element={
           <Layout>
             <AiSupplierMatcher />
           </Layout>
-        } />
-        <Route path="/ai-consultant-chat" element={
+        } /> */}
+        {/* <Route path="/ai-consultant-chat" element={
           <Layout>
             <AiConsultantChat />
           </Layout>
-        } />
-        <Route path="/decline-request-with-reason" element={
-          <Layout>
-            <DeclineRequestWithReason />
-          </Layout>
-        } />
-        <Route path="/send-to-alternative-supplier" element={
+        } /> */}
+        {/* <Route path="/send-to-alternative-supplier" element={
           <Layout>
             <SendToAlternativeSupplier />
           </Layout>
-        } />
-        <Route path="/sku-revenue-details" element={
-          <Layout>
-            <SkuRevenueDetails />
-          </Layout>
-        } />
-        <Route path="/review-filter-sort" element={
-          <Layout>
-            <ReviewFilterSort />
-          </Layout>
-        } />
-        <Route path="/dashboard-settings-panel" element={
+        } /> */}
+        {/* <Route path="/dashboard-settings-panel" element={
           <Layout>
             <DashboardSettingsPanel />
           </Layout>
-        } />
-        <Route path="/supplier-delivery-process" element={
-          <Layout>
-            <SupplierDeliveryProcess />
-          </Layout>
-        } />
+        } /> */}
         <Route path="/registration/step-1" element={
           <Layout>
             <RegistrationStep1PhoneVerification />
@@ -472,20 +445,6 @@ function App() {
         <Route path="/registration/step-3" element={
           <Layout>
             <RegistrationStep3ForDealers />
-          </Layout>
-        } />
-
-        {/* Product Routes */}
-        <Route path="/product/certificate-upload" element={
-          <Layout>
-            <ProductCertificateUpload />
-          </Layout>
-        } />
-
-        {/* Offer Routes */}
-        <Route path="/offer/decline-confirmation" element={
-          <Layout>
-            <OfferDeclineConfirmation />
           </Layout>
         } />
 

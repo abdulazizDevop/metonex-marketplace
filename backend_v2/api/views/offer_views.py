@@ -21,6 +21,31 @@ from ..serializers import (
 )
 
 
+class MyOffersView(APIView):
+    """
+    Standalone view for my_offers to bypass ViewSet permission issues
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        """Joriy foydalanuvchi bilan bog'liq takliflar"""
+        print(f"DEBUG MyOffersView: user={request.user}, authenticated={request.user.is_authenticated}")
+        print(f"DEBUG MyOffersView: user.role={getattr(request.user, 'role', 'NO_ROLE')}")
+        
+        if request.user.role == User.UserRole.SUPPLIER:
+            # Supplier uchun - o'zi bergan takliflar
+            offers = Offer.objects.select_related('rfq', 'supplier', 'product').filter(supplier=request.user)
+        elif request.user.role == User.UserRole.BUYER:
+            # Buyer uchun - uning RFQ'lariga kelgan takliflar
+            offers = Offer.objects.select_related('rfq', 'supplier', 'product').filter(rfq__buyer=request.user)
+        else:
+            return Response({'error': 'Noto\'g\'ri foydalanuvchi roli'}, 
+                           status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = OfferListSerializer(offers, many=True)
+        return Response(serializer.data)
+
+
 class OfferViewSet(viewsets.ModelViewSet):
     """
     Takliflar uchun ViewSet
@@ -83,12 +108,20 @@ class OfferViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def my_offers(self, request):
-        """Joriy foydalanuvchi takliflari"""
-        if request.user.role != User.UserRole.SUPPLIER:
-            return Response({'error': 'Faqat sotuvchilar taklif yarata oladi'}, 
+        """Joriy foydalanuvchi bilan bog'liq takliflar"""
+        print(f"DEBUG my_offers: user={request.user}, authenticated={request.user.is_authenticated}")
+        print(f"DEBUG my_offers: user.role={getattr(request.user, 'role', 'NO_ROLE')}")
+        
+        if request.user.role == User.UserRole.SUPPLIER:
+            # Supplier uchun - o'zi bergan takliflar
+            offers = self.get_queryset().filter(supplier=request.user)
+        elif request.user.role == User.UserRole.BUYER:
+            # Buyer uchun - uning RFQ'lariga kelgan takliflar
+            offers = self.get_queryset().filter(rfq__buyer=request.user)
+        else:
+            return Response({'error': 'Noto\'g\'ri foydalanuvchi roli'}, 
                            status=status.HTTP_400_BAD_REQUEST)
         
-        offers = self.get_queryset().filter(supplier=request.user)
         serializer = OfferListSerializer(offers, many=True)
         return Response(serializer.data)
     

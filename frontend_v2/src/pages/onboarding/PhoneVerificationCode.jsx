@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { authApi } from '../../utils/authApi'
 
 const PhoneVerificationCode = () => {
   const navigate = useNavigate()
@@ -58,7 +59,7 @@ const PhoneVerificationCode = () => {
     const code = verificationCode.join('')
     
     if (code.length !== 6) {
-      setError('Please enter the complete 6-digit code')
+      setError('6 xonali kodni to\'liq kiriting')
       return
     }
 
@@ -66,8 +67,10 @@ const PhoneVerificationCode = () => {
     setError('')
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const phoneNumber = localStorage.getItem('registrationPhone')
+      
+      // Call SMS verification API
+      await authApi.verifySMS(phoneNumber, code)
       
       // Store verification status
       localStorage.setItem('phoneVerified', 'true')
@@ -84,7 +87,16 @@ const PhoneVerificationCode = () => {
         navigate('/buyer/registration') // Default to buyer
       }
     } catch (err) {
-      setError('Invalid verification code. Please try again.')
+      console.error('SMS tasdiqlashda xatolik:', err)
+      
+      // Handle specific error messages
+      if (err.message?.includes('400') || err.message?.includes('Invalid')) {
+        setError('Noto\'g\'ri tasdiqlash kodi. Qaytadan urinib ko\'ring')
+      } else if (err.message?.includes('Network')) {
+        setError('Internet aloqasi yo\'q. Qaytadan urinib ko\'ring')
+      } else {
+        setError('Tasdiqlashda xatolik. Qaytadan urinib ko\'ring')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -95,14 +107,25 @@ const PhoneVerificationCode = () => {
     setError('')
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const phoneNumber = localStorage.getItem('registrationPhone')
+      
+      // Call SMS API again
+      await authApi.sendSMS(phoneNumber)
       
       setTimeLeft(300)
       setCanResend(false)
       setVerificationCode(['', '', '', '', '', ''])
     } catch (err) {
-      setError('Failed to resend code. Please try again.')
+      console.error('SMS qayta yuborishda xatolik:', err)
+      
+      // Handle specific error messages
+      if (err.message?.includes('429')) {
+        setError('Juda ko\'p so\'rov yuborildi. Biroz kuting')
+      } else if (err.message?.includes('Network')) {
+        setError('Internet aloqasi yo\'q. Qaytadan urinib ko\'ring')
+      } else {
+        setError('Kod qayta yuborishda xatolik. Qaytadan urinib ko\'ring')
+      }
     } finally {
       setIsLoading(false)
     }

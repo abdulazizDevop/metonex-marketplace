@@ -1,17 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const RequestSentConfirmation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [countdown, setCountdown] = useState(5);
   const [requestId] = useState('REQ-2024-001');
+  const [flowData, setFlowData] = useState({
+    rfqData: null,
+    flowStep: null,
+    nextStep: null
+  });
+
+  // Initialize flow data from location state
+  useEffect(() => {
+    if (location.state) {
+      setFlowData({
+        rfqData: location.state.rfqData || null,
+        flowStep: location.state.flowStep || null,
+        nextStep: location.state.nextStep || '/buyer/home'
+      });
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          navigate('/buyer/home');
+          navigate(flowData.nextStep || '/buyer/home');
           return 0;
         }
         return prev - 1;
@@ -19,14 +36,29 @@ const RequestSentConfirmation = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [navigate]);
+  }, [navigate, flowData.nextStep]);
 
   const handleViewRequest = () => {
-    navigate(`/buyer/rfq/${requestId}`);
+    navigate(`/buyer/rfq/${requestId}`, { 
+      state: { 
+        fromConfirmation: true,
+        flowStep: 'rfq-detail',
+        returnPath: '/buyer/request-confirmed'
+      } 
+    });
   };
 
   const handleBackToDashboard = () => {
-    navigate('/buyer/home');
+    navigate(flowData.nextStep || '/buyer/home');
+  };
+
+  const handleViewOrders = () => {
+    navigate('/buyer/orders?tab=requests', { 
+      state: { 
+        fromConfirmation: true,
+        flowStep: 'orders-management'
+      } 
+    });
   };
 
   return (
@@ -86,8 +118,15 @@ const RequestSentConfirmation = () => {
         {/* Actions */}
         <div className="space-y-3">
           <button 
+            onClick={handleViewOrders}
+            className="w-full bg-[#6C4FFF] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#5A3FE6] transition-colors"
+          >
+            View My Requests
+          </button>
+          
+          <button 
             onClick={handleViewRequest}
-            className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+            className="w-full bg-gray-100 text-gray-900 py-3 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
           >
             View Request Details
           </button>

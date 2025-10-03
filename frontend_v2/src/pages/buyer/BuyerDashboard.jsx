@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import userApi from '../../utils/userApi';
 
 const BuyerDashboard = () => {
   const navigate = useNavigate();
@@ -21,52 +22,60 @@ const BuyerDashboard = () => {
     navigate(`/buyer/offer/${offerId}`);
   };
 
-  // Mock data
-  const [pendingOffers] = useState([
-    {
-      id: 1,
-      title: 'Cement Grade 42.5',
-      supplier: 'CementCorp',
-      amount: 4500,
-      deadline: '2024-01-25',
-      offersCount: 3
-    },
-    {
-      id: 2,
-      title: 'Steel Plates 10mm',
-      supplier: 'SteelMaster',
-      amount: 7800,
-      deadline: '2024-01-28',
-      offersCount: 2
-    }
-  ]);
+  // State for dynamic data
+  const [pendingOffers, setPendingOffers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [notifications] = useState([
-    {
-      id: 1,
-      type: 'order',
-      title: 'Buyurtma yetkazib berildi',
-      message: 'Steel Beams I-200 buyurtmangiz yetkazib berildi',
-      time: '2 soat oldin',
-      read: false
-    },
-    {
-      id: 2,
-      type: 'offer',
-      title: 'Yangi taklif',
-      message: 'Cement Grade 42.5 uchun 3 ta yangi taklif',
-      time: '5 soat oldin',
-      read: false
-    },
-    {
-      id: 3,
-      type: 'payment',
-      title: 'To\'lov tasdiqlandi',
-      message: 'Concrete Mix C25 uchun to\'lov qabul qilindi',
-      time: '1 kun oldin',
-      read: true
+  const [notifications, setNotifications] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]);
+
+  // Load dashboard data
+  const loadDashboardData = async () => {
+    setLoading(true);
+    try {
+      // Load data in parallel
+      const [offersRes, ordersRes, categoriesRes] = await Promise.allSettled([
+        userApi.getOffers({ status: 'pending' }),
+        userApi.getOrders({ limit: 5 }),
+        userApi.getCategories()
+      ]);
+
+      if (offersRes.status === 'fulfilled') {
+        setPendingOffers(offersRes.value || []);
+      }
+
+      if (ordersRes.status === 'fulfilled') {
+        setRecentOrders(ordersRes.value || []);
+      }
+
+      if (categoriesRes.status === 'fulfilled') {
+        const categoriesData = categoriesRes.value.results || categoriesRes.value || [];
+        setCategories(categoriesData);
+      }
+
+      // Mock notifications for now (until notification API is ready)
+      setNotifications([
+        {
+          id: 1,
+          type: 'offer',
+          title: 'Yangi taklif',
+          message: 'Sizning so\'rovingizga yangi taklif keldi',
+          time: '2 soat oldin',
+          read: false
+        }
+      ]);
+
+    } catch (error) {
+      console.error('Dashboard ma\'lumotlarini yuklashda xatolik:', error);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -98,6 +107,13 @@ const BuyerDashboard = () => {
 
       {/* Main Content */}
       <main className="flex-1 px-4 py-6 space-y-6">
+        {loading && (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6C4FFF] mx-auto mb-4"></div>
+            <p className="text-gray-500">Ma'lumotlar yuklanmoqda...</p>
+          </div>
+        )}
+        
         {/* Chart Section */}
         <section>
           <h2 className="text-lg font-bold text-gray-900 mb-4">Xarajat tahlili</h2>
@@ -130,18 +146,15 @@ const BuyerDashboard = () => {
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold text-gray-900">Spending by Category</h3>
                   <div className="flex gap-2">
-                    <div className="flex items-center gap-1 text-sm">
-                      <div className="w-3 h-3 rounded-full bg-gray-400"></div>
-                      <span className="text-gray-600">Metal</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm">
-                      <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                      <span className="text-gray-600">Cement</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm">
-                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                      <span className="text-gray-600">Concrete</span>
-                    </div>
+                    {categories.slice(0, 3).map((category, index) => {
+                      const colors = ['bg-gray-400', 'bg-purple-500', 'bg-blue-500'];
+                      return (
+                        <div key={category.id} className="flex items-center gap-1 text-sm">
+                          <div className={`w-3 h-3 rounded-full ${colors[index] || 'bg-gray-400'}`}></div>
+                          <span className="text-gray-600">{category.name}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
                 

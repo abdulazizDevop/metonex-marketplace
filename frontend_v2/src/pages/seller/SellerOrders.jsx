@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import BottomNavigation from '../../components/BottomNavigation';
+import { userApi } from '../../utils/userApi';
 
 const SellerOrders = () => {
   const navigate = useNavigate();
@@ -8,7 +9,14 @@ const SellerOrders = () => {
   const [activeTab, setActiveTab] = useState('requests'); // 'requests', 'offers', 'orders'
   const [activeSubTab, setActiveSubTab] = useState('all'); // 'all', 'active', 'pending', 'completed', 'cancelled'
   const [selectedCategory, setSelectedCategory] = useState('all'); // 'all', 'steel', 'concrete', 'electro'
-  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState('all'); // 'all', 'active', 'pending', 'accepted', 'rejected', etc.
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [flowData, setFlowData] = useState({
+    fromDashboard: false,
+    flowStep: null,
+    returnPath: null
+  });
 
   // Handle URL parameters for tab
   useEffect(() => {
@@ -19,103 +27,147 @@ const SellerOrders = () => {
     }
   }, [location.search]);
 
-  // Sample data for different tabs
-  const [requestsData] = useState([
-    {
-      id: 1,
-      title: 'Rebar Ø12, 20 tons',
-      status: 'active',
-      offersCount: 3,
-      lowestPrice: '$710/t',
-      fastestDelivery: '2 days',
-      hasNewOffers: true,
-      deadline: '2024-07-25',
-      category: 'steel',
-      quantity: '20 tons',
-      specifications: 'Grade 60, ASTM A615',
-      createdDate: '2024-01-10'
-    },
-    {
-      id: 2,
-      title: 'Concrete Mix C25, 50 m³',
-      status: 'pending',
-      offersCount: 1,
-      lowestPrice: '$85/m³',
-      fastestDelivery: '1 day',
-      hasNewOffers: false,
-      deadline: '2024-07-30',
-      category: 'concrete',
-      quantity: '50 m³',
-      specifications: 'C25/30, 28-day strength',
-      createdDate: '2024-01-12'
-    }
-  ]);
+  // Reset status filter and reload data when tab changes
+  useEffect(() => {
+    setSelectedStatus('all');
+    loadOrdersData();
+  }, [activeTab]);
 
-  const [offersData] = useState([
-    {
-      id: 1,
-      requestId: 1,
-      requestTitle: 'Rebar Ø12, 20 tons',
-      buyer: 'Apex Construction',
-      price: '$710/t',
-      totalAmount: '$14,200',
-      status: 'pending',
-      category: 'steel',
-      deliveryDate: '2024-07-27',
-      message: 'We can deliver within 2 days',
-      createdDate: '2024-01-11'
-    },
-    {
-      id: 2,
-      requestId: 2,
-      requestTitle: 'Concrete Mix C25, 50 m³',
-      buyer: 'BuildCorp Ltd',
-      price: '$85/m³',
-      totalAmount: '$4,250',
-      status: 'accepted',
-      category: 'concrete',
-      deliveryDate: '2024-07-29',
-      message: 'Best quality concrete available',
-      createdDate: '2024-01-13'
+  // Initialize flow data from location state
+  useEffect(() => {
+    if (location.state) {
+      setFlowData({
+        fromDashboard: location.state.fromDashboard || false,
+        flowStep: location.state.flowStep || null,
+        returnPath: location.state.returnPath || null
+      });
     }
-  ]);
+  }, [location.state]);
 
-  const [ordersData] = useState([
-    {
-      id: 1,
-      requestId: 2,
-      requestTitle: 'Concrete Mix C25, 50 m³',
-      buyer: 'BuildCorp Ltd',
-      totalAmount: '$4,250',
-      status: 'in_preparation',
-      category: 'concrete',
-      orderDate: '2024-01-15',
-      deliveryDate: '2024-07-29',
-      paymentStatus: 'paid',
-      trackingNumber: 'TRK001234'
-    },
-    {
-      id: 2,
-      requestId: 3,
-      requestTitle: 'Steel Beams I-200, 10 pieces',
-      buyer: 'SteelCorp Ltd',
-      totalAmount: '$15,000',
-      status: 'delivered',
-      category: 'steel',
-      orderDate: '2024-01-10',
-      deliveryDate: '2024-01-20',
-      paymentStatus: 'paid',
-      trackingNumber: 'TRK001235'
+  // Real data from API
+
+
+  const [ordersData, setOrdersData] = useState([]);
+  const [offersData, setOffersData] = useState([]);
+  const [requestsData, setRequestsData] = useState([]);
+  
+  // Dynamic metadata from backend
+  const [categories, setCategories] = useState([]);
+  const [orderStatuses, setOrderStatuses] = useState([]);
+  const [rfqStatuses, setRfqStatuses] = useState([]);
+  const [offerStatuses, setOfferStatuses] = useState([]);
+  
+  // Load metadata on component mount
+  useEffect(() => {
+    loadMetadata()
+  }, [])
+
+  // Load data when tab changes
+  useEffect(() => {
+    loadOrdersData()
+  }, [activeTab])
+  
+  const loadMetadata = async () => {
+    try {
+      const [categoriesRes, orderStatusesRes, rfqStatusesRes, offerStatusesRes] = await Promise.allSettled([
+        userApi.getCategories(),
+        userApi.getOrderStatuses(),
+        userApi.getRFQStatuses(), 
+        userApi.getOfferStatuses()
+      ])
+      
+      if (categoriesRes.status === 'fulfilled') {
+        const categoriesData = categoriesRes.value.results || categoriesRes.value || []
+        setCategories([
+          { id: 'all', name: 'Barchasi', icon: 'apps' },
+          ...categoriesData.map(cat => ({
+            id: cat.slug || cat.id,
+            name: cat.name,
+            icon: cat.icon || 'category'
+          }))
+        ])
+      } 
+
+      if (orderStatusesRes.status === 'fulfilled') {
+        setOrderStatuses(orderStatusesRes.value)
+      }
+
+      if (rfqStatusesRes.status === 'fulfilled') {
+        setRfqStatuses(rfqStatusesRes.value)
+      }
+
+      if (offerStatusesRes.status === 'fulfilled') {
+        setOfferStatuses(offerStatusesRes.value)
+      }
+    } catch (error) {
+      console.error('Metadata yuklashda xatolik:', error)
     }
-  ]);
+  }
 
-  // Categories for filtering
-  const categories = [
-    { id: 'all', name: 'Barchasi', icon: 'apps' },
-    { id: 'steel', name: 'Steel', icon: 'build' },
-    { id: 'concrete', name: 'Concrete', icon: 'foundation' },
-    { id: 'electro', name: 'Electro', icon: 'electrical_services' }
-  ];
+  const loadOrdersData = async () => {
+    try {
+      setLoading(true);
+      
+      if (activeTab === 'requests') {
+        const rfqsResponse = await userApi.getAvailableRFQs();
+        console.log('Available RFQs:', rfqsResponse);
+        
+        const transformedRequests = rfqsResponse.map(rfq => ({
+          id: rfq.id,
+          title: `${rfq.brand} ${rfq.grade}`,
+          status: rfq.status,
+          price: '-',
+          totalAmount: '-',
+          category: rfq.category?.name || 'Boshqa',
+          quantity: `${rfq.volume} ${rfq.unit?.name || ''}`,
+          buyer: rfq.buyer?.first_name || 'Anonim',
+          deliveryDate: rfq.delivery_date?.split('T')[0] || '',
+          deadline: rfq.deadline?.split('T')[0] || '',
+          offersCount: rfq.offers_count || 0,
+          specifications: rfq.specifications || '',
+          deliveryLocation: rfq.delivery_location || '',
+          createdAt: rfq.created_at?.split('T')[0] || ''
+        }));
+        
+        setRequestsData(transformedRequests);
+      } else if (activeTab === 'orders') {
+        const ordersResponse = await userApi.getSellerOrders();
+        console.log('Seller orders:', ordersResponse);
+        
+        const transformedOrders = ordersResponse.map(order => ({
+          id: order.id,
+          title: `Buyurtma #${order.id}`,
+          status: order.status,
+          totalAmount: order.total_amount,
+          createdAt: order.created_at?.split('T')[0],
+          buyer: order.buyer,
+          items: order.items || []
+        }));
+        
+        setOrdersData(transformedOrders);
+      } else if (activeTab === 'offers') {
+        const offersResponse = await userApi.getSellerOffers();
+        console.log('Seller offers:', offersResponse);
+        
+        const transformedOffers = offersResponse.map(offer => ({
+          id: offer.id,
+          title: `Taklif #${offer.id}`,
+          status: offer.status,
+          amount: offer.total_amount,
+          createdAt: offer.created_at?.split('T')[0],
+          rfq: offer.rfq
+        }));
+        
+        setOffersData(transformedOffers);
+      }
+    } catch (error) {
+      console.error('Orders yuklashda xatolik:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
 
   const handleBack = () => {
     navigate(-1);
@@ -123,27 +175,45 @@ const SellerOrders = () => {
 
   const handleRespondToRequest = (requestId) => {
     console.log(`Responding to request ${requestId}`);
-    navigate(`/seller/respond-request/${requestId}`);
+    navigate(`/seller/request-details/${requestId}`, {
+      state: { 
+        returnTab: activeTab,
+        flowStep: 'request-response',
+        returnPath: '/seller/orders?tab=requests'
+      }
+    });
   };
 
   const handleViewRequest = (requestId) => {
     console.log(`Viewing request ${requestId}`);
     navigate(`/seller/request-details/${requestId}`, {
-      state: { returnTab: activeTab }
+      state: { 
+        returnTab: activeTab,
+        flowStep: 'request-detail',
+        returnPath: '/seller/orders?tab=requests'
+      }
     });
   };
 
   const handleViewOffer = (offerId) => {
     console.log(`Viewing offer ${offerId}`);
     navigate(`/seller/offer-details/${offerId}`, {
-      state: { returnTab: activeTab }
+      state: { 
+        returnTab: activeTab,
+        flowStep: 'offer-detail',
+        returnPath: '/seller/orders?tab=offers'
+      }
     });
   };
 
   const handleViewOrder = (orderId) => {
     console.log(`Viewing order ${orderId}`);
     navigate(`/seller/order-details/${orderId}`, {
-      state: { returnTab: activeTab }
+      state: { 
+        returnTab: activeTab,
+        flowStep: 'order-detail',
+        returnPath: '/seller/orders?tab=orders'
+      }
     });
   };
 
@@ -170,6 +240,11 @@ const SellerOrders = () => {
       data = data.filter(item => item.category === selectedCategory);
     }
 
+    // Filter by status
+    if (selectedStatus !== 'all') {
+      data = data.filter(item => item.status === selectedStatus);
+    }
+
     // Filter by search query
     if (searchQuery) {
       data = data.filter(item => 
@@ -182,82 +257,126 @@ const SellerOrders = () => {
     return data;
   };
 
-  // Get sub-tabs based on active main tab
-  const getSubTabs = () => {
+  // Dynamic sub-tabs for each main tab (based on backend statuses)
+  const getStatusFilters = () => {
+    const allTab = { id: 'all', name: 'Barchasi' }
+    
     switch (activeTab) {
       case 'requests':
-        return [
-          { id: 'all', name: 'Barchasi' },
-          { id: 'active', name: 'Faol' },
-          { id: 'pending', name: 'Kutilmoqda' },
-          { id: 'completed', name: 'Yakunlangan' }
-        ];
+        return [allTab, ...rfqStatuses.map(status => ({
+          id: status.value || status.id,
+          name: status.label || status.name
+        }))]
       case 'offers':
-        return [
-          { id: 'all', name: 'Barchasi' },
-          { id: 'pending', name: 'Kutilmoqda' },
-          { id: 'accepted', name: 'Qabul qilingan' },
-          { id: 'rejected', name: 'Rad etilgan' }
-        ];
+        return [allTab, ...offerStatuses.map(status => ({
+          id: status.value || status.id,
+          name: status.label || status.name
+        }))]
       case 'orders':
-        return [
-          { id: 'all', name: 'Barchasi' },
-          { id: 'in_preparation', name: 'Tayyorlanmoqda' },
-          { id: 'in_transit', name: 'Yo\'lda' },
-          { id: 'delivered', name: 'Yetkazib berilgan' }
-        ];
+        return [allTab, ...orderStatuses.map(status => ({
+          id: status.value || status.id,
+          name: status.label || status.name
+        }))]
       default:
-        return [];
+        return [allTab];
     }
   };
 
-  // Get status badge color
+  // Get status badge color (aligned with backend statuses)
   const getStatusBadgeColor = (status) => {
     switch (status) {
+      // RFQ statuses
       case 'active':
+        return 'bg-green-100 text-green-800'
+      case 'completed':
         return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
+      case 'cancelled':
+        return 'bg-red-100 text-red-800'
+      case 'expired':
+        return 'bg-gray-100 text-gray-800'
+      
+      // Offer statuses
       case 'pending':
         return 'bg-yellow-100 text-yellow-800'
       case 'accepted':
         return 'bg-green-100 text-green-800'
       case 'rejected':
         return 'bg-red-100 text-red-800'
+      case 'counter_offered':
+        return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
+      
+      // Order statuses
+      case 'created':
+        return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
+      case 'contract_generated':
+        return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
+      case 'awaiting_payment':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'payment_received':
+        return 'bg-green-100 text-green-800'
       case 'in_preparation':
         return 'bg-orange-100 text-orange-800'
       case 'in_transit':
         return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
       case 'delivered':
+        return 'bg-[#6C4FFF]/10 text-[#6C4FFF]'
+      case 'confirmed':
         return 'bg-green-100 text-green-800'
       case 'completed':
         return 'bg-green-100 text-green-800'
       case 'cancelled':
         return 'bg-red-100 text-red-800'
+      
       default:
         return 'bg-gray-100 text-gray-800'
     }
   };
 
-  // Get status display name
+  // Get status display name (aligned with backend statuses)
   const getStatusDisplayName = (status) => {
     switch (status) {
+      // RFQ statuses
       case 'active':
         return 'Faol'
+      case 'completed':
+        return 'Yakunlangan'
+      case 'cancelled':
+        return 'Bekor qilingan'
+      case 'expired':
+        return 'Muddati tugagan'
+      
+      // Offer statuses
       case 'pending':
         return 'Kutilmoqda'
       case 'accepted':
         return 'Qabul qilingan'
       case 'rejected':
         return 'Rad etilgan'
+      case 'counter_offered':
+        return 'Qarshi taklif'
+      
+      // Order statuses
+      case 'created':
+        return 'Yaratilgan'
+      case 'contract_generated':
+        return 'Shartnoma yaratilgan'
+      case 'awaiting_payment':
+        return 'To\'lov kutilmoqda'
+      case 'payment_received':
+        return 'To\'lov qabul qilingan'
       case 'in_preparation':
         return 'Tayyorlanmoqda'
       case 'in_transit':
         return 'Yo\'lda'
       case 'delivered':
         return 'Yetkazib berilgan'
+      case 'confirmed':
+        return 'Tasdiqlangan'
       case 'completed':
         return 'Yakunlangan'
       case 'cancelled':
         return 'Bekor qilingan'
+      
       default:
         return status
     }
@@ -531,20 +650,37 @@ const SellerOrders = () => {
             </div>
           </div>
           
-          {/* Category Filters */}
+           {/* Category Filters */}
+           <div className="flex gap-2 overflow-x-auto mb-3">
+             {categories.map((category) => (
+               <button
+                 key={category.id}
+                 onClick={() => setSelectedCategory(category.id)}
+                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                   selectedCategory === category.id
+                     ? 'bg-[#6C4FFF] text-white'
+                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                 }`}
+               >
+                 <span className="material-symbols-outlined text-sm">{category.icon}</span>
+                 <span>{category.name}</span>
+               </button>
+             ))}
+           </div>
+
+          {/* Status Filters */}
           <div className="flex gap-2 overflow-x-auto">
-            {categories.map((category) => (
+            {getStatusFilters().map((status) => (
               <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  selectedCategory === category.id
+                key={status.id}
+                onClick={() => setSelectedStatus(status.id)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                  selectedStatus === status.id
                     ? 'bg-[#6C4FFF] text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                <span className="material-symbols-outlined text-sm">{category.icon}</span>
-                <span>{category.name}</span>
+                {status.name}
               </button>
             ))}
           </div>

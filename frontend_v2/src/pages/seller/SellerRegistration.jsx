@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import userApi from '../../utils/userApi'
 
 const SellerRegistration = () => {
   const navigate = useNavigate()
@@ -112,17 +113,12 @@ const SellerRegistration = () => {
     setIsLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Store registration data
+      // Prepare registration data for backend
       const registrationData = {
-        user: {
-          phone: formData.phone,
-          password: formData.password,
-          role: 'supplier',
-          supplier_type: formData.supplierType
-        },
+        phone: formData.phone,
+        password: formData.password,
+        role: 'supplier',
+        supplier_type: formData.supplierType,
         company: {
           name: formData.companyName,
           legal_address: formData.legalAddress,
@@ -136,19 +132,32 @@ const SellerRegistration = () => {
           accountant_contact: {
             name: formData.accountantName,
             phone: formData.accountantPhone,
-            email: formData.accountantEmail
-          },
-          telegram_owner: formData.telegramOwner
-        },
-        completedAt: new Date().toISOString()
+            email: formData.accountantEmail,
+            telegram: formData.telegramOwner
+          }
+        }
+      }
+
+      // Register seller via API
+      const response = await userApi.registerSeller(registrationData)
+      
+      // Store auth tokens if provided
+      if (response.tokens?.access) {
+        localStorage.setItem('token', response.tokens.access)
+        localStorage.setItem('refresh_token', response.tokens.refresh)
       }
       
-      localStorage.setItem('sellerRegistrationData', JSON.stringify(registrationData))
+      // Store registration success data
+      localStorage.setItem('sellerRegistrationData', JSON.stringify({
+        ...registrationData,
+        completedAt: new Date().toISOString()
+      }))
       
       // Navigate to seller dashboard
       navigate('/seller/dashboard')
     } catch (err) {
-      setError('Ro\'yxatdan o\'tishda xatolik yuz berdi. Qaytadan urinib ko\'ring.')
+      console.error('Registration error:', err)
+      setError(err.response?.data?.error || err.message || 'Ro\'yxatdan o\'tishda xatolik yuz berdi. Qaytadan urinib ko\'ring.')
     } finally {
       setIsLoading(false)
     }

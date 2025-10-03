@@ -6,6 +6,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from ..views.offer_views import (
     OfferViewSet,
+    MyOffersView,
     OfferListView,
     OfferDetailView,
     OfferCreateView,
@@ -27,9 +28,15 @@ counter_offer_router = DefaultRouter()
 counter_offer_router.register(r'counter-offers', CounterOfferViewSet, basename='counter-offer')
 
 offer_urlpatterns = [
-    # Router URLs
-    path('', include(offer_router.urls)),
-    path('', include(counter_offer_router.urls)),
+    # Custom offer actions (MUST be before router URLs)
+    path('my_offers/', MyOffersView.as_view(), name='offer-my'),
+    path('pending/', OfferViewSet.as_view({'get': 'pending'}), name='offer-pending'),
+    path('accepted/', OfferViewSet.as_view({'get': 'accepted'}), name='offer-accepted'),
+    path('rejected/', OfferViewSet.as_view({'get': 'rejected'}), name='offer-rejected'),
+    path('counter-offered/', OfferViewSet.as_view({'get': 'counter_offered'}), name='offer-counter-offered'),
+    path('by-rfq/', OfferViewSet.as_view({'get': 'by_rfq'}), name='offer-by-rfq'),
+    path('by-supplier/', OfferViewSet.as_view({'get': 'by_supplier'}), name='offer-by-supplier'),
+    path('<int:pk>/counter-offers/', OfferViewSet.as_view({'get': 'counter_offers'}), name='offer-counter-offers'),
     
     # Offer actions
     path('<int:pk>/accept/', OfferAcceptView.as_view(), name='offer-accept'),
@@ -43,13 +50,7 @@ offer_urlpatterns = [
     # Offer search
     path('search/', OfferSearchView.as_view(), name='offer-search'),
     
-    # Custom offer actions
-    path('my-offers/', OfferViewSet.as_view({'get': 'my_offers'}), name='offer-my'),
-    path('pending/', OfferViewSet.as_view({'get': 'pending'}), name='offer-pending'),
-    path('accepted/', OfferViewSet.as_view({'get': 'accepted'}), name='offer-accepted'),
-    path('rejected/', OfferViewSet.as_view({'get': 'rejected'}), name='offer-rejected'),
-    path('counter-offered/', OfferViewSet.as_view({'get': 'counter_offered'}), name='offer-counter-offered'),
-    path('by-rfq/', OfferViewSet.as_view({'get': 'by_rfq'}), name='offer-by-rfq'),
-    path('by-supplier/', OfferViewSet.as_view({'get': 'by_supplier'}), name='offer-by-supplier'),
-    path('<int:pk>/counter-offers/', OfferViewSet.as_view({'get': 'counter_offers'}), name='offer-counter-offers'),
+    # Router URLs (TEMPORARILY COMMENTED OUT)
+    # path('', include(offer_router.urls)),
+    # path('', include(counter_offer_router.urls)),
 ]

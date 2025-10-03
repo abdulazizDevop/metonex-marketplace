@@ -4,21 +4,20 @@ Authentication views - Autentifikatsiya uchun views
 
 import random
 import string
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.utils import timezone
 from django.core.cache import cache
-from django.conf import settings
 from rest_framework import status, permissions
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 from ..models import User, VerificationCode
 from ..serializers import (
     UserRegistrationSerializer,
+    SendSMSSerializer,
     UserPhoneVerificationSerializer,
     UserPasswordChangeSerializer,
     UserProfileSerializer
@@ -33,7 +32,7 @@ class SendSMSView(APIView):
     permission_classes = [permissions.AllowAny]
     
     def post(self, request):
-        serializer = UserPhoneVerificationSerializer(data=request.data)
+        serializer = SendSMSSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
@@ -56,9 +55,10 @@ class SendSMSView(APIView):
             expires_at=timezone.now() + timedelta(minutes=5)
         )
         
-        # SMS yuborish
+        # SMS yuborish - telefon raqamidan + belgisini olib tashlash
         try:
-            result = sms_service.send_verification_code(phone, code)
+            clean_phone = phone.replace('+', '')  # +998XXXXXXXXX -> 998XXXXXXXXX
+            result = sms_service.send_verification_code(clean_phone, code)
             if not result.get('success', False):
                 error_msg = result.get('error', 'Nomalum xatolik')
                 return Response({
@@ -130,7 +130,11 @@ class UserRegistrationView(APIView):
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            print("Registration validation errors:", serializer.errors)  # Debug uchun
+            return Response({
+                'error': 'Ma\'lumotlar validation dan o\'tmadi',
+                'details': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
         
         # Telefon raqami tasdiqlanganligini tekshirish
         phone = serializer.validated_data['phone']
@@ -145,6 +149,7 @@ class UserRegistrationView(APIView):
         # Foydalanuvchi yaratish
         user = serializer.save()
         user.phone_verified = True
+        print(f"Created user: {user.phone}, role: {user.role}, supplier_type: {user.supplier_type}")  # Debug
         user.save()
         
         # JWT token yaratish
@@ -172,9 +177,24 @@ class UserLoginView(TokenObtainPairView):
         if response.status_code == 200:
             # Foydalanuvchi ma'lumotlarini qo'shish
             user = User.objects.get(phone=request.data.get('phone'))
+            
+            # Oxirgi kirish vaqtini yangilash
+            user.last_login_at = timezone.now()
+            user.last_login_ip = self.get_client_ip(request)
+            user.save(update_fields=['last_login_at', 'last_login_ip'])
+            
             response.data['user'] = UserProfileSerializer(user).data
         
         return response
+    
+    def get_client_ip(self, request):
+        """Client IP manzilini olish"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
 
 
 class UserLogoutView(APIView):
@@ -274,9 +294,10 @@ class SendPasswordChangeCodeView(APIView):
             expires_at=timezone.now() + timedelta(minutes=5)
         )
         
-        # SMS yuborish
+        # SMS yuborish - telefon raqamidan + belgisini olib tashlash
         try:
-            result = sms_service.send_password_change_code(phone, code)
+            clean_phone = phone.replace('+', '')  # +998XXXXXXXXX -> 998XXXXXXXXX
+            result = sms_service.send_password_change_code(clean_phone, code)
             if not result.get('success', False):
                 error_msg = result.get('error', 'Nomalum xatolik')
                 return Response({

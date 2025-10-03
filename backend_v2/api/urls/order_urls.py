@@ -15,6 +15,7 @@ from ..views.order_views import (
     OrderStatusHistoryViewSet,
     OrderSearchView
 )
+from ..views.order_document_views import OrderDocumentView
 
 # Order routers
 order_router = DefaultRouter()
@@ -27,7 +28,25 @@ order_status_history_router = DefaultRouter()
 order_status_history_router.register(r'status-history', OrderStatusHistoryViewSet, basename='order-status-history')
 
 order_urlpatterns = [
-    # Router URLs
+    # Custom order actions (must be before router)
+    path('my_orders/', OrderViewSet.as_view({'get': 'my_orders'}), name='order-my'),
+    path('my_buyer_orders/', OrderViewSet.as_view({'get': 'buyer_orders'}), name='order-buyer'),
+    path('my_supplier_orders/', OrderViewSet.as_view({'get': 'supplier_orders'}), name='order-supplier'),
+    path('created/', OrderViewSet.as_view({'get': 'created'}), name='order-created'),
+    path('awaiting_payment/', OrderViewSet.as_view({'get': 'awaiting_payment'}), name='order-awaiting-payment'),
+    path('payment_confirmed/', OrderViewSet.as_view({'get': 'payment_confirmed'}), name='order-payment-confirmed'),
+    path('ready_for_delivery/', OrderViewSet.as_view({'get': 'ready_for_delivery'}), name='order-ready-for-delivery'),
+    path('in_preparation/', OrderViewSet.as_view({'get': 'in_preparation'}), name='order-in-preparation'),
+    path('in_transit/', OrderViewSet.as_view({'get': 'in_transit'}), name='order-in-transit'),
+    path('delivered/', OrderViewSet.as_view({'get': 'delivered'}), name='order-delivered'),
+    path('confirmed/', OrderViewSet.as_view({'get': 'confirmed'}), name='order-confirmed'),
+    path('completed/', OrderViewSet.as_view({'get': 'completed'}), name='order-completed'),
+    path('cancelled/', OrderViewSet.as_view({'get': 'cancelled'}), name='order-cancelled'),
+    
+    # Order search
+    path('search/', OrderSearchView.as_view(), name='order-search'),
+    
+    # Router URLs (after custom paths)
     path('', include(order_router.urls)),
     path('<int:order_pk>/', include(order_document_router.urls)),
     path('<int:order_pk>/', include(order_status_history_router.urls)),
@@ -35,31 +54,20 @@ order_urlpatterns = [
     # Order status update
     path('<int:pk>/status/', OrderStatusUpdateView.as_view(), name='order-status-update'),
     
-    # Order search
-    path('search/', OrderSearchView.as_view(), name='order-search'),
-    
-    # Custom order actions
-    path('my-orders/', OrderViewSet.as_view({'get': 'my_orders'}), name='order-my'),
-    path('buyer-orders/', OrderViewSet.as_view({'get': 'buyer_orders'}), name='order-buyer'),
-    path('supplier-orders/', OrderViewSet.as_view({'get': 'supplier_orders'}), name='order-supplier'),
-    path('created/', OrderViewSet.as_view({'get': 'created'}), name='order-created'),
-    path('contract-generated/', OrderViewSet.as_view({'get': 'contract_generated'}), name='order-contract-generated'),
-    path('awaiting-payment/', OrderViewSet.as_view({'get': 'awaiting_payment'}), name='order-awaiting-payment'),
-    path('payment-received/', OrderViewSet.as_view({'get': 'payment_received'}), name='order-payment-received'),
-    path('in-preparation/', OrderViewSet.as_view({'get': 'in_preparation'}), name='order-in-preparation'),
-    path('in-transit/', OrderViewSet.as_view({'get': 'in_transit'}), name='order-in-transit'),
-    path('delivered/', OrderViewSet.as_view({'get': 'delivered'}), name='order-delivered'),
-    path('confirmed/', OrderViewSet.as_view({'get': 'confirmed'}), name='order-confirmed'),
-    path('completed/', OrderViewSet.as_view({'get': 'completed'}), name='order-completed'),
-    path('cancelled/', OrderViewSet.as_view({'get': 'cancelled'}), name='order-cancelled'),
-    
     # Order management actions
-    path('<int:pk>/generate-documents/', OrderViewSet.as_view({'post': 'generate_documents'}), name='order-generate-documents'),
+    path('<int:pk>/confirm-payment/', OrderViewSet.as_view({'post': 'confirm_payment'}), name='order-confirm-payment'),
+    path('<int:pk>/upload-payment-proof/', OrderViewSet.as_view({'post': 'upload_payment_proof'}), name='order-upload-payment-proof'),
+    path('<int:pk>/upload-ttn/', OrderViewSet.as_view({'post': 'upload_ttn'}), name='order-upload-ttn'),
+    path('<int:pk>/upload-contract/', OrderViewSet.as_view({'post': 'upload_contract'}), name='order-upload-contract'),
+    path('<int:pk>/upload-invoice/', OrderViewSet.as_view({'post': 'upload_invoice'}), name='order-upload-invoice'),
     path('<int:pk>/confirm-delivery/', OrderViewSet.as_view({'post': 'confirm_delivery'}), name='order-confirm-delivery'),
     path('<int:pk>/cancel/', OrderViewSet.as_view({'post': 'cancel'}), name='order-cancel'),
     path('<int:pk>/complete/', OrderViewSet.as_view({'post': 'complete'}), name='order-complete'),
     
-    # Order documents
+    # Order documents (yangi Document model)
+    path('<int:order_id>/documents/', OrderDocumentView.as_view(), name='order-documents-new'),
+    
+    # Order documents (eski)
     path('<int:order_pk>/documents/', OrderDocumentViewSet.as_view({'get': 'list', 'post': 'create'}), name='order-documents'),
     path('<int:order_pk>/documents/<int:pk>/', OrderDocumentViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='order-document-detail'),
     

@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from ..models import (
-    User, VerificationCode, UserSession, Company, Unit, Category, SubCategory, 
+    User, VerificationCode, UserSession, Company, CompanyMember, Unit, Category, SubCategory, 
     Factory, Product, RFQ, Offer, CounterOffer, Order, OrderDocument, 
     OrderStatusHistory, Payment, Notification, Document, DocumentShare
 )
@@ -25,6 +25,7 @@ admin_site = MetOneXAdminSite(name='metonex_admin')
 # Import all admin classes
 from .user_admin import UserAdmin, VerificationCodeAdmin, UserSessionAdmin
 from .company_admin import CompanyAdmin
+from .company_member_admin import CompanyMemberAdmin
 from .catalog_admin import UnitAdmin, CategoryAdmin, SubCategoryAdmin, FactoryAdmin
 from .product_admin import ProductAdmin
 from .rfq_admin import RFQAdmin
@@ -39,6 +40,7 @@ admin_site.register(User, UserAdmin)
 admin_site.register(VerificationCode, VerificationCodeAdmin)
 admin_site.register(UserSession, UserSessionAdmin)
 admin_site.register(Company, CompanyAdmin)
+admin_site.register(CompanyMember, CompanyMemberAdmin)
 admin_site.register(Unit, UnitAdmin)
 admin_site.register(Category, CategoryAdmin)
 admin_site.register(SubCategory, SubCategoryAdmin)
@@ -61,6 +63,7 @@ __all__ = [
     'VerificationCodeAdmin',
     'UserSessionAdmin',
     'CompanyAdmin',
+    'CompanyMemberAdmin',
     'UnitAdmin',
     'CategoryAdmin',
     'SubCategoryAdmin',

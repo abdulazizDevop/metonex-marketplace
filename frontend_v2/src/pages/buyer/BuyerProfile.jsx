@@ -1,77 +1,158 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { userApi } from '../../utils/userApi';
 
 const BuyerProfile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [viewMode, setViewMode] = useState('category');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   
-  const [profileData] = useState({
-    companyName: 'O\'zbekiston Qurilish MChJ',
-    buyerId: '123456',
-    rating: 4.8,
-    rank: 8,
-    totalBuyers: 150,
-    totalReviews: 95,
-    profileImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBj41-PwDLpMDAVf0vzGk89KRvxCUknfTyrhRvmtMkNK29xe4ngs3qUssLoayhPwAPuseJ84dl4TTlO08AqaWnQv0SwBd-5IJCxShTODuYldLnvXjMN3CQz-qUKnPRuonOTqO0zq6JFolj-oGctqKvT4CvxMJg6wBjgG6YxWYe4ZoNFYzIzAIv9RNp9agkGsbGcyyXpuZ3ZxU52YS_6KQDSKXw2zipAFfkEschcYc8183tWUl4w_G6Ni_wrkTSpRkOzPieIq_Zkh6o',
+  const [profileData, setProfileData] = useState({
+    companyName: '',
+    buyerId: '',
+    rating: 0,
+    rank: 0,
+    totalBuyers: 0,
+    totalReviews: 0,
+    profileImage: '',
 
-    metrics: [
-      { name: 'On-time Payments', value: '95%', icon: 'payment', trend: 'up', color: 'text-green-500' },
-      { name: 'Avg. Order Value', value: '$5,200', icon: 'paid', trend: 'up', color: 'text-green-500' },
-      { name: 'Order Frequency', value: '2.1/month', icon: 'schedule', trend: 'up', color: 'text-green-500' },
-      { name: 'Supplier Rating', value: '4.8', icon: 'star', trend: 'up', color: 'text-green-500' },
-      { name: 'Response Time', value: '1.5 hrs', icon: 'schedule', trend: 'down', color: 'text-red-500' },
-      { name: 'Monthly Growth', value: '+15%', icon: 'trending_up', trend: 'up', color: 'text-green-500' }
-    ],
-    categories: ['Steel', 'Concrete', 'Electro'],
-    certifications: [
-      { name: 'ISO 9001', icon: 'verified' },
-      { name: 'Quality Assurance', icon: 'shield' }
-    ],
-    recentOrders: [
-      {
-        id: 1,
-        title: 'Steel Beams I-200',
-        supplier: 'SteelCorp Ltd',
-        amount: 12000,
-        status: 'in_transit',
-        date: '2024-01-20',
-        trackingNumber: 'TRK001234'
-      },
-      {
-        id: 2,
-        title: 'Concrete Mix C25',
-        supplier: 'ConcretePro',
-        amount: 8500,
-        status: 'delivered',
-        date: '2024-01-18',
-        trackingNumber: 'TRK001235'
-      },
-      {
-        id: 3,
-        title: 'Rebar Ø12',
-        supplier: 'MetalWorks',
-        amount: 6500,
-        status: 'in_preparation',
-        date: '2024-01-15',
-        trackingNumber: 'TRK001236'
-      }
-    ],
-    team: [
-      { 
-        name: 'John Doe', 
-        position: 'Purchasing Manager',
-        phone: '+998 90 123 45 67',
-        email: 'john.doe@uzbekiston-qurilish.uz'
-      },
-      { 
-        name: 'Sarah Wilson', 
-        position: 'Accountant',
-        phone: '+998 90 234 56 78',
-        email: 'sarah.wilson@uzbekiston-qurilish.uz'
-      }
-    ]
+    // User ma'lumotlari
+    userPhone: '',
+    userEmail: '',
+    userFirstName: '',
+    userLastName: '',
+    userRole: 'buyer',
+    lastLoginAt: null,
+    userCreatedAt: null,
+
+    metrics: [],
+    categories: [],
+    certifications: [],
+    recentOrders: [],
+    team: [],
+    
+    // Financial data
+    totalSpent: 0,
+    pendingPayments: 0,
+    avgOrderValue: 0,
+    totalOrders: 0,
+    
+    // Spending analysis
+    spendingByCategory: {},
+    spendingBySupplier: {},
+    topSupplier: null,
+    lastPurchase: null
   });
+
+  // Load profile data from API
+  useEffect(() => {
+    const loadProfileData = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        
+        // Load user profile and company data
+        const [userProfile, companyData, ordersData, analyticsData] = await Promise.all([
+          userApi.getProfile(),
+          userApi.getCompany(),
+          userApi.getOrders({ limit: 3 }), // Get recent 3 orders
+          userApi.getAnalytics() // Get financial analytics
+        ]);
+
+        // Process orders data
+        const recentOrders = (ordersData.results || ordersData || []).map(order => ({
+          id: order.id,
+          title: order.items?.[0]?.name || 'Order',
+          supplier: order.supplier?.company_name || 'Supplier',
+          amount: order.total_amount || 0,
+          status: order.status,
+          date: order.created_at,
+          trackingNumber: order.tracking_number || `ORD-${order.id}`
+        }));
+
+        // Process team data - get from company-members endpoint
+        let team = [];
+        try {
+          const teamResponse = await userApi.getTeamMembers();
+          team = teamResponse.map(member => ({
+            name: member.name || 'Team Member',
+            position: member.role_display || member.role || 'Employee',
+            phone: member.phone || '',
+            email: member.email || '',
+            telegram: member.telegram_username || '',
+            role: member.role || 'employee',
+            isActive: member.is_active || true
+          }));
+          
+        } catch (teamError) {
+          console.error('Team members olishda xatolik:', teamError);
+          team = [];
+        }
+
+        // Process financial data
+        const totalSpent = analyticsData.total_spent || 0;
+        const pendingPayments = analyticsData.pending_payments || 0;
+        const avgOrderValue = analyticsData.avg_order_value || 0;
+        const totalOrders = analyticsData.total_orders || 0;
+
+        // Process spending analysis
+        const spendingByCategory = analyticsData.spending_by_category || {};
+        const spendingBySupplier = analyticsData.spending_by_supplier || {};
+        const topSupplier = analyticsData.top_supplier || null;
+        const lastPurchase = analyticsData.last_purchase || null;
+
+        // Update profile data with API response
+        setProfileData(prev => ({
+          ...prev,
+          companyName: companyData.name || userProfile.company?.name || 'Company Name',
+          buyerId: userProfile.id || 'N/A',
+          rating: userProfile.rating || 0,
+          rank: userProfile.rank || 0,
+          totalBuyers: userProfile.total_buyers || 0,
+          totalReviews: userProfile.total_reviews || 0,
+          profileImage: userProfile.avatar || '',
+          
+          // User ma'lumotlari
+          userPhone: userProfile.phone || '',
+          userEmail: userProfile.email || '',
+          userFirstName: userProfile.first_name || '',
+          userLastName: userProfile.last_name || '',
+          userRole: userProfile.role || 'buyer',
+          lastLoginAt: userProfile.last_login_at || null,
+          userCreatedAt: userProfile.created_at || null,
+          
+          recentOrders,
+          team,
+          
+          // Financial data
+          totalSpent,
+          pendingPayments,
+          avgOrderValue,
+          totalOrders,
+          
+          // Spending analysis
+          spendingByCategory,
+          spendingBySupplier,
+          topSupplier,
+          lastPurchase,
+          
+          // Categories from company data
+          categories: companyData.categories || [],
+          certifications: companyData.certifications || []
+        }));
+
+      } catch (err) {
+        console.error('Profil ma\'lumotlarini yuklashda xatolik:', err);
+        setError('Profil ma\'lumotlarini yuklashda xatolik yuz berdi');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfileData();
+  }, []);
 
   const handleBack = () => {
     navigate(-1);
@@ -145,7 +226,9 @@ const BuyerProfile = () => {
                     <div>
                       <p className="text-sm font-medium text-[#140e1b]">To'lanadigan</p>
                       <div className="flex items-center gap-1">
-                        <p className="text-lg font-bold text-[#735095]">$3,200</p>
+                        <p className="text-lg font-bold text-[#735095]">
+                          ${new Intl.NumberFormat().format(profileData.pendingPayments)}
+                        </p>
                         <span className="material-symbols-outlined text-sm text-green-500">arrow_upward</span>
                       </div>
                       <p className="text-xs text-green-500">+12% o'tgan oydan</p>
@@ -161,7 +244,9 @@ const BuyerProfile = () => {
                     <div>
                       <p className="text-sm font-medium text-[#140e1b]">Jami xarajat</p>
                       <div className="flex items-center gap-1">
-                        <p className="text-lg font-bold text-[#735095]">$12,450</p>
+                        <p className="text-lg font-bold text-[#735095]">
+                          ${new Intl.NumberFormat().format(profileData.totalSpent)}
+                        </p>
                         <span className="material-symbols-outlined text-sm text-green-500">arrow_upward</span>
                       </div>
                       <p className="text-xs text-green-500">+8% o'tgan oydan</p>
@@ -200,55 +285,57 @@ const BuyerProfile = () => {
                 
                 {viewMode === 'category' ? (
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">Metal</span>
-                      <span className="text-sm font-semibold text-[#140e1b]">35%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-gray-400 h-2 rounded-full" style={{ width: '35%' }}></div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">Cement</span>
-                      <span className="text-sm font-semibold text-[#140e1b]">28%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-purple-500 h-2 rounded-full" style={{ width: '28%' }}></div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">Concrete</span>
-                      <span className="text-sm font-semibold text-[#140e1b]">22%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-500 h-2 rounded-full" style={{ width: '22%' }}></div>
-                    </div>
+                    {Object.entries(profileData.spendingByCategory).length > 0 ? (
+                      Object.entries(profileData.spendingByCategory).map(([category, percentage], index) => (
+                        <div key={category}>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-600">{category}</span>
+                            <span className="text-sm font-semibold text-[#140e1b]">{percentage}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                index === 0 ? 'bg-gray-400' : 
+                                index === 1 ? 'bg-purple-500' : 
+                                'bg-blue-500'
+                              }`} 
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-gray-500">
+                        <p className="text-sm">Hozircha kategoriya bo'yicha xarajat ma'lumotlari yo'q</p>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">ID 14ad</span>
-                      <span className="text-sm font-semibold text-[#140e1b]">40%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-400 h-2 rounded-full" style={{ width: '40%' }}></div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">ID 25fg</span>
-                      <span className="text-sm font-semibold text-[#140e1b]">30%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-purple-400 h-2 rounded-full" style={{ width: '30%' }}></div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-600">ID 39hj</span>
-                      <span className="text-sm font-semibold text-[#140e1b]">20%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-gray-400 h-2 rounded-full" style={{ width: '20%' }}></div>
-                    </div>
+                    {Object.entries(profileData.spendingBySupplier).length > 0 ? (
+                      Object.entries(profileData.spendingBySupplier).map(([supplier, percentage], index) => (
+                        <div key={supplier}>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-600">{supplier}</span>
+                            <span className="text-sm font-semibold text-[#140e1b]">{percentage}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                index === 0 ? 'bg-blue-400' : 
+                                index === 1 ? 'bg-purple-400' : 
+                                'bg-gray-400'
+                              }`} 
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-gray-500">
+                        <p className="text-sm">Hozircha sotuvchi bo'yicha xarajat ma'lumotlari yo'q</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -258,35 +345,53 @@ const BuyerProfile = () => {
             <section>
               <h2 className="text-lg font-bold text-[#140e1b]">Top Sotuvchi & Oxirgi xarajat</h2>
               <div className="mt-4 grid grid-cols-1 gap-4">
-                <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Top Sotuvchi</p>
-                      <p className="text-lg font-bold text-[#140e1b]">ID 14ad</p>
-                      <p className="text-sm text-gray-500">Mostly purchased: Cement</p>
+                {profileData.topSupplier ? (
+                  <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Top Sotuvchi</p>
+                        <p className="text-lg font-bold text-[#140e1b]">{profileData.topSupplier.name}</p>
+                        <p className="text-sm text-gray-500">Mostly purchased: {profileData.topSupplier.top_category}</p>
+                      </div>
+                      <button 
+                        onClick={() => navigate('/buyer/products')}
+                        className="px-4 py-2 bg-[#a35ee8] text-white rounded-lg hover:bg-[#8e4dd1] transition-colors text-sm"
+                      >
+                        Qayta buyurtma
+                      </button>
                     </div>
-                    <button 
-                      onClick={() => navigate('/buyer/products')}
-                      className="px-4 py-2 bg-[#a35ee8] text-white rounded-lg hover:bg-[#8e4dd1] transition-colors text-sm"
-                    >
-                      Qayta buyurtma
-                    </button>
                   </div>
-                </div>
+                ) : (
+                  <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 shadow-sm">
+                    <div className="text-center py-4 text-gray-500">
+                      <p className="text-sm">Hozircha top sotuvchi ma'lumotlari yo'q</p>
+                    </div>
+                  </div>
+                )}
                 
-                <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Oxirgi xarajat</p>
-                      <p className="text-lg font-bold text-[#140e1b]">Reinforced Steel Bars</p>
-                      <p className="text-sm text-gray-500">10 tons • $2,500 • Jul 20</p>
-                      <p className="text-xs text-gray-400">Next payment: Aug 15, 2024</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-[#735095]">$2,500</p>
+                {profileData.lastPurchase ? (
+                  <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Oxirgi xarajat</p>
+                        <p className="text-lg font-bold text-[#140e1b]">{profileData.lastPurchase.title}</p>
+                        <p className="text-sm text-gray-500">
+                          {profileData.lastPurchase.quantity} • ${new Intl.NumberFormat().format(profileData.lastPurchase.amount)} • {new Date(profileData.lastPurchase.date).toLocaleDateString()}
+                        </p>
+                        <p className="text-xs text-gray-400">Next payment: {new Date(profileData.lastPurchase.next_payment).toLocaleDateString()}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-[#735095]">${new Intl.NumberFormat().format(profileData.lastPurchase.amount)}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 shadow-sm">
+                    <div className="text-center py-4 text-gray-500">
+                      <p className="text-sm">Hozircha oxirgi xarajat ma'lumotlari yo'q</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -294,11 +399,17 @@ const BuyerProfile = () => {
             <section>
               <h2 className="text-lg font-bold text-[#140e1b]">Preferred Categories</h2>
               <div className="mt-3 flex flex-wrap gap-2">
-                {profileData.categories.map((category, index) => (
-                  <span key={index} className="rounded-full bg-[#ede8f3] px-3 py-1.5 text-sm font-medium text-[#735095]">
-                    {category}
-                  </span>
-                ))}
+                {profileData.categories.length > 0 ? (
+                  profileData.categories.map((category, index) => (
+                    <span key={index} className="rounded-full bg-[#ede8f3] px-3 py-1.5 text-sm font-medium text-[#735095]">
+                      {category}
+                    </span>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    <p className="text-sm">Hozircha kategoriya ma'lumotlari yo'q</p>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -355,15 +466,17 @@ const BuyerProfile = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-600">Total Orders</span>
-                    <span className="text-sm font-semibold text-[#140e1b]">128</span>
+                    <span className="text-sm font-semibold text-[#140e1b]">{profileData.totalOrders}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-600">Avg. Order Value</span>
-                    <span className="text-sm font-semibold text-[#140e1b]">$4,200</span>
+                    <span className="text-sm font-semibold text-[#140e1b]">${new Intl.NumberFormat().format(profileData.avgOrderValue)}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-600">Top Category</span>
-                    <span className="text-sm font-semibold text-[#140e1b]">Cement</span>
+                    <span className="text-sm font-semibold text-[#140e1b]">
+                      {Object.keys(profileData.spendingByCategory)[0] || 'N/A'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-600">Pending Offers</span>
@@ -415,31 +528,76 @@ const BuyerProfile = () => {
             <section>
               <h2 className="text-lg font-bold text-[#140e1b]">Team</h2>
               <div className="mt-3 space-y-3">
-                {profileData.team.map((member, index) => (
-                  <div key={index} className="flex items-center gap-3 rounded-lg border border-gray-100 p-3">
-                    <div className="flex size-10 items-center justify-center rounded-full bg-[#ede8f3] text-[#735095]">
-                      <span className="material-symbols-outlined">person</span>
+                {profileData.team.length > 0 ? (
+                  profileData.team.map((member, index) => (
+                    <div key={index} className="flex items-center gap-3 rounded-lg border border-gray-100 p-3">
+                      <div className="flex size-10 items-center justify-center rounded-full bg-[#ede8f3] text-[#735095]">
+                        <span className="material-symbols-outlined">person</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-[#140e1b]">{member.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            member.role === 'owner' 
+                              ? 'bg-purple-100 text-purple-800' 
+                              : member.role === 'admin'
+                              ? 'bg-blue-100 text-blue-800'
+                              : member.role === 'manager'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {member.role === 'owner' && '👑'}
+                            {member.role === 'admin' && '⚡'}
+                            {member.role === 'manager' && '📋'}
+                            {member.role === 'employee' && '👤'}
+                            {member.role === 'accountant' && '💰'}
+                            <span className="ml-1">{member.position}</span>
+                          </span>
+                        </div>
+                        {member.phone && (
+                          <p className="text-sm text-gray-500 mt-1">{member.phone}</p>
+                        )}
+                        {member.telegram && (
+                          <p className="text-xs text-gray-400">@{member.telegram}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {member.phone && (
+                          <button 
+                            onClick={() => handleCall(member.phone)}
+                            className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                            title="Qo'ng'iroq qilish"
+                          >
+                            <span className="material-symbols-outlined text-xl">call</span>
+                          </button>
+                        )}
+                        {member.email && (
+                          <button 
+                            onClick={() => handleEmail(member.email)}
+                            className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                            title="Email yuborish"
+                          >
+                            <span className="material-symbols-outlined text-xl">mail</span>
+                          </button>
+                        )}
+                        {member.telegram && (
+                          <button 
+                            onClick={() => window.open(`https://t.me/${member.telegram}`, '_blank')}
+                            className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                            title="Telegram"
+                          >
+                            <span className="material-symbols-outlined text-xl">send</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-[#140e1b]">{member.name}</p>
-                      <p className="text-sm text-gray-500">{member.position}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => handleCall(member.phone)}
-                        className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-xl">call</span>
-                      </button>
-                      <button 
-                        onClick={() => handleEmail(member.email)}
-                        className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-xl">mail</span>
-                      </button>
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <span className="material-symbols-outlined text-4xl mb-2">group</span>
+                    <p className="text-sm">Hozircha jamoa a'zolari yo'q</p>
                   </div>
-                ))}
+                )}
               </div>
             </section>
           </div>
@@ -475,8 +633,18 @@ const BuyerProfile = () => {
           <div className="relative">
             <div 
               className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-28" 
-              style={{ backgroundImage: `url("${profileData.profileImage}")` }}
-            />
+              style={{ 
+                backgroundImage: profileData.profileImage 
+                  ? `url("http://localhost:8000${profileData.profileImage}")` 
+                  : 'linear-gradient(135deg, #6C4FFF 0%, #8B5CF6 100%)'
+              }}
+            >
+              {!profileData.profileImage && (
+                <div className="flex items-center justify-center h-full">
+                  <span className="material-symbols-outlined text-white text-4xl">business</span>
+                </div>
+              )}
+            </div>
             <div className="absolute bottom-0 right-0 flex items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 ring-2 ring-white">
               <span className="material-symbols-outlined text-sm">verified</span>
               <span>Verified</span>
@@ -484,14 +652,35 @@ const BuyerProfile = () => {
           </div>
           
           <div className="text-center">
-            <p className="text-[22px] font-bold text-[#140e1b]">{profileData.companyName}</p>
+            {/* User to'liq ismi */}
+            <p className="text-[22px] font-bold text-[#140e1b]">
+              {profileData.userFirstName} {profileData.userLastName}
+            </p>
             <p className="text-sm text-gray-500">Buyer ID: {profileData.buyerId}</p>
+            
+            {/* User aloqa ma'lumotlari */}
+            <div className="mt-3 space-y-1">
+              <p className="text-sm text-gray-500">{profileData.userPhone}</p>
+              {profileData.userEmail && (
+                <p className="text-sm text-gray-500">{profileData.userEmail}</p>
+              )}
+            </div>
+            
             <div className="mt-2 flex flex-col items-center gap-1">
               <div className="flex items-center gap-1 text-sm text-gray-500">
-                <span className="font-medium text-gray-600">Member since 2024</span>
+                <span className="font-medium text-gray-600">
+                  Account ochilgan: {profileData.userCreatedAt ? new Date(profileData.userCreatedAt).toLocaleDateString('uz-UZ') : 'Noma\'lum'}
+                </span>
                 <span className="text-gray-400">·</span>
-                <span className="font-medium text-gray-600">Rank #{profileData.rank} of {profileData.totalBuyers}</span>
+                <span className="font-medium text-gray-600">
+                  Oxirgi kirish: {profileData.lastLoginAt ? new Date(profileData.lastLoginAt).toLocaleDateString('uz-UZ') : 'Hozircha yo\'q'}
+                </span>
               </div>
+              {profileData.lastLoginAt && (
+                <div className="text-xs text-gray-400">
+                  Oxirgi kirish vaqti: {new Date(profileData.lastLoginAt).toLocaleString('uz-UZ')}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -519,7 +708,28 @@ const BuyerProfile = () => {
 
         {/* Main Content */}
         <main className="flex-1 bg-white p-4">
-          {renderTabContent()}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-8 h-8 border-2 border-[#6C4FFF] border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-gray-500">Profil ma'lumotlari yuklanmoqda...</p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <p className="text-red-500 mb-4">{error}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="px-4 py-2 bg-[#6C4FFF] text-white rounded-lg hover:bg-[#5A3FE6] transition-colors"
+                >
+                  Qayta urinish
+                </button>
+              </div>
+            </div>
+          ) : (
+            renderTabContent()
+          )}
         </main>
       </div>
 

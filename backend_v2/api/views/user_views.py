@@ -44,7 +44,7 @@ class UserViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """Permission tekshirish"""
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'me', 'stats']:
             permission_classes = [permissions.IsAuthenticated]
         else:
             permission_classes = [permissions.IsAdminUser]
@@ -105,6 +105,67 @@ class UserViewSet(viewsets.ModelViewSet):
         user.is_active = False
         user.save()
         return Response({'message': 'Foydalanuvchi deaktivlashtirildi'})
+    
+    @action(detail=False, methods=['get'])
+    def stats(self, request):
+        """Joriy foydalanuvchi statistikasi"""
+        user = request.user
+        
+        stats = {
+            'user_id': user.id,
+            'role': user.role,
+            'total_products': 0,
+            'total_rfqs': 0,
+            'total_offers': 0,
+            'total_orders_as_buyer': 0,
+            'total_orders_as_supplier': 0,
+            'total_revenue': 0,
+            'total_spent': 0,
+            'profile_completion': 0,
+            'company_info': {}
+        }
+        
+        if user.role == User.UserRole.SUPPLIER:
+            # Supplier statistikasi
+            stats['total_products'] = user.products.filter(is_active=True).count()
+            stats['total_offers'] = user.offers.count()
+            stats['total_orders_as_supplier'] = user.supplier_orders.count()
+            
+            # Kompaniya ma'lumotlari
+            if user.company:
+                stats ['company_info'] = {
+                    'id': user.company.id,
+                    'name': user.company.name,
+                    'tax_id': user.company.inn_stir,
+                    'legal_address': user.company.legal_address,
+                    'is_verified': user.company.is_verified
+                }
+                stats['profile_completion'] = 85  # Supplier uchun
+            else:
+                stats['profile_completion'] = 60
+                
+        elif user.role == User.UserRole.BUYER:
+            # Buyer statistikasi
+            stats['total_rfqs'] = user.rfqs.count()
+            stats['total_offers'] = user.offers.count()
+            stats['total_orders_as_buyer'] = user.buyer_orders.count()
+            
+            # Kompaniya ma'lumotlari
+            if user.company:
+                stats['company_info'] = {
+                    'id': user.company.id,
+                    'name': user.company.name,
+                    'tax_id': user.company.inn_stir,
+                    'legal_address': user.company.legal_address,
+                    'is_verified': user.company.is_verified
+                }
+                stats['profile_completion'] = 80  # Buyer uchun
+            else:
+                stats['profile_completion'] = 50
+        else:
+            stats['profile_completion'] = 30
+        
+        return Response(stats)
 
 
 class UserListView(viewsets.ReadOnlyModelViewSet):
@@ -195,10 +256,10 @@ class UserDetailView(viewsets.ReadOnlyModelViewSet):
             'supplier_orders': OrderListSerializer(supplier_orders, many=True).data
         })
     
-    @action(detail=True, methods=['get'])
-    def stats(self, request, pk=None):
+    @action(detail=False, methods=['get'])
+    def stats(self, request):
         """Foydalanuvchi statistikasi"""
-        user = self.get_object()
+        user = request.user
         
         stats = {
             'user_id': user.id,

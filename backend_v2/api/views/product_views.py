@@ -50,7 +50,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """Permission tekshirish"""
-        if self.action in ['list', 'retrieve', 'search', 'analytics']:
+        if self.action in ['list', 'retrieve', 'search', 'analytics', 'my_products']:
             permission_classes = [permissions.IsAuthenticated]
         elif self.action in ['create', 'update', 'partial_update', 'destroy']:
             permission_classes = [permissions.IsAuthenticated]

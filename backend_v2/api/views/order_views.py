@@ -9,7 +9,8 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 
-from ..models import Order, OrderDocument, OrderStatusHistory
+from ..models import Order, OrderDocument, OrderStatusHistory, Document
+from django.utils import timezone
 from ..serializers import (
     OrderSerializer,
     OrderListSerializer,
@@ -57,7 +58,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """Permission tekshirish"""
-        if self.action in ['list', 'retrieve', 'search']:
+        if self.action in ['list', 'retrieve', 'search', 'my_orders', 'buyer_orders', 'supplier_orders']:
             permission_classes = [permissions.IsAuthenticated]
         elif self.action in ['create', 'update', 'partial_update', 'destroy']:
             permission_classes = [permissions.IsAuthenticated]
@@ -115,9 +116,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'])
-    def contract_generated(self, request):
-        """Shartnoma yaratilgan buyurtmalar"""
-        orders = self.get_queryset().filter(status='contract_generated')
+    def payment_confirmed(self, request):
+        """To'lov tasdiqlangan buyurtmalar"""
+        orders = self.get_queryset().filter(status='payment_confirmed')
         serializer = OrderListSerializer(orders, many=True)
         return Response(serializer.data)
     
@@ -129,9 +130,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'])
-    def payment_received(self, request):
-        """To'lov qabul qilingan buyurtmalar"""
-        orders = self.get_queryset().filter(status='payment_received')
+    def ready_for_delivery(self, request):
+        """Yetkazib berishga tayyor buyurtmalar"""
+        orders = self.get_queryset().filter(status='ready_for_delivery')
         serializer = OrderListSerializer(orders, many=True)
         return Response(serializer.data)
     
@@ -178,19 +179,169 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     @action(detail=True, methods=['post'])
-    def generate_documents(self, request, pk=None):
-        """Hujjatlarni yaratish"""
+    def confirm_payment(self, request, pk=None):
+        """Sotuvchi tomonidan to'lovni tasdiqlash"""
         order = self.get_object()
-        # Faqat buyurtma egasi yoki admin yarata oladi
-        if order.buyer != request.user and order.supplier != request.user and not request.user.is_staff:
-            raise permissions.PermissionDenied("Siz bu buyurtma uchun hujjatlar yarata olmaysiz")
         
-        # Hujjatlarni yaratish logikasi bu yerda bo'ladi
-        # Hozircha placeholder
-        order.status = 'contract_generated'
+        if order.supplier != request.user:
+            return Response(
+                {'error': 'Faqat sotuvchi to\'lovni tasdiqlashi mumkin'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if order.status != Order.OrderStatus.AWAITING_PAYMENT:
+            return Response(
+                {'error': 'To\'lov kutilayotgan buyurtmalar uchun tasdiqlash mumkin'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        order.payment_confirmed_by_seller = True
+        order.payment_confirmed_at = timezone.now()
+        order.status = Order.OrderStatus.PAYMENT_CONFIRMED
         order.save()
         
-        return Response({'message': 'Hujjatlar yaratildi'})
+        # Status history ga qo'shish
+        OrderStatusHistory.objects.create(
+            order=order,
+            status=order.status,
+            comment='Sotuvchi tomonidan to\'lov tasdiqlangan',
+            created_by=request.user
+        )
+        
+        return Response({'message': 'To\'lov muvaffaqiyatli tasdiqlandi'})
+    
+    @action(detail=True, methods=['post'])
+    def upload_payment_proof(self, request, pk=None):
+        """Buyer tomonidan to'lov hujjatini yuklash"""
+        order = self.get_object()
+        
+        if order.buyer != request.user:
+            return Response(
+                {'error': 'Faqat buyer to\'lov hujjatini yuklashi mumkin'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if order.status != Order.OrderStatus.AWAITING_PAYMENT:
+            return Response(
+                {'error': 'To\'lov kutilayotgan buyurtmalar uchun hujjat yuklash mumkin'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Hujjat yuklash logikasi
+        document = Document.objects.create(
+            title=f"To'lov hujjati - Order {order.id}",
+            file=request.FILES['file'],
+            user=request.user,
+            order=order,
+            document_type='payment_proof',
+            file_name=request.FILES['file'].name,
+            file_size=request.FILES['file'].size,
+            content_type=request.FILES['file'].content_type
+        )
+        
+        order.payment_proof_document = document
+        order.save()
+        
+        return Response({'message': 'To\'lov hujjati muvaffaqiyatli yuklandi'})
+    
+    @action(detail=True, methods=['post'])
+    def upload_ttn(self, request, pk=None):
+        """Sotuvchi tomonidan TTN hujjatini yuklash"""
+        order = self.get_object()
+        
+        if order.supplier != request.user:
+            return Response(
+                {'error': 'Faqat sotuvchi TTN hujjatini yuklashi mumkin'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if order.status not in [Order.OrderStatus.READY_FOR_DELIVERY, Order.OrderStatus.IN_PREPARATION]:
+            return Response(
+                {'error': 'Tayyor yoki yetkazib berishga tayyor buyurtmalar uchun TTN yuklash mumkin'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # TTN hujjatini yuklash
+        document = Document.objects.create(
+            title=f"TTN hujjati - Order {order.id}",
+            file=request.FILES['file'],
+            user=request.user,
+            order=order,
+            document_type='ttn',
+            file_name=request.FILES['file'].name,
+            file_size=request.FILES['file'].size,
+            content_type=request.FILES['file'].content_type
+        )
+        
+        order.ttn_document = document
+        order.status = Order.OrderStatus.IN_TRANSIT
+        order.save()
+        
+        # Status history ga qo'shish
+        OrderStatusHistory.objects.create(
+            order=order,
+            status=order.status,
+            comment='TTN hujjati yuklandi, mahsulot yo\'lda',
+            created_by=request.user
+        )
+        
+        return Response({'message': 'TTN hujjati muvaffaqiyatli yuklandi'})
+    
+    @action(detail=True, methods=['post'])
+    def upload_contract(self, request, pk=None):
+        """Sotuvchi tomonidan shartnoma hujjatini yuklash"""
+        order = self.get_object()
+        
+        if order.supplier != request.user:
+            return Response(
+                {'error': 'Faqat sotuvchi shartnoma hujjatini yuklashi mumkin'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Shartnoma hujjatini yuklash
+        document = Document.objects.create(
+            title=f"Shartnoma - Order {order.id}",
+            file=request.FILES['file'],
+            user=request.user,
+            order=order,
+            document_type='contract',
+            file_name=request.FILES['file'].name,
+            file_size=request.FILES['file'].size,
+            content_type=request.FILES['file'].content_type
+        )
+        
+        order.contract_document = document
+        order.save()
+        
+        return Response({'message': 'Shartnoma hujjati muvaffaqiyatli yuklandi'})
+    
+    @action(detail=True, methods=['post'])
+    def upload_invoice(self, request, pk=None):
+        """Sotuvchi tomonidan hisob-faktura hujjatini yuklash"""
+        order = self.get_object()
+        
+        if order.supplier != request.user:
+            return Response(
+                {'error': 'Faqat sotuvchi hisob-faktura hujjatini yuklashi mumkin'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Hisob-faktura hujjatini yuklash
+        document = Document.objects.create(
+            title=f"Hisob-faktura - Order {order.id}",
+            file=request.FILES['file'],
+            user=request.user,
+            order=order,
+            document_type='invoice',
+            file_name=request.FILES['file'].name,
+            file_size=request.FILES['file'].size,
+            content_type=request.FILES['file'].content_type
+        )
+        
+        order.invoice_document = document
+        order.save()
+        
+        return Response({'message': 'Hisob-faktura hujjati muvaffaqiyatli yuklandi'})
     
     @action(detail=True, methods=['post'])
     def confirm_delivery(self, request, pk=None):

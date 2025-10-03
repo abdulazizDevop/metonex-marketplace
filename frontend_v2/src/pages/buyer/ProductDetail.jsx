@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
 const ProductDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const [product, setProduct] = useState(null)
+  const [flowData, setFlowData] = useState({
+    fromAvailableProducts: false,
+    selectedCategories: [],
+    flowStep: null,
+    returnPath: null
+  })
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
@@ -92,6 +99,17 @@ const ProductDetail = () => {
     }, 1000)
   }, [id])
 
+  // Initialize flow data from location state
+  useEffect(() => {
+    if (location.state) {
+      setFlowData({
+        fromAvailableProducts: location.state.fromAvailableProducts || false,
+        selectedCategories: location.state.selectedCategories || [],
+        flowStep: location.state.flowStep || null,
+        returnPath: location.state.returnPath || null
+      });
+    }
+  }, [location.state]);
 
   const handleQuantityChange = (value) => {
     const numValue = parseInt(value) || 1
@@ -172,11 +190,14 @@ const ProductDetail = () => {
       return
     }
 
-    // Navigate to RFQ form with product data
+    // Navigate to RFQ form with product data and flow context
     navigate('/buyer/rfq-form', { 
       state: { 
         product: product,
-        selectedCategories: [product.category]
+        selectedCategories: flowData.selectedCategories.length > 0 ? flowData.selectedCategories : [product.category],
+        flowData,
+        flowStep: 'rfq-creation',
+        returnPath: `/buyer/product/${id}`
       } 
     })
   }
@@ -218,7 +239,13 @@ const ProductDetail = () => {
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => {
+                if (flowData.returnPath) {
+                  navigate(flowData.returnPath);
+                } else {
+                  navigate(-1);
+                }
+              }}
               className="p-2 -ml-2 text-gray-600 hover:text-gray-800"
             >
               <span className="material-symbols-outlined text-xl">arrow_back</span>

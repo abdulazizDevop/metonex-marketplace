@@ -59,19 +59,49 @@ const SellerRequestDetail = () => {
     offersCount: 2
   });
 
+  const [flowData, setFlowData] = useState({
+    flowStep: null,
+    returnPath: null
+  });
+
+  // Initialize flow data from location state
+  React.useEffect(() => {
+    if (location.state) {
+      setFlowData({
+        flowStep: location.state.flowStep || null,
+        returnPath: location.state.returnPath || `/seller/orders?tab=${returnTab}`
+      });
+    }
+  }, [location.state, returnTab]);
+
   const handleBack = () => {
-    navigate(`/seller/orders?tab=${returnTab}`);
+    if (flowData.returnPath) {
+      navigate(flowData.returnPath);
+    } else {
+      navigate(`/seller/orders?tab=${returnTab}`);
+    }
   };
 
   const handleRespondToRequest = () => {
-    navigate(`/seller/respond-request/${id}`, {
-      state: { returnTab, requestData }
+    // Navigate to offer creation page (we'll create this)
+    navigate(`/seller/offer-details/new`, {
+      state: { 
+        returnTab, 
+        requestData,
+        flowStep: 'offer-creation',
+        returnPath: `/seller/request-details/${id}`
+      }
     });
   };
 
   const handleViewOffer = (offerId) => {
     navigate(`/seller/offer-details/${offerId}`, {
-      state: { returnTab, requestData }
+      state: { 
+        returnTab, 
+        requestData,
+        flowStep: 'offer-detail',
+        returnPath: `/seller/request-details/${id}`
+      }
     });
   };
 

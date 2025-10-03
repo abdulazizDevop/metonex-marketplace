@@ -10,14 +10,16 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .auth_urls import auth_urlpatterns
 from .user_urls import user_urlpatterns
 from .company_urls import company_urlpatterns
+from .company_member_urls import company_member_urlpatterns
 from .catalog_urls import catalog_urlpatterns
+from .metadata_urls import metadata_urlpatterns
 from .product_urls import product_urlpatterns
 from .rfq_urls import rfq_urlpatterns
 from .offer_urls import offer_urlpatterns
 from .order_urls import order_urlpatterns
 from .payment_urls import payment_urlpatterns
 from .notification_urls import notification_urlpatterns
-from .document_urls import urlpatterns as document_urlpatterns
+from .document_urls import document_urlpatterns
 
 # Main router for API v1
 router = DefaultRouter()
@@ -38,8 +40,12 @@ urlpatterns = [
         # Company management
         path('companies/', include(company_urlpatterns)),
         
+        # Company member management
+        path('company-members/', include(company_member_urlpatterns)),
+        
         # Catalog management
         path('catalog/', include(catalog_urlpatterns)),
+        path('', include(metadata_urlpatterns)),
         
         # Product management
         path('products/', include(product_urlpatterns)),
@@ -60,7 +66,7 @@ urlpatterns = [
         path('notifications/', include(notification_urlpatterns)),
         
         # Document management
-        path('', include(document_urlpatterns)),
+        path('documents/', include(document_urlpatterns)),
     ])),
     
     # Router URLs
@@ -73,7 +79,9 @@ __all__ = [
     'auth_urlpatterns',
     'user_urlpatterns',
     'company_urlpatterns',
+    'company_member_urlpatterns',
     'catalog_urlpatterns',
+    'metadata_urlpatterns',
     'product_urlpatterns',
     'rfq_urlpatterns',
     'offer_urlpatterns',

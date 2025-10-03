@@ -3,7 +3,7 @@ Order serializers - Buyurtmalar uchun serializers
 """
 
 from rest_framework import serializers
-from ..models import Order, OrderDocument, OrderStatusHistory, User, RFQ, Offer
+from ..models import Order, OrderDocument, OrderStatusHistory, User, RFQ, Offer, Document
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -16,14 +16,22 @@ class OrderSerializer(serializers.ModelSerializer):
     offer_info = serializers.SerializerMethodField()
     payment_status = serializers.SerializerMethodField()
     can_be_cancelled = serializers.SerializerMethodField()
+    contract_document_url = serializers.SerializerMethodField()
+    invoice_document_url = serializers.SerializerMethodField()
+    ttn_document_url = serializers.SerializerMethodField()
+    payment_proof_document_url = serializers.SerializerMethodField()
+    payment_confirmed_by_seller = serializers.BooleanField(read_only=True)
+    payment_confirmed_at = serializers.DateTimeField(read_only=True)
     
     class Meta:
         model = Order
         fields = [
             'id', 'rfq', 'rfq_info', 'offer', 'offer_info', 'buyer', 'buyer_info',
             'supplier', 'supplier_info', 'total_amount', 'payment_method', 'status',
-            'contract_url', 'invoice_url', 'payment_reference', 'delivery_date',
-            'delivery_address', 'delivery_contact', 'tracking_number',
+            'contract_document', 'invoice_document', 'ttn_document', 'payment_proof_document',
+            'contract_document_url', 'invoice_document_url', 'ttn_document_url', 'payment_proof_document_url',
+            'payment_confirmed_by_seller', 'payment_confirmed_at',
+            'delivery_date', 'delivery_address', 'delivery_contact', 'tracking_number',
             'estimated_delivery_date', 'actual_delivery_date', 'payment_status',
             'can_be_cancelled', 'created_at', 'updated_at'
         ]
@@ -78,6 +86,22 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_can_be_cancelled(self, obj):
         """Bekor qilinadimi tekshirish"""
         return obj.can_be_cancelled()
+    
+    def get_contract_document_url(self, obj):
+        """Shartnoma hujjati URL"""
+        return obj.contract_document.file.url if obj.contract_document else None
+    
+    def get_invoice_document_url(self, obj):
+        """Hisob-faktura hujjati URL"""
+        return obj.invoice_document.file.url if obj.invoice_document else None
+    
+    def get_ttn_document_url(self, obj):
+        """TTN hujjati URL"""
+        return obj.ttn_document.file.url if obj.ttn_document else None
+    
+    def get_payment_proof_document_url(self, obj):
+        """To'lov hujjati URL"""
+        return obj.payment_proof_document.file.url if obj.payment_proof_document else None
 
 
 class OrderListSerializer(serializers.ModelSerializer):

@@ -1,23 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import userApi from '../../utils/userApi';
 
 const BuyerEditCompany = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    companyName: 'O\'zbekiston Qurilish MChJ',
-    legalAddress: 'Tashkent, Uzbekistan',
-    innStir: '123456789',
-    bankName: 'Asaka Bank',
-    accountNumber: '****1234',
-    mfo: '00014',
+    companyName: '',
+    legalAddress: '',
+    innStir: '',
+    bankName: '',
+    accountNumber: '',
+    mfo: '',
     currency: 'UZS',
-    accountantName: 'Sarah Wilson',
-    accountantPhone: '+998 90 234 56 78',
-    accountantEmail: 'sarah.wilson@uzbekiston-qurilish.uz',
-    telegramOwner: '@sarah_wilson'
+    accountantName: '',
+    accountantPhone: '',
+    accountantEmail: '',
+    telegramOwner: ''
   });
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  // Load company data from backend
+  const loadCompanyData = async () => {
+    setInitialLoading(true);
+    try {
+      const company = await userApi.getCompany();
+      
+      setFormData({
+        companyName: company.name || '',
+        legalAddress: company.legal_address || '',
+        innStir: company.inn_stir || '',
+        bankName: company.bank_details?.bank_name || '',
+        accountNumber: company.bank_details?.account_number || '',
+        mfo: company.bank_details?.mfo || '',
+        currency: company.bank_details?.currency || 'UZS',
+        accountantName: company.accountant_contact?.name || '',
+        accountantPhone: company.accountant_contact?.phone || '',
+        accountantEmail: company.accountant_contact?.email || '',
+        telegramOwner: company.accountant_contact?.telegram || ''
+      });
+      
+    } catch (error) {
+      console.error('Company ma\'lumotlarini yuklashda xatolik:', error);
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCompanyData();
+  }, []);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -29,20 +62,47 @@ const BuyerEditCompany = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving company data:', formData);
-      navigate('/buyer/profile?tab=company');
+      const companyUpdateData = {
+        name: formData.companyName,
+        legal_address: formData.legalAddress,
+        inn_stir: formData.innStir,
+        bank_details: {
+          bank_name: formData.bankName,
+          account_number: formData.accountNumber,
+          mfo: formData.mfo,
+          currency: formData.currency
+        },
+        accountant_contact: {
+          name: formData.accountantName,
+          phone: formData.accountantPhone,
+          email: formData.accountantEmail,
+          telegram: formData.telegramOwner
+        }
+      };
+
+      await userApi.updateCompany(companyUpdateData);
+      alert('Company ma\'lumotlari muvaffaqiyatli saqlandi');
+      navigate('/buyer/company');
     } catch (error) {
-      console.error('Error saving company data:', error);
+      console.error('Company ma\'lumotlarini saqlashda xatolik:', error);
+      alert('Company ma\'lumotlarini saqlashda xatolik yuz berdi');
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    navigate('/buyer/profile?tab=company');
+    navigate('/buyer/company');
   };
+
+  if (initialLoading) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6C4FFF] mb-4"></div>
+        <p className="text-gray-500">Ma'lumotlar yuklanmoqda...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex size-full min-h-screen flex-col justify-between group/design-root overflow-x-hidden bg-white">

@@ -23,6 +23,20 @@ const RFQForm = () => {
 
   const product = location.state?.product
   const selectedCategories = location.state?.selectedCategories || []
+  const [flowData, setFlowData] = useState({
+    flowStep: null,
+    returnPath: null
+  })
+
+  // Initialize flow data from location state
+  useEffect(() => {
+    if (location.state) {
+      setFlowData({
+        flowStep: location.state.flowStep || null,
+        returnPath: location.state.returnPath || null
+      });
+    }
+  }, [location.state]);
 
   // Backend ma'lumotlariga mos kategoriyalar
   const categories = [
@@ -144,8 +158,15 @@ const RFQForm = () => {
       // Show success message
       alert('So\'rov muvaffaqiyatli yuborildi!')
       
-      // Navigate to request confirmation page
-      navigate('/buyer/request-confirmed')
+      // Navigate to request confirmation page with flow context
+      navigate('/buyer/request-confirmed', { 
+        state: { 
+          rfqData: result,
+          flowData,
+          flowStep: 'request-confirmed',
+          nextStep: '/buyer/orders?tab=requests'
+        } 
+      })
 
     } catch (error) {
       console.error('RFQ yuborishda xatolik:', error)
@@ -154,7 +175,14 @@ const RFQForm = () => {
       if (error.message.includes('Failed to fetch') || error.message.includes('404')) {
         console.log('API mavjud emas, mock response qaytarilmoqda')
         alert('So\'rov muvaffaqiyatli yuborildi! (Mock)')
-        navigate('/buyer/request-confirmed')
+        navigate('/buyer/request-confirmed', { 
+          state: { 
+            rfqData: { id: 'mock-rfq-001', ...rfqData },
+            flowData,
+            flowStep: 'request-confirmed',
+            nextStep: '/buyer/orders?tab=requests'
+          } 
+        })
         return
       }
       
@@ -187,7 +215,13 @@ const RFQForm = () => {
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => {
+                if (flowData.returnPath) {
+                  navigate(flowData.returnPath);
+                } else {
+                  navigate(-1);
+                }
+              }}
               className="p-2 -ml-2 text-gray-600 hover:text-gray-800"
             >
               <span className="material-symbols-outlined text-xl">arrow_back</span>

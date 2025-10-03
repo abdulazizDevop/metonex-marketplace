@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { authApi } from '../../utils/authApi'
 
 const RegistrationStep1PhoneVerification = () => {
   const navigate = useNavigate()
@@ -26,28 +27,41 @@ const RegistrationStep1PhoneVerification = () => {
     setError('')
     
     if (!phoneNumber.trim()) {
-      setError('Please enter your phone number')
+      setError('Telefon raqamini kiriting')
       return
     }
 
     if (!validatePhoneNumber(phoneNumber)) {
-      setError('Please enter a valid 9-digit phone number (e.g., 901234567)')
+      setError('To\'g\'ri 9 xonali telefon raqam kiriting (masalan: 901234567)')
       return
     }
 
     setIsLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const fullPhone = `${countryCode}${phoneNumber}`
+      
+      // Call SMS API
+      await authApi.sendSMS(fullPhone)
       
       // Store phone number in localStorage for next step
-      localStorage.setItem('registrationPhone', `${countryCode}${phoneNumber}`)
+      localStorage.setItem('registrationPhone', fullPhone)
       
       // Navigate to verification code step
       navigate('/registration/phone-verification-code')
     } catch (err) {
-      setError('Failed to send verification code. Please try again.')
+      console.error('SMS yuborishda xatolik:', err)
+      
+      // Handle specific error messages
+      if (err.message?.includes('400')) {
+        setError('Telefon raqami noto\'g\'ri formatda')
+      } else if (err.message?.includes('429')) {
+        setError('Juda ko\'p so\'rov yuborildi. Biroz kuting')
+      } else if (err.message?.includes('Network')) {
+        setError('Internet aloqasi yo\'q. Qaytadan urinib ko\'ring')
+      } else {
+        setError('SMS yuborishda xatolik. Qaytadan urinib ko\'ring')
+      }
     } finally {
       setIsLoading(false)
     }

@@ -116,12 +116,25 @@ const ConfirmDelivery = () => {
 
       // Navigate to success page after delay
       setTimeout(() => {
-        navigate('/supplier/orders', {
-          state: {
-            message: 'Yetkazib berish muvaffaqiyatli tasdiqlandi',
-            type: 'success'
-          }
-        });
+        // Check if this is first order
+        const isFirstOrder = localStorage.getItem('isFirstOrder') === 'true';
+        
+        if (isFirstOrder) {
+          navigate('/buyer/first-order-congratulations', {
+            state: {
+              orderData: orderData,
+              fromDelivery: true,
+              nextStep: '/buyer/delivery-feedback'
+            }
+          });
+        } else {
+          navigate('/buyer/delivery-feedback', {
+            state: {
+              orderData: orderData,
+              fromDelivery: true
+            }
+          });
+        }
       }, 2000);
 
     } catch (error) {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { authApi, tokenManager } from '../../utils/authApi'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -16,20 +17,32 @@ const Login = () => {
     setLoginError('')
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Check if user exists (simulate)
-      if (loginData.phone && loginData.password) {
-        // Store login data
-        localStorage.setItem('userLoginData', JSON.stringify({
-          phone: loginData.phone,
-          loggedIn: true,
-          loginTime: new Date().toISOString()
-        }))
+      // Validate input
+      if (!loginData.phone || !loginData.password) {
+        setLoginError('Telefon raqami va parolni kiriting')
+        return
+      }
+
+      // Call login API
+      const response = await authApi.login({
+        phone: loginData.phone,
+        password: loginData.password
+      })
+
+      // Store user data
+      localStorage.setItem('userLoginData', JSON.stringify({
+        phone: loginData.phone,
+        loggedIn: true,
+        loginTime: new Date().toISOString()
+      }))
+
+      // Get user profile to determine role
+      try {
+        const profile = await authApi.getProfile()
+        const userRole = profile.role || 'buyer'
+        localStorage.setItem('userRole', userRole)
         
-        // Navigate to appropriate dashboard based on stored role
-        const userRole = localStorage.getItem('userRole') || 'buyer'
+        // Navigate to appropriate dashboard
         if (userRole === 'buyer') {
           navigate('/buyer/home')
         } else if (userRole === 'supplier') {
@@ -37,11 +50,24 @@ const Login = () => {
         } else {
           navigate('/buyer/home') // Default to buyer
         }
-      } else {
-        setLoginError('Please enter valid phone number and password')
+      } catch (profileError) {
+        console.error('Profil olishda xatolik:', profileError)
+        // Still navigate to buyer home as fallback
+        navigate('/buyer/home')
       }
     } catch (error) {
-      setLoginError('Login failed. Please try again.')
+      console.error('Login error:', error)
+      
+      // Handle specific error messages
+      if (error.message?.includes('401') || error.message?.includes('Invalid credentials')) {
+        setLoginError('Telefon raqami yoki parol noto\'g\'ri')
+      } else if (error.message?.includes('400')) {
+        setLoginError('Ma\'lumotlar to\'liq emas')
+      } else if (error.message?.includes('Network')) {
+        setLoginError('Internet aloqasi yo\'q. Qaytadan urinib ko\'ring')
+      } else {
+        setLoginError('Kirishda xatolik yuz berdi. Qaytadan urinib ko\'ring')
+      }
     } finally {
       setIsLoginLoading(false)
     }
@@ -156,19 +182,22 @@ const Login = () => {
           {/* Additional Options */}
           <div className="mt-6 space-y-4">
             <div className="text-center">
-              <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                Forgot your password?
+              <button 
+                onClick={() => navigate('/forgot-password')}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Parolni unutdingizmi?
               </button>
             </div>
             
             <div className="text-center">
               <p className="text-sm text-gray-500">
-                Don't have an account?{' '}
+                Hisobingiz yo'qmi?{' '}
                 <button
                   onClick={handleRegister}
                   className="text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  Create one here
+                  Ro'yxatdan o'ting
                 </button>
               </p>
             </div>
@@ -180,7 +209,7 @@ const Login = () => {
       <div className="relative z-10 p-6 pb-8">
         <div className="text-center">
           <p className="text-xs text-gray-400">
-            By signing in, you agree to our Terms of Service and Privacy Policy
+            Kirish orqali siz Xizmat shartlari va Maxfiylik siyosatiga rozilik bildirasiz
           </p>
         </div>
       </div>

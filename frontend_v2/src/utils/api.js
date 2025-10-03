@@ -1,5 +1,10 @@
 // API utility functions
-const API_BASE_URL = import.meta.env?.VITE_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env?.VITE_API_URL || 'http://localhost:8000/api/v1';
+
+// Token management
+const getAuthToken = () => {
+  return localStorage.getItem('auth_token');
+};
 
 // Generic API request function
 const apiRequest = async (endpoint, options = {}) => {
@@ -11,6 +16,15 @@ const apiRequest = async (endpoint, options = {}) => {
     },
   };
 
+  // Add authorization header if token exists
+  const token = getAuthToken();
+  if (token) {
+    defaultOptions.headers['Authorization'] = `Bearer ${token}`;
+    console.log('Token found and added to headers:', token.substring(0, 20) + '...');
+  } else {
+    console.log('No token found in localStorage');
+  }
+
   const config = {
     ...defaultOptions,
     ...options,
@@ -20,14 +34,81 @@ const apiRequest = async (endpoint, options = {}) => {
     },
   };
 
+  // Remove Content-Type for FormData to let browser set it automatically
+  if (options.body instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
   try {
+    console.log('API Request:', { url, config });
+    console.log('Request headers:', config.headers);
+    console.log('Request body type:', typeof config.body);
+    if (config.body instanceof FormData) {
+      console.log('FormData contents:');
+      for (let [key, value] of config.body.entries()) {
+        console.log(`  ${key}:`, value);
+      }
+    } else {
+      console.log('Request body:', config.body);
+    }
     const response = await fetch(url, config);
+    console.log('API Response:', { status: response.status, ok: response.ok });
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      // If 401 error, try to refresh token
+      if (response.status === 401 && token) {
+        try {
+          const refreshToken = localStorage.getItem('refresh_token');
+          if (refreshToken) {
+            const refreshResponse = await fetch(`${API_BASE_URL}/auth/token/refresh/`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refresh: refreshToken })
+            });
+            
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json();
+              localStorage.setItem('auth_token', refreshData.access);
+              
+              // Retry the original request with new token
+              const newConfig = {
+                ...config,
+                headers: {
+                  ...config.headers,
+                  'Authorization': `Bearer ${refreshData.access}`
+                }
+              };
+              
+              const retryResponse = await fetch(url, newConfig);
+              if (retryResponse.ok) {
+                return await retryResponse.json();
+              }
+            }
+          }
+          
+          // Refresh failed, redirect to login
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('refresh_token');
+          window.location.href = '/login';
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('refresh_token');
+          window.location.href = '/login';
+        }
+      }
+      
+      const error = new Error(`HTTP error! status: ${response.status}`);
+      error.status = response.status;
+      error.response = response;
+      throw error;
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log('API Response Data:', data);
+    return data;
   } catch (error) {
     console.error('API request failed:', error);
     throw error;
@@ -41,24 +122,58 @@ export const api = {
     apiRequest(endpoint, { ...options, method: 'GET' }),
   
   // POST request
-  post: (endpoint, data, options = {}) => 
-    apiRequest(endpoint, {
+  post: (endpoint, data, options = {}) => {
+    const requestOptions = {
       ...options,
       method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    };
+    
+    // If data is FormData, don't stringify it
+    if (data instanceof FormData) {
+      requestOptions.body = data;
+      // Remove Content-Type header for FormData
+      if (requestOptions.headers) {
+        delete requestOptions.headers['Content-Type'];
+      }
+    } else {
+      requestOptions.body = JSON.stringify(data);
+    }
+    
+    return apiRequest(endpoint, requestOptions);
+  },
   
   // PUT request
-  put: (endpoint, data, options = {}) => 
-    apiRequest(endpoint, {
+  put: (endpoint, data, options = {}) => {
+    const requestOptions = {
       ...options,
       method: 'PUT',
-      body: JSON.stringify(data),
-    }),
+    };
+    
+    // If data is FormData, don't stringify it
+    if (data instanceof FormData) {
+      requestOptions.body = data;
+      // Remove Content-Type header for FormData
+      if (requestOptions.headers) {
+        delete requestOptions.headers['Content-Type'];
+      }
+    } else {
+      requestOptions.body = JSON.stringify(data);
+    }
+    
+    return apiRequest(endpoint, requestOptions);
+  },
   
   // DELETE request
-  delete: (endpoint, options = {}) => 
-    apiRequest(endpoint, { ...options, method: 'DELETE' }),
+  delete: (endpoint, options = {}) => {
+    const requestOptions = { ...options, method: 'DELETE' };
+    
+    // If data is provided, add it to the body
+    if (options.data) {
+      requestOptions.body = JSON.stringify(options.data);
+    }
+    
+    return apiRequest(endpoint, requestOptions);
+  },
   
   // PATCH request
   patch: (endpoint, data, options = {}) => 
@@ -169,20 +284,20 @@ export const endpoints = {
   
   // Documents
   documents: {
-    list: '/v1/documents/',
-    create: '/v1/documents/',
-    detail: (id) => `/v1/documents/${id}/`,
-    update: (id) => `/v1/documents/${id}/`,
-    delete: (id) => `/v1/documents/${id}/`,
-    download: (id) => `/v1/documents/${id}/download/`,
-    verify: (id) => `/v1/documents/${id}/verify/`,
-    share: (id) => `/v1/documents/${id}/share/`,
-    myDocuments: '/v1/documents/my-documents/',
-    orderDocuments: (orderId) => `/v1/documents/order-documents/${orderId}/`,
-    companyDocuments: (companyId) => `/v1/documents/company-documents/${companyId}/`,
-    search: '/v1/documents/search/',
-    sharedWithMe: '/v1/documents/shared-with-me/',
-    sharedByMe: '/v1/documents/shared-by-me/',
+    list: '/documents/',
+    create: '/documents/',
+    detail: (id) => `/documents/${id}/`,
+    update: (id) => `/documents/${id}/`,
+    delete: (id) => `/documents/${id}/`,
+    download: (id) => `/documents/${id}/download/`,
+    verify: (id) => `/documents/${id}/verify/`,
+    share: (id) => `/documents/${id}/share/`,
+    myDocuments: '/documents/my-documents/',
+    orderDocuments: (orderId) => `/documents/order-documents/${orderId}/`,
+    companyDocuments: (companyId) => `/documents/company-documents/${companyId}/`,
+    search: '/documents/search/',
+    sharedWithMe: '/documents/shared-with-me/',
+    sharedByMe: '/documents/shared-by-me/',
   },
 };
 

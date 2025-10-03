@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import userApi from '../../utils/userApi'
 
 const RegistrationStep3ForDealers = () => {
   const navigate = useNavigate()
@@ -66,26 +67,41 @@ const RegistrationStep3ForDealers = () => {
     setIsLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // To'liq registration ma'lumotlarini yig'ish
+      // Prepare registration data for backend
       const registrationData = {
-        user: {
-          phone: dealerData.phone,
-          password: dealerData.password,
-          role: 'supplier',
-          supplier_type: dealerData.supplierType
-        },
+        phone: dealerData.phone,
+        password: dealerData.password,
+        role: 'supplier',
+        supplier_type: dealerData.supplierType,
         company: {
           name: dealerData.companyName,
           inn_stir: dealerData.innStir,
           factories: factories
-        },
-        completedAt: new Date().toISOString()
+        }
+      }
+
+      // Register dealer via API
+      const response = await userApi.registerSeller(registrationData)
+      
+      console.log('Registration response:', response)  // Debug
+      
+      // Store auth tokens if provided
+      if (response.tokens?.access) {
+        console.log('Storing tokens:', response.tokens.access)  // Debug
+        localStorage.setItem('token', response.tokens.access)
+        localStorage.setItem('refresh_token', response.tokens.refresh)
+        
+        // Save dealer factories via separate API call
+        try {
+          await userApi.saveDealerFactories(factories)
+          console.log('Dealer zakodlar muvaffaqiyatli saqlandi')
+        } catch (factoryError) {
+          console.warn('Dealer zakodlarni saqlashda xatolik:', factoryError)
+        }
+      } else {
+        console.warn('Token topilmadi response-da:', response)
       }
       
-      localStorage.setItem('sellerRegistrationData', JSON.stringify(registrationData))
       localStorage.setItem('userRole', 'supplier')
       
       // Dealer ma'lumotlarini tozalash
@@ -94,7 +110,8 @@ const RegistrationStep3ForDealers = () => {
       // Navigate to dashboard
       navigate('/seller/dashboard')
     } catch (err) {
-      setError('Ro\'yxatdan o\'tishda xatolik yuz berdi. Qaytadan urinib ko\'ring.')
+      console.error('Dealer registration error:', err)
+      setError(err.response?.data?.error || err.message || 'Ro\'yxatdan o\'tishda xatolik yuz berdi')
     } finally {
       setIsLoading(false)
     }

@@ -31,11 +31,11 @@ const SellerEditProfile = () => {
 
   const handleSave = () => {
     console.log('Saving profile data:', formData);
-    navigate('/seller/profile-3');
+    navigate('/seller/profile');
   };
 
   const handleCancel = () => {
-    navigate('/seller/profile-3');
+    navigate('/seller/profile');
   };
 
   const handleSupport = () => {

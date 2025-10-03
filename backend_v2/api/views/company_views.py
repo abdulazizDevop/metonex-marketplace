@@ -3,13 +3,17 @@ Company views - Kompaniyalar uchun views
 """
 
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework import viewsets, status, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
+import json
+import uuid
 
-from ..models import Company, User
+from ..models import Company, User, Factory, DealerFactory
 from ..serializers import (
     CompanySerializer,
     CompanyProfileSerializer,
@@ -51,9 +55,9 @@ class CompanyViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """Permission tekshirish"""
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'my_company', 'members', 'member_detail']:
             permission_classes = [permissions.IsAuthenticated]
-        elif self.action in ['create', 'update', 'partial_update']:
+        elif self.action in ['create', 'update', 'partial_update', 'create_profile']:
             permission_classes = [permissions.IsAuthenticated]
         else:
             permission_classes = [permissions.IsAdminUser]
@@ -64,7 +68,26 @@ class CompanyViewSet(viewsets.ModelViewSet):
         # Har bir foydalanuvchi faqat bitta kompaniya yarata oladi
         if hasattr(self.request.user, 'company'):
             raise permissions.PermissionDenied("Sizda allaqachon kompaniya mavjud")
-        serializer.save()
+        
+        # Foydalanuvchini kompaniya egasi sifatida belgilash
+        company = serializer.save(user=self.request.user)
+        
+        # Kompaniya yaratilganda foydalanuvchini faollashtirish
+        self.request.user.is_active = True
+        self.request.user.save()
+        
+        # Kompaniya egasini member sifatida qo'shish
+        from ..models import CompanyMember
+        CompanyMember.objects.create(
+            company=company,
+            user=self.request.user,
+            name=f"{self.request.user.first_name} {self.request.user.last_name}".strip() or self.request.user.phone,
+            role=CompanyMember.Role.OWNER,
+            phone=self.request.user.phone,
+            email=self.request.user.email or ''
+        )
+        
+        return company
     
     def perform_update(self, serializer):
         """Kompaniya yangilash"""
@@ -139,6 +162,134 @@ class CompanyViewSet(viewsets.ModelViewSet):
         serializer = CompanyListSerializer(companies, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get', 'post'])
+    def members(self, request):
+        """Kompaniya a'zolarini boshqarish"""
+        try:
+            company = request.user.company
+        except Company.DoesNotExist:
+            return Response({'error': 'Kompaniya topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if request.method == 'GET':
+            # Kompaniya a'zolarini olish
+            members = company.team_members or []
+            return Response({
+                'company_id': company.id,
+                'company_name': company.name,
+                'members': members
+            })
+        
+        elif request.method == 'POST':
+            # Yangi a'zo qo'shish
+            member_data = request.data
+            required_fields = ['name', 'position']
+            
+            for field in required_fields:
+                if field not in member_data:
+                    return Response(
+                        {'error': f'{field} maydoni majburiy'}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            # Mavjud a'zolarni olish
+            current_members = company.team_members or []
+            
+            # Yangi a'zoni qo'shish
+            new_member = {
+                'id': len(current_members) + 1,
+                'name': member_data['name'],
+                'position': member_data['position'],
+                'phone': member_data.get('phone', ''),
+                'email': member_data.get('email', ''),
+                'created_at': timezone.now().isoformat()
+            }
+            
+            current_members.append(new_member)
+            company.team_members = current_members
+            company.save()
+            
+            return Response({
+                'message': 'A\'zo muvaffaqiyatli qo\'shildi',
+                'member': new_member
+            }, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['put', 'delete'], url_path='members/(?P<member_id>[^/.]+)')
+    def member_detail(self, request, member_id=None):
+        """Kompaniya a'zosini yangilash yoki o'chirish"""
+        try:
+            company = request.user.company
+        except Company.DoesNotExist:
+            return Response({'error': 'Kompaniya topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Mavjud a'zolarni olish
+        current_members = company.team_members or []
+        
+        # A'zoni topish
+        member_index = None
+        for i, member in enumerate(current_members):
+            if str(member.get('id', '')) == str(member_id):
+                member_index = i
+                break
+        
+        if member_index is None:
+            return Response({'error': 'A\'zo topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if request.method == 'PUT':
+            # A'zoni yangilash
+            member_data = request.data
+            current_members[member_index].update({
+                'name': member_data.get('name', current_members[member_index]['name']),
+                'position': member_data.get('position', current_members[member_index]['position']),
+                'phone': member_data.get('phone', current_members[member_index]['phone']),
+                'email': member_data.get('email', current_members[member_index]['email']),
+                'updated_at': timezone.now().isoformat()
+            })
+            
+            company.team_members = current_members
+            company.save()
+            
+            return Response({
+                'message': 'A\'zo muvaffaqiyatli yangilandi',
+                'member': current_members[member_index]
+            })
+        
+        elif request.method == 'DELETE':
+            # A'zoni o'chirish
+            deleted_member = current_members.pop(member_index)
+            company.team_members = current_members
+            company.save()
+            
+            return Response({
+                'message': 'A\'zo muvaffaqiyatli o\'chirildi',
+                'deleted_member': deleted_member
+            })
+    @action(detail=False, methods=['get'])
+    def factories(self, request):
+        """Foydalanuvchining zavodlarini olish"""
+        if request.user.role != User.UserRole.SUPPLIER:
+            return Response({'error': 'Faqat sotuvchilar zavodlarni ko\'ra oladi'}, 
+                           status=status.HTTP_400_BAD_REQUEST)
+        
+        user_factories = Factory.objects.filter(
+            dealers_factories__dealer=request.user
+        ).distinct()
+        
+        factory_data = []
+        for factory in user_factories:
+            factory_data.append({
+                'id': factory.id,
+                'name': factory.name,
+                'location': factory.location,
+                'contact_info': factory.contact_info,
+                'website': factory.website,
+                'description': factory.description
+            })
+        
+        return Response({
+            'count': len(factory_data),
+            'results': factory_data
+        })
+
 
 class CompanyProfileView(APIView):
     """
@@ -177,6 +328,67 @@ class CompanyProfileView(APIView):
         except Company.DoesNotExist:
             return Response({'error': 'Kompaniya topilmadi'}, 
                            status=status.HTTP_404_NOT_FOUND)
+    
+    @action(detail=False, methods=['post'])
+    def dealer_factories(self, request):
+        """Dealer zavodlarini saqlash"""
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication kerak'}, 
+                           status=status.HTTP_401_UNAUTHORIZED)
+        
+        if request.user.role != User.UserRole.SUPPLIER:
+            return Response({'error': 'Faqat sotuvchilar qo\'shishga ruxsati bor'}, 
+                           status=status.HTTP_403_FORBIDDEN)
+        
+        if request.user.supplier_type != User.SupplierType.DEALER:
+            return Response({'error': 'Faqat dealer zavodlarini qo\'sha oladi'}, 
+                           status=status.HTTP_403_FORBIDDEN)
+        
+        factories_data = request.data.get('factories', [])
+        if not factories_data:
+            return Response({'error': 'Zavodlar matn ro\'yxati kerak'}, 
+                           status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Eski dealer factory ma'lumotlarini o'chirish
+            DealerFactory.objects.filter(dealer=request.user).delete()
+            
+            # Yangi zavodlarni qo'shish
+            created_factories = []
+            for factory_name in factories_data:
+                if factory_name and factory_name.strip():
+                    # Factory yaratish yoki olish
+                    factory, created = Factory.objects.get_or_create(
+                        name=factory_name.strip(),
+                        defaults={
+                            'location': '',  # Bo'sh qoldirish mumkin
+                            'contact_info': '',
+                            'website': '',
+                            'description': ''
+                        }
+                    )
+                    
+                    # DealerFactory bog'lanishini yaratish
+                    dealer_factory, df_created = DealerFactory.objects.get_or_create(
+                        dealer=request.user,
+                        factory=factory
+                    )
+                    
+                    created_factories.append({
+                        'id': factory.id,
+                        'name': factory.name,
+                        'location': factory.location,
+                        'created': created or df_created
+                    })
+            
+            return Response({
+                'message': f'{len(created_factories)} ta zavod qo\'shildi',
+                'factories': created_factories
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response({'error': f'Zavod qo\'shishda xatolik: {str(e)}'}, 
+                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CompanyListView(viewsets.ReadOnlyModelViewSet):

@@ -2,7 +2,6 @@ from django.db import models
 from django.utils import timezone
 from django.core.validators import RegexValidator, FileExtensionValidator
 from django.contrib.auth.models import AbstractUser
-import os
 import uuid
 
 
@@ -62,6 +61,7 @@ class User(AbstractUser):
     # Status va vaqt
     is_active = models.BooleanField(default=True)
     last_login_ip = models.GenericIPAddressField(null=True, blank=True, protocol='both')
+    last_login_at = models.DateTimeField(null=True, blank=True, verbose_name='Oxirgi kirish vaqti')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -120,6 +120,9 @@ class Company(models.Model):
     is_verified = models.BooleanField(default=False, verbose_name='Tasdiqlangan')
     verification_documents = models.JSONField(default=list, blank=True, verbose_name='Tasdiqlash hujjatlari')
     
+    # Team members
+    team_members = models.JSONField(default=list, blank=True, verbose_name='Jamoa a\'zolari')
+    
     # Vaqt
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -131,6 +134,43 @@ class Company(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class CompanyMember(models.Model):
+    """
+    Kompaniya a'zolari - alohida model
+    """
+    class Role(models.TextChoices):
+        OWNER = 'owner', 'Egasi'
+        ADMIN = 'admin', 'Administrator'
+        MANAGER = 'manager', 'Menejer'
+        EMPLOYEE = 'employee', 'Xodim'
+        ACCOUNTANT = 'accountant', 'Buxgalter'
+
+    id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='members')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='company_memberships', null=True, blank=True)
+    
+    # Member ma'lumotlari
+    name = models.CharField(max_length=255, verbose_name='Ism')
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.EMPLOYEE, verbose_name='Rol')
+    phone = models.CharField(max_length=20, blank=True, verbose_name='Telefon raqami')
+    telegram_username = models.CharField(max_length=100, blank=True, verbose_name='Telegram username')
+    email = models.EmailField(blank=True, verbose_name='Email')
+    
+    # Qo'shimcha ma'lumotlar
+    is_active = models.BooleanField(default=True, verbose_name='Faol')
+    joined_at = models.DateTimeField(auto_now_add=True, verbose_name='Qo\'shilgan vaqt')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Yangilangan vaqt')
+
+    class Meta:
+        db_table = 'company_members'
+        verbose_name = 'Kompaniya a\'zosi'
+        verbose_name_plural = 'Kompaniya a\'zolari'
+        unique_together = ['company', 'user']  # Bir user bir kompaniyada faqat bitta role
+
+    def __str__(self):
+        return f"{self.name} - {self.company.name} ({self.get_role_display()})"
 
 
 class Unit(models.Model):
@@ -305,6 +345,9 @@ class Factory(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, verbose_name='Zavod nomi')
     location = models.CharField(max_length=255, blank=True, verbose_name='Manzil')
+    contact_info = models.TextField(blank=True, verbose_name='Aloqa ma\'lumotlari')
+    website = models.URLField(blank=True, verbose_name='Veb-sayt')
+    description = models.TextField(blank=True, verbose_name='Tavsif')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -667,10 +710,10 @@ class Order(models.Model):
     """
     class OrderStatus(models.TextChoices):
         CREATED = 'created', 'Yaratilgan'
-        CONTRACT_GENERATED = 'contract_generated', 'Shartnoma yaratilgan'
         AWAITING_PAYMENT = 'awaiting_payment', 'To\'lov kutilmoqda'
-        PAYMENT_RECEIVED = 'payment_received', 'To\'lov qabul qilingan'
+        PAYMENT_CONFIRMED = 'payment_confirmed', 'To\'lov tasdiqlangan'
         IN_PREPARATION = 'in_preparation', 'Tayyorlanmoqda'
+        READY_FOR_DELIVERY = 'ready_for_delivery', 'Yetkazib berishga tayyor'
         IN_TRANSIT = 'in_transit', 'Yo\'lda'
         DELIVERED = 'delivered', 'Yetkazib berilgan'
         CONFIRMED = 'confirmed', 'Tasdiqlangan'
@@ -685,17 +728,60 @@ class Order(models.Model):
     
     # Moliyaviy ma'lumotlar
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Jami summa')
+    currency = models.CharField(max_length=3, default='UZS', verbose_name='Valyuta')
     payment_method = models.CharField(max_length=20, verbose_name='To\'lov usuli')
     
     # Status
     status = models.CharField(max_length=30, choices=OrderStatus.choices, default=OrderStatus.CREATED)
     
-    # Hujjatlar
-    contract_url = models.URLField(blank=True, verbose_name='Shartnoma URL')
-    invoice_url = models.URLField(blank=True, verbose_name='Hisob-faktura URL')
+    # Hujjatlar - manual yuklash uchun (Document modeli orqali)
+    contract_document = models.ForeignKey(
+        'Document', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='contract_orders',
+        verbose_name='Shartnoma hujjati',
+        limit_choices_to={'document_type': 'contract'}
+    )
+    invoice_document = models.ForeignKey(
+        'Document', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='invoice_orders',
+        verbose_name='Hisob-faktura hujjati',
+        limit_choices_to={'document_type': 'invoice'}
+    )
+    ttn_document = models.ForeignKey(
+        'Document', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='ttn_orders',
+        verbose_name='TTN hujjati',
+        limit_choices_to={'document_type': 'ttn'}
+    )
+    payment_proof_document = models.ForeignKey(
+        'Document', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='payment_proof_orders',
+        verbose_name='To\'lov hujjati',
+        limit_choices_to={'document_type': 'payment_proof'}
+    )
     
-    # To'lov ma'lumotlari
-    payment_reference = models.CharField(max_length=100, blank=True, verbose_name='To\'lov havolasi')
+    # To'lov tasdiqlash
+    payment_confirmed_by_seller = models.BooleanField(
+        default=False, 
+        verbose_name='Sotuvchi tomonidan to\'lov tasdiqlangan'
+    )
+    payment_confirmed_at = models.DateTimeField(
+        null=True, 
+        blank=True,
+        verbose_name='To\'lov tasdiqlangan vaqt'
+    )
     
     # Yetkazib berish
     delivery_date = models.DateField(verbose_name='Yetkazib berish sanasi')
@@ -728,23 +814,74 @@ class Order(models.Model):
         """Bekor qilinadimi tekshirish"""
         return self.status in [
             self.OrderStatus.CREATED,
-            self.OrderStatus.CONTRACT_GENERATED,
             self.OrderStatus.AWAITING_PAYMENT
         ]
 
     def get_payment_status(self):
         """To'lov holatini olish"""
-        if self.status in [self.OrderStatus.PAYMENT_RECEIVED, self.OrderStatus.IN_PREPARATION]:
+        if self.status in [self.OrderStatus.PAYMENT_CONFIRMED, self.OrderStatus.IN_PREPARATION]:
             return 'paid'
         elif self.status == self.OrderStatus.AWAITING_PAYMENT:
             return 'pending'
         else:
             return 'not_required'
+    
+    def can_seller_confirm_payment(self):
+        """Sotuvchi to'lovni tasdiqlashi mumkinmi"""
+        return (self.status == self.OrderStatus.AWAITING_PAYMENT and 
+                not self.payment_confirmed_by_seller)
+    
+    def can_buyer_upload_payment_proof(self):
+        """Buyer to'lov hujjatini yuklashi mumkinmi"""
+        return (self.status == self.OrderStatus.AWAITING_PAYMENT and 
+                not self.payment_proof_document)
+    
+    def can_seller_upload_ttn(self):
+        """Sotuvchi TTN yuklashi mumkinmi"""
+        return self.status in [
+            self.OrderStatus.READY_FOR_DELIVERY, 
+            self.OrderStatus.IN_PREPARATION
+        ]
+    
+    @property
+    def order_number(self):
+        """Buyurtma raqami: ORD-{id}"""
+        return f"ORD-{self.id}"
+    
+    @property
+    def offers_count(self):
+        """RFQ'ga kelgan takliflar soni"""
+        return self.rfq.offers.count() if self.rfq else 0
+    
+    @property
+    def lowest_price(self):
+        """Eng arzon taklif narxi"""
+        if not self.rfq:
+            return None
+        lowest_offer = self.rfq.offers.order_by('price_per_unit').first()
+        return lowest_offer.price_per_unit if lowest_offer else None
+    
+    @property
+    def fastest_delivery(self):
+        """Eng tez yetkazib berish (kunlarda)"""
+        if not self.rfq:
+            return None
+        fastest_offer = self.rfq.offers.order_by('delivery_days').first()
+        return fastest_offer.delivery_days if fastest_offer else None
+    
+    @property
+    def has_new_offers(self):
+        """Yangi takliflar bor-yo'qligi (oxirgi 24 soat ichida)"""
+        if not self.rfq:
+            return False
+        from django.utils import timezone
+        yesterday = timezone.now() - timezone.timedelta(days=1)
+        return self.rfq.offers.filter(created_at__gte=yesterday).exists()
 
 
 class OrderDocument(models.Model):
     """
-    Buyurtma hujjatlari
+    Buyurtma hujjatlari (eski model - backward compatibility uchun)
     """
     class DocumentType(models.TextChoices):
         CONTRACT = 'contract', 'Shartnoma'
@@ -758,7 +895,7 @@ class OrderDocument(models.Model):
     document_type = models.CharField(max_length=50, choices=DocumentType.choices, verbose_name='Hujjat turi')
     file_url = models.URLField(verbose_name='Fayl URL')
     
-    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_documents')
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='order_documents')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -1008,13 +1145,25 @@ class Notification(models.Model):
 def document_upload_path(instance, filename):
     """
     Moslashuvchan fayl yuklash yo'li
-    Format: documents/{user_id}/{document_type}/{year}/{month}/{filename}
+    Format: documents/{company_name}/{year}/{document_type}/{filename}
     """
+    import re
     ext = filename.split('.')[-1]
-    filename = f"{uuid.uuid4().hex}.{ext}"
+    unique_filename = f"{uuid.uuid4().hex}.{ext}"
     
-    date_path = timezone.now().strftime('%Y/%m')
-    return f"documents/{instance.user.id}/{instance.document_type}/{date_path}/{filename}"
+    # Company name or user ID for path
+    if instance.company:
+        # Clean company name for file path
+        company_name = re.sub(r'[^\w\s-]', '', instance.company.name).strip()
+        company_name = re.sub(r'[-\s]+', '_', company_name)
+        path_prefix = company_name
+    else:
+        path_prefix = f"user_{instance.user.id}"
+    
+    year = timezone.now().strftime('%Y')
+    document_type = instance.document_type or 'other'
+    
+    return f"documents/{path_prefix}/{year}/{document_type}/{unique_filename}"
 
 
 class Document(models.Model):
@@ -1033,6 +1182,7 @@ class Document(models.Model):
         INVOICE = 'invoice', 'Hisob-faktura'
         TTN = 'ttn', 'TTN (Transport hujjati)'
         RECEIPT = 'receipt', 'Qabul qilish hujjati'
+        PAYMENT_PROOF = 'payment_proof', 'To\'lov hujjati'
         
         # Mahsulot hujjatlari
         CERTIFICATE = 'certificate', 'Sertifikat'
@@ -1066,7 +1216,7 @@ class Document(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents')
     order = models.ForeignKey(
         'Order', 
-        on_delete=models.CASCADE, 
+        on_delete=models.CASCADE,
         related_name='new_documents',
         null=True, 
         blank=True,

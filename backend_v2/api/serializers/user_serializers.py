@@ -13,24 +13,26 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     Foydalanuvchi ro'yxatdan o'tish uchun serializer
     """
     password = serializers.CharField(write_only=True, validators=[validate_password])
-    password_confirm = serializers.CharField(write_only=True)
+    password_confirm = serializers.CharField(write_only=True, required=False)
+    company = serializers.DictField(required=False, allow_null=True)
     
     class Meta:
         model = User
         fields = [
             'phone', 'role', 'supplier_type', 'first_name', 'last_name',
-            'password', 'password_confirm'
+            'password', 'password_confirm', 'company'
         ]
         extra_kwargs = {
             'phone': {'required': True},
             'role': {'required': True},
-            'first_name': {'required': True},
-            'last_name': {'required': True},
+            'first_name': {'required': False},
+            'last_name': {'required': False},
         }
     
     def validate(self, attrs):
         """Parol tasdiqlash"""
-        if attrs['password'] != attrs['password_confirm']:
+        # Agar password_confirm berilgan bo'lsa, tekshirish
+        if 'password_confirm' in attrs and attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError({
                 'password_confirm': 'Parollar mos kelmaydi'
             })
@@ -45,14 +47,29 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         """Foydalanuvchi yaratish"""
-        validated_data.pop('password_confirm')
+        validated_data.pop('password_confirm', None)  # Xavfsiz remove qilish
         password = validated_data.pop('password')
+        company_data = validated_data.pop('company', None)
+        
+        print("Validation data:", validated_data)  # Debug
         
         user = User.objects.create_user(
             username=validated_data['phone'],  # Username sifatida phone ishlatamiz
             password=password,
             **validated_data
         )
+        
+        # Company ma'lumotlarini yaratish (agar mavjud bo'lsa)
+        if company_data:
+            Company.objects.create(
+                user=user,
+                name=company_data.get('name', ''),
+                legal_address=company_data.get('legal_address', ''),
+                inn_stir=company_data.get('inn_stir', ''),
+                bank_details=company_data.get('bank_details', {}),
+                accountant_contact=company_data.get('accountant_contact', {}),
+                telegram_owner=company_data.get('telegram_owner', '')
+            )
         
         return user
 
@@ -64,17 +81,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
     company = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     last_login_ip = serializers.CharField(max_length=45, read_only=True, allow_null=True)
+    last_login_at = serializers.DateTimeField(read_only=True, allow_null=True)
     
     class Meta:
         model = User
         fields = [
             'id', 'phone', 'phone_verified', 'role', 'supplier_type',
             'first_name', 'last_name', 'full_name', 'avatar', 'is_active',
-            'last_login_ip', 'created_at', 'updated_at', 'company'
+            'last_login_ip', 'last_login_at', 'created_at', 'updated_at', 'company'
         ]
         read_only_fields = [
             'id', 'phone', 'phone_verified', 'role', 'supplier_type',
-            'last_login_ip', 'created_at', 'updated_at'
+            'last_login_ip', 'last_login_at', 'created_at', 'updated_at'
         ]
     
     def get_company(self, obj):
@@ -158,6 +176,23 @@ class UserSerializer(serializers.ModelSerializer):
     def get_full_name(self, obj):
         """To'liq ismni olish"""
         return obj.get_full_name()
+
+
+class SendSMSSerializer(serializers.Serializer):
+    """
+    SMS yuborish uchun serializer
+    """
+    phone = serializers.CharField(max_length=20)
+    
+    def validate_phone(self, value):
+        """Telefon raqami validatsiyasi"""
+        import re
+        
+        if not re.match(r'^\+998\d{9}$', value):
+            raise serializers.ValidationError(
+                'Telefon raqami +998XXXXXXXXX formatida bo\'lishi kerak'
+            )
+        return value
 
 
 class UserPhoneVerificationSerializer(serializers.Serializer):

@@ -24,6 +24,7 @@ user_urlpatterns = [
     
     # Custom user actions
     path('me/', UserViewSet.as_view({'get': 'me'}), name='user-me'),
+    path('stats/', UserViewSet.as_view({'get': 'stats'}), name='user-stats'),
     path('suppliers/', UserViewSet.as_view({'get': 'suppliers'}), name='user-suppliers'),
     path('buyers/', UserViewSet.as_view({'get': 'buyers'}), name='user-buyers'),
     path('manufacturers/', UserViewSet.as_view({'get': 'manufacturers'}), name='user-manufacturers'),

@@ -52,9 +52,9 @@ const OrderDetail = () => {
           },
           totalAmount: 12000,
           currency: 'USD',
-          status: 'in_transit',
-          paymentStatus: 'paid',
-          paymentMethod: 'bank',
+          status: 'awaiting_payment',
+          paymentStatus: 'pending',
+          paymentMethod: 'cash',
           orderDate: '2024-01-18',
           deliveryDate: '2024-01-20',
           estimatedDeliveryDate: '2024-01-22',
@@ -88,22 +88,10 @@ const OrderDetail = () => {
               comment: 'To\'lov kutilmoqda'
             },
             {
-              status: 'payment_received',
-              statusText: 'To\'lov qabul qilingan',
+              status: 'awaiting_payment',
+              statusText: 'To\'lov kutilmoqda',
               date: '2024-01-18T14:00:00Z',
-              comment: 'To\'lov tasdiqlandi'
-            },
-            {
-              status: 'in_preparation',
-              statusText: 'Tayyorlanmoqda',
-              date: '2024-01-19T09:00:00Z',
-              comment: 'Mahsulot tayyorlanmoqda'
-            },
-            {
-              status: 'in_transit',
-              statusText: 'Yo\'lda',
-              date: '2024-01-20T08:00:00Z',
-              comment: 'Yetkazib berish yo\'lida'
+              comment: 'Shartnoma tayyorlanmoqda'
             }
           ]
         }
@@ -250,8 +238,13 @@ const OrderDetail = () => {
 
   const handleTrackOrder = () => {
     console.log('Tracking order:', order.trackingNumber)
-    // In real app, this would open tracking page
-    alert('Kuzatish sahifasi ochiladi...')
+    navigate(`/buyer/order-tracking/${order.id}`, {
+      state: {
+        orderData: order,
+        returnPath: `/buyer/order/${order.id}`,
+        flowStep: 'order-tracking'
+      }
+    })
   }
 
   const handleContactSupplier = () => {
@@ -588,6 +581,125 @@ const OrderDetail = () => {
               <p className="text-sm font-medium text-gray-900">{order.paymentReference}</p>
             </div>
           </div>
+
+          {/* Status-based actions */}
+          {order.status === 'awaiting_payment' && order.paymentMethod === 'bank' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-blue-600">schedule</span>
+                <div>
+                  <h4 className="font-medium text-blue-900">Shartnoma tayyorlanmoqda</h4>
+                  <p className="text-sm text-blue-700">Sotuvchi shartnoma tayyorlab, sizga yuboradi</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {order.status === 'awaiting_payment' && order.paymentMethod === 'cash' && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-green-600">payments</span>
+                <div>
+                  <h4 className="font-medium text-green-900">Naqd to'lov</h4>
+                  <p className="text-sm text-green-700">Yetkazib berishda naqd pul to'lanadi</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {order.status === 'contract_sent' && order.paymentMethod === 'bank' && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-green-600">check_circle</span>
+                <div>
+                  <h4 className="font-medium text-green-900">Shartnoma yuborildi</h4>
+                  <p className="text-sm text-green-700">To'lov hujjatini yuklang</p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/buyer/upload-payment-proof', {
+                  state: { orderData: order, returnPath: `/buyer/order/${order.id}` }
+                })}
+                className="mt-3 w-full bg-[#6C4FFF] text-white py-2 px-4 rounded-lg hover:bg-[#5A3FE6] transition-colors"
+              >
+                To'lov hujjatini yuklash
+              </button>
+            </div>
+          )}
+
+          {order.status === 'in_preparation' && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-orange-600">build</span>
+                <div>
+                  <h4 className="font-medium text-orange-900">Tayyorlanmoqda</h4>
+                  <p className="text-sm text-orange-700">Mahsulot tayyorlanmoqda</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {order.status === 'in_transit' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-blue-600">local_shipping</span>
+                <div>
+                  <h4 className="font-medium text-blue-900">Yo'lda</h4>
+                  <p className="text-sm text-blue-700">Mahsulot yetkazib berish yo'lida</p>
+                </div>
+              </div>
+              {order.trackingNumber && (
+                <button
+                  onClick={handleTrackOrder}
+                  className="mt-3 w-full bg-[#6C4FFF] text-white py-2 px-4 rounded-lg hover:bg-[#5A3FE6] transition-colors"
+                >
+                  TTN hujjatini ko'rish
+                </button>
+              )}
+            </div>
+          )}
+
+          {order.status === 'delivered' && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-green-600">check_circle</span>
+                <div>
+                  <h4 className="font-medium text-green-900">Yetkazib berildi</h4>
+                  <p className="text-sm text-green-700">Hujjat asosida qabul qiling</p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/buyer/confirm-delivery', {
+                  state: { orderData: order, returnPath: `/buyer/order/${order.id}` }
+                })}
+                className="mt-3 w-full bg-[#6C4FFF] text-white py-2 px-4 rounded-lg hover:bg-[#5A3FE6] transition-colors"
+              >
+                Qabul qilish
+              </button>
+            </div>
+          )}
+
+          {order.status === 'delivered' && order.paymentMethod === 'cash' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-blue-600">payments</span>
+                <div>
+                  <h4 className="font-medium text-blue-900">Pul to'landi</h4>
+                  <p className="text-sm text-blue-700">Sotuvchiga pul to'landi</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  // Mark order as completed
+                  setOrder(prev => ({ ...prev, status: 'completed' }))
+                }}
+                className="mt-3 w-full bg-[#6C4FFF] text-white py-2 px-4 rounded-lg hover:bg-[#5A3FE6] transition-colors"
+              >
+                Buyurtmani yakunlash
+              </button>
+            </div>
+          )}
+
         </div>
 
         {/* Documents */}

@@ -1,0 +1,395 @@
+Token found and added to headers: eyJhbGciOiJIUzI1NiIs...
+api.js?t=1759395911527:43 API Request: {url: 'http://localhost:8000/api/v1/offers/my_offers/?limit=5', config: {…}}
+api.js?t=1759395911527:44 Request headers: {Content-Type: 'application/json', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2…jMifQ.7CFNMRsYzsUR3ylVdEvU2aoCgPGddW3l-fkXO-hnvyU'}
+api.js?t=1759395911527:45 Request body type: undefined
+api.js?t=1759395911527:52 Request body: undefined
+userApi.js?t=1759403795598:8 Getting user profile...
+api.js?t=1759395911527:23 Token found and added to headers: eyJhbGciOiJIUzI1NiIs...
+api.js?t=1759395911527:43 API Request: {url: 'http://localhost:8000/api/v1/auth/profile/', config: {…}}
+api.js?t=1759395911527:44 Request headers: {Content-Type: 'application/json', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2…jMifQ.7CFNMRsYzsUR3ylVdEvU2aoCgPGddW3l-fkXO-hnvyU'}
+api.js?t=1759395911527:45 Request body type: undefined
+api.js?t=1759395911527:52 Request body: undefined
+api.js?t=1759395911527:23 Token found and added to headers: eyJhbGciOiJIUzI1NiIs...
+api.js?t=1759395911527:43 API Request: {url: 'http://localhost:8000/api/v1/users/me/stats/', config: {…}}
+api.js?t=1759395911527:44 Request headers: {Content-Type: 'application/json', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2…jMifQ.7CFNMRsYzsUR3ylVdEvU2aoCgPGddW3l-fkXO-hnvyU'}
+api.js?t=1759395911527:45 Request body type: undefined
+api.js?t=1759395911527:52 Request body: undefined
+api.js?t=1759395911527:23 Token found and added to headers: eyJhbGciOiJIUzI1NiIs...
+api.js?t=1759395911527:43 API Request: {url: 'http://localhost:8000/api/v1/products/my_products/?limit=5', config: {…}}
+api.js?t=1759395911527:44 Request headers: {Content-Type: 'application/json', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2…jMifQ.7CFNMRsYzsUR3ylVdEvU2aoCgPGddW3l-fkXO-hnvyU'}
+api.js?t=1759395911527:45 Request body type: undefined
+api.js?t=1759395911527:52 Request body: undefined
+api.js?t=1759395911527:23 Token found and added to headers: eyJhbGciOiJIUzI1NiIs...
+api.js?t=1759395911527:43 API Request: {url: 'http://localhost:8000/api/v1/orders/my_supplier_orders/?limit=5', config: {…}}
+api.js?t=1759395911527:44 Request headers: {Content-Type: 'application/json', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2…jMifQ.7CFNMRsYzsUR3ylVdEvU2aoCgPGddW3l-fkXO-hnvyU'}
+api.js?t=1759395911527:45 Request body type: undefined
+api.js?t=1759395911527:52 Request body: undefined
+api.js?t=1759395911527:23 Token found and added to headers: eyJhbGciOiJIUzI1NiIs...
+api.js?t=1759395911527:43 API Request: {url: 'http://localhost:8000/api/v1/offers/my_offers/?limit=5', config: {…}}
+api.js?t=1759395911527:44 Request headers: {Content-Type: 'application/json', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2…jMifQ.7CFNMRsYzsUR3ylVdEvU2aoCgPGddW3l-fkXO-hnvyU'}
+api.js?t=1759395911527:45 Request body type: undefined
+api.js?t=1759395911527:52 Request body: undefined
+api.js?t=1759395911527:55 API Response: {status: 200, ok: true}
+api.js?t=1759395911527:110 API Response Data: {id: 3, phone: '+998944190677', phone_verified: true, role: 'buyer', supplier_type: null, …}
+userApi.js?t=1759403795598:10 Profile response: {id: 3, phone: '+998944190677', phone_verified: true, role: 'buyer', supplier_type: null, …}
+api.js?t=1759395911527:54  GET http://localhost:8000/api/v1/users/me/stats/ 404 (Not Found)
+apiRequest @ api.js?t=1759395911527:54
+get @ api.js?t=1759395911527:122
+getSellerStats @ userApi.js?t=1759403795598:356
+loadDashboardData @ SellerDashboard.jsx:32
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+commitPassiveMountOnFiber @ chunk-C4BO3AWI.js?v=2148201e:18182
+commitPassiveMountEffects_complete @ chunk-C4BO3AWI.js?v=2148201e:18155
+commitPassiveMountEffects_begin @ chunk-C4BO3AWI.js?v=2148201e:18145
+commitPassiveMountEffects @ chunk-C4BO3AWI.js?v=2148201e:18135
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19516
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:55 API Response: {status: 404, ok: false}
+api.js?t=1759395911527:113 API request failed: Error: HTTP error! status: 404
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerStats (userApi.js?t=1759403795598:356:24)
+    at async Promise.allSettled (index 1)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+apiRequest @ api.js?t=1759395911527:113
+await in apiRequest
+get @ api.js?t=1759395911527:122
+getSellerStats @ userApi.js?t=1759403795598:356
+loadDashboardData @ SellerDashboard.jsx:32
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+commitPassiveMountOnFiber @ chunk-C4BO3AWI.js?v=2148201e:18182
+commitPassiveMountEffects_complete @ chunk-C4BO3AWI.js?v=2148201e:18155
+commitPassiveMountEffects_begin @ chunk-C4BO3AWI.js?v=2148201e:18145
+commitPassiveMountEffects @ chunk-C4BO3AWI.js?v=2148201e:18135
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19516
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+userApi.js?t=1759403795598:359 Seller statistikasini olishda xatolik: Error: HTTP error! status: 404
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerStats (userApi.js?t=1759403795598:356:24)
+    at async Promise.allSettled (index 1)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+getSellerStats @ userApi.js?t=1759403795598:359
+await in getSellerStats
+loadDashboardData @ SellerDashboard.jsx:32
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+commitPassiveMountOnFiber @ chunk-C4BO3AWI.js?v=2148201e:18182
+commitPassiveMountEffects_complete @ chunk-C4BO3AWI.js?v=2148201e:18155
+commitPassiveMountEffects_begin @ chunk-C4BO3AWI.js?v=2148201e:18145
+commitPassiveMountEffects @ chunk-C4BO3AWI.js?v=2148201e:18135
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19516
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:54  GET http://localhost:8000/api/v1/products/my_products/?limit=5 403 (Forbidden)
+apiRequest @ api.js?t=1759395911527:54
+get @ api.js?t=1759395911527:122
+getSellerProducts @ userApi.js?t=1759403795598:369
+loadDashboardData @ SellerDashboard.jsx:33
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+commitPassiveMountOnFiber @ chunk-C4BO3AWI.js?v=2148201e:18182
+commitPassiveMountEffects_complete @ chunk-C4BO3AWI.js?v=2148201e:18155
+commitPassiveMountEffects_begin @ chunk-C4BO3AWI.js?v=2148201e:18145
+commitPassiveMountEffects @ chunk-C4BO3AWI.js?v=2148201e:18135
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19516
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:55 API Response: {status: 403, ok: false}
+api.js?t=1759395911527:113 API request failed: Error: HTTP error! status: 403
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerProducts (userApi.js?t=1759403795598:369:24)
+    at async Promise.allSettled (index 2)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+apiRequest @ api.js?t=1759395911527:113
+await in apiRequest
+get @ api.js?t=1759395911527:122
+getSellerProducts @ userApi.js?t=1759403795598:369
+loadDashboardData @ SellerDashboard.jsx:33
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+commitPassiveMountOnFiber @ chunk-C4BO3AWI.js?v=2148201e:18182
+commitPassiveMountEffects_complete @ chunk-C4BO3AWI.js?v=2148201e:18155
+commitPassiveMountEffects_begin @ chunk-C4BO3AWI.js?v=2148201e:18145
+commitPassiveMountEffects @ chunk-C4BO3AWI.js?v=2148201e:18135
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19516
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+userApi.js?t=1759403795598:372 Seller mahsulotlarini olishda xatolik: Error: HTTP error! status: 403
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerProducts (userApi.js?t=1759403795598:369:24)
+    at async Promise.allSettled (index 2)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+getSellerProducts @ userApi.js?t=1759403795598:372
+await in getSellerProducts
+loadDashboardData @ SellerDashboard.jsx:33
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+commitPassiveMountOnFiber @ chunk-C4BO3AWI.js?v=2148201e:18182
+commitPassiveMountEffects_complete @ chunk-C4BO3AWI.js?v=2148201e:18155
+commitPassiveMountEffects_begin @ chunk-C4BO3AWI.js?v=2148201e:18145
+commitPassiveMountEffects @ chunk-C4BO3AWI.js?v=2148201e:18135
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19516
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:54  GET http://localhost:8000/api/v1/orders/my_supplier_orders/?limit=5 404 (Not Found)
+apiRequest @ api.js?t=1759395911527:54
+get @ api.js?t=1759395911527:122
+getSellerOrders @ userApi.js?t=1759403795598:382
+loadDashboardData @ SellerDashboard.jsx:34
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+commitPassiveMountOnFiber @ chunk-C4BO3AWI.js?v=2148201e:18182
+commitPassiveMountEffects_complete @ chunk-C4BO3AWI.js?v=2148201e:18155
+commitPassiveMountEffects_begin @ chunk-C4BO3AWI.js?v=2148201e:18145
+commitPassiveMountEffects @ chunk-C4BO3AWI.js?v=2148201e:18135
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19516
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:55 API Response: {status: 404, ok: false}
+api.js?t=1759395911527:113 API request failed: Error: HTTP error! status: 404
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerOrders (userApi.js?t=1759403795598:382:24)
+    at async Promise.allSettled (index 3)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+apiRequest @ api.js?t=1759395911527:113
+await in apiRequest
+get @ api.js?t=1759395911527:122
+getSellerOrders @ userApi.js?t=1759403795598:382
+loadDashboardData @ SellerDashboard.jsx:34
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+commitPassiveMountOnFiber @ chunk-C4BO3AWI.js?v=2148201e:18182
+commitPassiveMountEffects_complete @ chunk-C4BO3AWI.js?v=2148201e:18155
+commitPassiveMountEffects_begin @ chunk-C4BO3AWI.js?v=2148201e:18145
+commitPassiveMountEffects @ chunk-C4BO3AWI.js?v=2148201e:18135
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19516
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+userApi.js?t=1759403795598:385 Seller buyurtmalarini olishda xatolik: Error: HTTP error! status: 404
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerOrders (userApi.js?t=1759403795598:382:24)
+    at async Promise.allSettled (index 3)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+getSellerOrders @ userApi.js?t=1759403795598:385
+await in getSellerOrders
+loadDashboardData @ SellerDashboard.jsx:34
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+commitPassiveMountOnFiber @ chunk-C4BO3AWI.js?v=2148201e:18182
+commitPassiveMountEffects_complete @ chunk-C4BO3AWI.js?v=2148201e:18155
+commitPassiveMountEffects_begin @ chunk-C4BO3AWI.js?v=2148201e:18145
+commitPassiveMountEffects @ chunk-C4BO3AWI.js?v=2148201e:18135
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19516
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:54  GET http://localhost:8000/api/v1/users/me/stats/ 404 (Not Found)
+apiRequest @ api.js?t=1759395911527:54
+get @ api.js?t=1759395911527:122
+getSellerStats @ userApi.js?t=1759403795598:356
+loadDashboardData @ SellerDashboard.jsx:32
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+invokePassiveEffectMountInDEV @ chunk-C4BO3AWI.js?v=2148201e:18350
+invokeEffectsInDev @ chunk-C4BO3AWI.js?v=2148201e:19727
+commitDoubleInvokeEffectsInDEV @ chunk-C4BO3AWI.js?v=2148201e:19712
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19529
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:55 API Response: {status: 404, ok: false}
+api.js?t=1759395911527:113 API request failed: Error: HTTP error! status: 404
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerStats (userApi.js?t=1759403795598:356:24)
+    at async Promise.allSettled (index 1)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+apiRequest @ api.js?t=1759395911527:113
+await in apiRequest
+get @ api.js?t=1759395911527:122
+getSellerStats @ userApi.js?t=1759403795598:356
+loadDashboardData @ SellerDashboard.jsx:32
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+invokePassiveEffectMountInDEV @ chunk-C4BO3AWI.js?v=2148201e:18350
+invokeEffectsInDev @ chunk-C4BO3AWI.js?v=2148201e:19727
+commitDoubleInvokeEffectsInDEV @ chunk-C4BO3AWI.js?v=2148201e:19712
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19529
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+userApi.js?t=1759403795598:359 Seller statistikasini olishda xatolik: Error: HTTP error! status: 404
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerStats (userApi.js?t=1759403795598:356:24)
+    at async Promise.allSettled (index 1)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+getSellerStats @ userApi.js?t=1759403795598:359
+await in getSellerStats
+loadDashboardData @ SellerDashboard.jsx:32
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+invokePassiveEffectMountInDEV @ chunk-C4BO3AWI.js?v=2148201e:18350
+invokeEffectsInDev @ chunk-C4BO3AWI.js?v=2148201e:19727
+commitDoubleInvokeEffectsInDEV @ chunk-C4BO3AWI.js?v=2148201e:19712
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19529
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:55 API Response: {status: 200, ok: true}
+api.js?t=1759395911527:110 API Response Data: []
+api.js?t=1759395911527:54  GET http://localhost:8000/api/v1/products/my_products/?limit=5 403 (Forbidden)
+apiRequest @ api.js?t=1759395911527:54
+get @ api.js?t=1759395911527:122
+getSellerProducts @ userApi.js?t=1759403795598:369
+loadDashboardData @ SellerDashboard.jsx:33
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+invokePassiveEffectMountInDEV @ chunk-C4BO3AWI.js?v=2148201e:18350
+invokeEffectsInDev @ chunk-C4BO3AWI.js?v=2148201e:19727
+commitDoubleInvokeEffectsInDEV @ chunk-C4BO3AWI.js?v=2148201e:19712
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19529
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:55 API Response: {status: 403, ok: false}
+api.js?t=1759395911527:113 API request failed: Error: HTTP error! status: 403
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerProducts (userApi.js?t=1759403795598:369:24)
+    at async Promise.allSettled (index 2)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+apiRequest @ api.js?t=1759395911527:113
+await in apiRequest
+get @ api.js?t=1759395911527:122
+getSellerProducts @ userApi.js?t=1759403795598:369
+loadDashboardData @ SellerDashboard.jsx:33
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+invokePassiveEffectMountInDEV @ chunk-C4BO3AWI.js?v=2148201e:18350
+invokeEffectsInDev @ chunk-C4BO3AWI.js?v=2148201e:19727
+commitDoubleInvokeEffectsInDEV @ chunk-C4BO3AWI.js?v=2148201e:19712
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19529
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+userApi.js?t=1759403795598:372 Seller mahsulotlarini olishda xatolik: Error: HTTP error! status: 403
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerProducts (userApi.js?t=1759403795598:369:24)
+    at async Promise.allSettled (index 2)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+getSellerProducts @ userApi.js?t=1759403795598:372
+await in getSellerProducts
+loadDashboardData @ SellerDashboard.jsx:33
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+invokePassiveEffectMountInDEV @ chunk-C4BO3AWI.js?v=2148201e:18350
+invokeEffectsInDev @ chunk-C4BO3AWI.js?v=2148201e:19727
+commitDoubleInvokeEffectsInDEV @ chunk-C4BO3AWI.js?v=2148201e:19712
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19529
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:55 API Response: {status: 200, ok: true}
+api.js?t=1759395911527:54  GET http://localhost:8000/api/v1/orders/my_supplier_orders/?limit=5 404 (Not Found)
+apiRequest @ api.js?t=1759395911527:54
+get @ api.js?t=1759395911527:122
+getSellerOrders @ userApi.js?t=1759403795598:382
+loadDashboardData @ SellerDashboard.jsx:34
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+invokePassiveEffectMountInDEV @ chunk-C4BO3AWI.js?v=2148201e:18350
+invokeEffectsInDev @ chunk-C4BO3AWI.js?v=2148201e:19727
+commitDoubleInvokeEffectsInDEV @ chunk-C4BO3AWI.js?v=2148201e:19712
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19529
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:55 API Response: {status: 404, ok: false}
+api.js?t=1759395911527:113 API request failed: Error: HTTP error! status: 404
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerOrders (userApi.js?t=1759403795598:382:24)
+    at async Promise.allSettled (index 3)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+apiRequest @ api.js?t=1759395911527:113
+await in apiRequest
+get @ api.js?t=1759395911527:122
+getSellerOrders @ userApi.js?t=1759403795598:382
+loadDashboardData @ SellerDashboard.jsx:34
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+invokePassiveEffectMountInDEV @ chunk-C4BO3AWI.js?v=2148201e:18350
+invokeEffectsInDev @ chunk-C4BO3AWI.js?v=2148201e:19727
+commitDoubleInvokeEffectsInDEV @ chunk-C4BO3AWI.js?v=2148201e:19712
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19529
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+userApi.js?t=1759403795598:385 Seller buyurtmalarini olishda xatolik: Error: HTTP error! status: 404
+    at apiRequest (api.js?t=1759395911527:103:21)
+    at async Object.getSellerOrders (userApi.js?t=1759403795598:382:24)
+    at async Promise.allSettled (index 3)
+    at async loadDashboardData (SellerDashboard.jsx:30:73)
+getSellerOrders @ userApi.js?t=1759403795598:385
+await in getSellerOrders
+loadDashboardData @ SellerDashboard.jsx:34
+(анонимная) @ SellerDashboard.jsx:104
+commitHookEffectListMount @ chunk-C4BO3AWI.js?v=2148201e:16934
+invokePassiveEffectMountInDEV @ chunk-C4BO3AWI.js?v=2148201e:18350
+invokeEffectsInDev @ chunk-C4BO3AWI.js?v=2148201e:19727
+commitDoubleInvokeEffectsInDEV @ chunk-C4BO3AWI.js?v=2148201e:19712
+flushPassiveEffectsImpl @ chunk-C4BO3AWI.js?v=2148201e:19529
+flushPassiveEffects @ chunk-C4BO3AWI.js?v=2148201e:19473
+(анонимная) @ chunk-C4BO3AWI.js?v=2148201e:19354
+workLoop @ chunk-C4BO3AWI.js?v=2148201e:195
+flushWork @ chunk-C4BO3AWI.js?v=2148201e:174
+performWorkUntilDeadline @ chunk-C4BO3AWI.js?v=2148201e:382Пояснение к ошибке
+api.js?t=1759395911527:110 API Response Data: {id: 3, phone: '+998944190677', phone_verified: true, role: 'buyer', supplier_type: null, …}
+userApi.js?t=1759403795598:10 Profile response: {id: 3, phone: '+998944190677', phone_verified: true, role: 'buyer', supplier_type: null, …}
+api.js?t=1759395911527:55 API Response: {status: 200, ok: true}
+api.js?t=1759395911527:110 API Response Data: []
+
+
+Ko'rib bering. Sellerda oxirida zavod qo'shish ham bor edi. Yana bazi xatoliklar chiqdi ko'rib bering

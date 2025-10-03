@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import userApi from '../../utils/userApi';
 
 const AvailableProducts = () => {
   const navigate = useNavigate();
@@ -12,6 +13,10 @@ const AvailableProducts = () => {
   const [sortBy, setSortBy] = useState('rating'); // rating, price, eta
   const [error, setError] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [flowData, setFlowData] = useState({
+    flowStep: null,
+    returnPath: null
+  });
 
   // URL dan selected categories ni olish
   const categories = location.state?.selectedCategories || [];
@@ -19,7 +24,15 @@ const AvailableProducts = () => {
   useEffect(() => {
     setSelectedCategories(categories);
     fetchProducts();
-  }, [categories.length, categories.join(',')]);
+    
+    // Initialize flow data from location state
+    if (location.state) {
+      setFlowData({
+        flowStep: location.state.flowStep || null,
+        returnPath: location.state.returnPath || null
+      });
+    }
+  }, [categories.length, categories.join(','), location.state]);
 
   useEffect(() => {
     filterAndSortProducts();
@@ -28,12 +41,41 @@ const AvailableProducts = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      setError(null);
       
       // Fetch products based on selected categories
-      // const productsResponse = await api.get(`/products?categories=${categories.join(',')}`);
-      // setProducts(productsResponse.data);
+      const params = {};
+      if (categories.length > 0) {
+        params.categories = categories.join(',');
+      }
       
-      // Mock products data based on selected categories
+      const response = await userApi.getProducts(params);
+      const productsData = response.results || response || [];
+      
+      // Transform backend data to component format if needed
+      const transformedProducts = productsData.map(product => ({
+        id: product.id,
+        name: product.name,
+        category: product.category?.name || 'Unknown',
+        rating: product.rating || 0,
+        reviewCount: product.review_count || 0,
+        price: product.price || 0,
+        unit: product.unit || 'pcs',
+        image: product.image || '/placeholder-product.jpg',
+        supplier: product.supplier?.name || 'Unknown Supplier',
+        location: product.supplier?.location || 'Unknown',
+        verified: product.supplier?.verified || false,
+        minOrder: product.min_order || 1,
+        inStock: product.in_stock || false
+      }));
+      
+      setProducts(transformedProducts);
+      
+    } catch (error) {
+      console.error('Mahsulotlarni yuklashda xatolik:', error);
+      setError('Mahsulotlarni yuklashda xatolik yuz berdi');
+      
+      // Fallback to mock data on error
       const mockProducts = [
         {
           id: 'prod-001',
@@ -97,17 +139,13 @@ const AvailableProducts = () => {
         }
       ];
 
-      // Filter products based on selected categories
+      // Filter products based on selected categories for fallback
       const filteredProducts = categories.length > 0 
         ? mockProducts.filter(product => categories.includes(product.category))
         : mockProducts;
       
       setProducts(filteredProducts);
       
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Mahsulotlarni yuklashda xatolik yuz berdi');
     } finally {
       setLoading(false);
     }
@@ -155,7 +193,10 @@ const AvailableProducts = () => {
     navigate(`/buyer/product/${productId}`, {
       state: { 
         selectedCategories,
-        fromAvailableProducts: true
+        fromAvailableProducts: true,
+        flowData,
+        flowStep: 'product-detail',
+        returnPath: '/buyer/products'
       }
     });
   };
@@ -163,18 +204,25 @@ const AvailableProducts = () => {
   const handleRequestQuote = (productId) => {
     const product = products.find(p => p.id === productId);
     if (product) {
-      // Navigate to RFQ form with product data
+      // Navigate to RFQ form with product data and flow context
       navigate('/buyer/rfq-form', { 
         state: { 
           product: product,
-          selectedCategories: categories 
+          selectedCategories: categories,
+          flowData,
+          flowStep: 'rfq-creation',
+          returnPath: '/buyer/products'
         } 
       });
     }
   };
 
   const handleBack = () => {
-    navigate(-1);
+    if (flowData.returnPath) {
+      navigate(flowData.returnPath);
+    } else {
+      navigate(-1);
+    }
   };
 
   const formatCurrency = (amount) => {

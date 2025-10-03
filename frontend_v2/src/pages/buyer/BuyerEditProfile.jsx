@@ -1,38 +1,106 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import userApi from '../../utils/userApi';
 
 const BuyerEditProfile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Flow tracking state
+  const [flowData, setFlowData] = useState({
+    fromRegistration: false,
+    flowStep: null,
+    nextStep: null,
+    registrationData: null
+  });
   const [formData, setFormData] = useState({
-    companyName: 'O\'zbekiston Qurilish MChJ',
-    contactPerson: 'John Doe',
-    phoneNumber: '+998 90 123 45 67',
-    email: 'john.doe@uzbekiston-qurilish.uz',
-    address: 'Tashkent, Uzbekistan',
-    taxId: '••••-•••-••98',
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    email: '',
+    companyName: '',
+    contactPerson: '',
+    address: '',
+    taxId: '',
     password: '••••••••'
   });
 
-  const [teamMembers, setTeamMembers] = useState([
-    {
-      id: 1,
-      name: 'John Doe',
-      role: 'Purchasing Manager',
-      phone: '+998 90 123 45 67',
-      email: 'john.doe@uzbekiston-qurilish.uz',
-      avatar: 'https://via.placeholder.com/120x120/4F46E5/FFFFFF?text=JD'
-    },
-    {
-      id: 2,
-      name: 'Sarah Wilson',
-      role: 'Accountant',
-      phone: '+998 90 234 56 78',
-      email: 'sarah.wilson@uzbekiston-qurilish.uz',
-      avatar: 'https://via.placeholder.com/120x120/4F46E5/FFFFFF?text=SW'
-    }
-  ]);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+
+  // Load profile data from backend
+  const loadProfileData = async () => {
+    setInitialLoading(true);
+    try {
+      const [profileRes, companyRes, teamRes] = await Promise.allSettled([
+        userApi.getProfile(),
+        userApi.getCompany(),
+        userApi.getTeamMembers()
+      ]);
+
+      if (profileRes.status === 'fulfilled') {
+        const profile = profileRes.value;
+        setFormData(prev => ({
+          ...prev,
+          firstName: profile.first_name || '',
+          lastName: profile.last_name || '',
+          phoneNumber: profile.phone || '',
+          email: profile.email || ''
+        }));
+      }
+
+      if (companyRes.status === 'fulfilled') {
+        const company = companyRes.value;
+        setFormData(prev => ({
+          ...prev,
+          companyName: company.name || '',
+          contactPerson: company.accountant_contact?.name || '',
+          address: company.legal_address || '',
+          taxId: company.inn_stir || ''
+        }));
+      }
+
+      if (teamRes.status === 'fulfilled') {
+        setTeamMembers(teamRes.value || []);
+      }
+
+    } catch (error) {
+      console.error('Ma\'lumotlarni yuklashda xatolik:', error);
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
+  // Initialize flow data from location state
+  useEffect(() => {
+    if (location.state) {
+      setFlowData({
+        fromRegistration: location.state.fromRegistration || false,
+        flowStep: location.state.flowStep || null,
+        nextStep: location.state.nextStep || null,
+        registrationData: location.state.registrationData || null
+      });
+      
+      // Pre-populate form with registration data if available
+      if (location.state.registrationData) {
+        const regData = location.state.registrationData;
+        setFormData(prev => ({
+          ...prev,
+          companyName: regData.company?.name || prev.companyName,
+          contactPerson: regData.company?.accountant_contact?.name || prev.contactPerson,
+          phoneNumber: regData.user?.phone || prev.phoneNumber,
+          email: regData.company?.accountant_contact?.email || prev.email,
+          address: regData.company?.legal_address || prev.address
+        }));
+      }
+    }
+    
+    // Load profile data
+    loadProfileData();
+  }, [location.state]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -41,13 +109,70 @@ const BuyerEditProfile = () => {
     }));
   };
 
-  const handleSave = () => {
-    console.log('Saving profile data:', formData);
-    navigate('/buyer/profile');
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      // User profile ma'lumotlarini yangilash
+      const userUpdateData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email
+      };
+
+      // Company ma'lumotlarini yangilash
+      const companyUpdateData = {
+        name: formData.companyName,
+        legal_address: formData.address,
+        inn_stir: formData.taxId,
+        accountant_contact: {
+          name: formData.contactPerson,
+          email: formData.email
+        }
+      };
+
+      // API chaqiruvlari
+      const [userRes, companyRes] = await Promise.allSettled([
+        userApi.updateProfile(userUpdateData),
+        userApi.updateCompany(companyUpdateData)
+      ]);
+
+      if (userRes.status === 'rejected') {
+        console.error('User yangilashda xatolik:', userRes.reason);
+      }
+
+      if (companyRes.status === 'rejected') {
+        console.error('Company yangilashda xatolik:', companyRes.reason);
+      }
+
+      // Muvaffaqiyatli saqlandi
+      alert('Ma\'lumotlar muvaffaqiyatli saqlandi');
+      
+      // Navigate based on flow context
+      if (flowData.fromRegistration && flowData.nextStep) {
+        navigate(flowData.nextStep, { 
+          state: { 
+            fromProfileSetup: true,
+            flowStep: 'dashboard-entry'
+          } 
+        });
+      } else {
+        navigate('/buyer/profile');
+      }
+    } catch (error) {
+      console.error('Ma\'lumotlarni saqlashda xatolik:', error);
+      alert('Ma\'lumotlarni saqlashda xatolik yuz berdi');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
-    navigate('/buyer/profile');
+    if (flowData.fromRegistration) {
+      // If from registration, go back to registration
+      navigate('/buyer/registration');
+    } else {
+      navigate('/buyer/profile');
+    }
   };
 
   const handleSupport = () => {
@@ -68,37 +193,72 @@ const BuyerEditProfile = () => {
     // In real app, this would open a modal or navigate to password change page
   };
 
-  const handleAddTeamMember = () => {
-    const newMember = {
-      id: Date.now(),
-      name: '',
-      role: '',
-      phone: '',
-      email: '',
-      avatar: 'https://via.placeholder.com/120x120/4F46E5/FFFFFF?text=+'
-    };
-    setTeamMembers(prev => [...prev, newMember]);
+  const handleAddTeamMember = async () => {
+    try {
+      const newMemberData = {
+        name: 'Yangi a\'zo',
+        role: 'MEMBER',
+        phone: '',
+        email: ''
+      };
+      
+      const response = await userApi.addTeamMember(newMemberData);
+      setTeamMembers(prev => [...prev, response]);
+      alert('Yangi a\'zo qo\'shildi');
+    } catch (error) {
+      console.error('A\'zo qo\'shishda xatolik:', error);
+      alert('A\'zo qo\'shishda xatolik yuz berdi');
+    }
   };
 
-  const handleTeamMemberChange = (id, field, value) => {
+  const handleTeamMemberChange = async (id, field, value) => {
+    // Local state'ni darhol yangilash
     setTeamMembers(prev => prev.map(member => 
       member.id === id ? { ...member, [field]: value } : member
     ));
+    
+    // Backend'ga yuborish (debounce qilish mumkin)
+    try {
+      const member = teamMembers.find(m => m.id === id);
+      if (member) {
+        const updateData = { ...member, [field]: value };
+        await userApi.updateTeamMember(id, updateData);
+      }
+    } catch (error) {
+      console.error('A\'zo yangilashda xatolik:', error);
+    }
   };
 
   const handleDeleteTeamMember = (id) => {
     setShowDeleteConfirm(id);
   };
 
-  const confirmDeleteTeamMember = (id) => {
-    setTeamMembers(prev => prev.filter(member => member.id !== id));
-    setShowDeleteConfirm(null);
+  const confirmDeleteTeamMember = async (id) => {
+    try {
+      await userApi.deleteTeamMember(id);
+      setTeamMembers(prev => prev.filter(member => member.id !== id));
+      setShowDeleteConfirm(null);
+      alert('A\'zo o\'chirildi');
+    } catch (error) {
+      console.error('A\'zo o\'chirishda xatolik:', error);
+      alert('A\'zo o\'chirishda xatolik yuz berdi');
+      setShowDeleteConfirm(null);
+    }
   };
 
   const handleUploadAvatar = (id) => {
     console.log('Upload avatar for member:', id);
     // In real app, this would open file picker
   };
+
+  if (initialLoading) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6C4FFF] mb-4"></div>
+        <p className="text-gray-500">Ma'lumotlar yuklanmoqda...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex size-full min-h-screen flex-col justify-between group/design-root overflow-x-hidden bg-white">
@@ -122,6 +282,26 @@ const BuyerEditProfile = () => {
             <section>
               <h2 className="text-lg font-bold text-[#140e1b] mb-4">Company Information</h2>
               <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                  <input
+                    type="text"
+                    value={formData.firstName}
+                    onChange={(e) => handleInputChange('firstName', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a35ee8] focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                  <input
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(e) => handleInputChange('lastName', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a35ee8] focus:border-transparent"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
                   <input
@@ -324,9 +504,17 @@ const BuyerEditProfile = () => {
           </button>
           <button 
             onClick={handleSave}
-            className="flex-1 h-12 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-[#a35ee8] text-base font-bold text-white shadow-lg shadow-[#a35ee8]/30 hover:bg-[#8e4dd1] transition-colors"
+            disabled={loading}
+            className="flex-1 h-12 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-[#a35ee8] text-base font-bold text-white shadow-lg shadow-[#a35ee8]/30 hover:bg-[#8e4dd1] transition-colors disabled:opacity-50"
           >
-            <span className="truncate">Save Changes</span>
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span className="truncate">Saving...</span>
+              </div>
+            ) : (
+              <span className="truncate">Save Changes</span>
+            )}
           </button>
         </div>
       </footer>

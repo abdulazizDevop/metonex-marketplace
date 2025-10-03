@@ -136,9 +136,14 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'category': {'required': True},
             'brand': {'required': True},
             'grade': {'required': True},
-            'unit': {'required': True},
             'base_price': {'required': True},
             'min_order_quantity': {'required': True},
+            'factory': {'required': True},
+            'unit': {'required': False},  # Unit auto-select bo'ladi kategoriya asosida
+            'specifications': {'required': False},  # Ixtiyoriy
+            'material': {'required': False},  # Kerak emas
+            'origin_country': {'required': False},  # Ixtiyoriy
+            'warranty_period': {'required': False},  # Ixtiyoriy
         }
     
     def validate(self, attrs):
@@ -156,6 +161,22 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'factory': 'Diler uchun zavod tanlash majburiy'
             })
+        
+        # Unit auto-select: Agar unit berilmagan bo'lsa, kategoriyaning default unitini tanlash
+        if attrs.get('category') and not attrs.get('unit'):
+            from ..models import Unit
+            try:
+                default_unit = Unit.objects.filter(unit_type=attrs['category'].unit_type).first()
+                if default_unit:
+                    attrs['unit'] = default_unit
+                else:
+                    raise serializers.ValidationError({
+                        'unit': f'{attrs["category"].name} kategoriyasi uchun mos birlik topilmadi'
+                    })
+            except Unit.DoesNotExist:
+                raise serializers.ValidationError({
+                    'unit': f'{attrs["category"].name} kategoriyasi uchun mos birlik topilmadi'
+                })
         
         # Unit kategoriya bilan mos kelishi kerak
         if attrs.get('unit') and attrs.get('category'):

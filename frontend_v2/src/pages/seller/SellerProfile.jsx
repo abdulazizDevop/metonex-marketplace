@@ -1,44 +1,24 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import BottomNavigation from '../../components/BottomNavigation';
+import { userApi } from '../../utils/userApi';
 
 const SellerProfile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(true);
+  const [flowData, setFlowData] = useState({
+    fromDashboard: false,
+    flowStep: null,
+    returnPath: null
+  });
   const [showReviewsModal, setShowReviewsModal] = useState(false);
   const [selectedRating, setSelectedRating] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
   
   // Documents state
-  const [documents, setDocuments] = useState([
-    {
-      id: 1,
-      title: 'Kompaniya litsenziyasi',
-      type: 'company_license',
-      status: 'verified',
-      uploadDate: '2024-08-15',
-      fileSize: '2.5 MB',
-      fileName: 'license.pdf'
-    },
-    {
-      id: 2,
-      title: 'Soliq guvohnomasi',
-      type: 'tax_certificate',
-      status: 'pending',
-      uploadDate: '2024-08-20',
-      fileSize: '1.8 MB',
-      fileName: 'tax_cert.pdf'
-    },
-    {
-      id: 3,
-      title: 'Transport TTN shakli',
-      type: 'ttn',
-      status: 'verified',
-      uploadDate: '2024-08-18',
-      fileSize: '3.2 MB',
-      fileName: 'ttn_template.pdf'
-    }
-  ]);
+  const [documents, setDocuments] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadForm, setUploadForm] = useState({
     title: '',
@@ -46,99 +26,97 @@ const SellerProfile = () => {
     file: null
   });
   
-  const [profileData] = useState({
-    companyName: 'BuildRight Supplies',
-    supplierId: '789012',
-    rating: 4.7,
-    rank: 5,
-    totalSuppliers: 100,
-    totalReviews: 120,
-    profileImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBj41-PwDLpMDAVf0vzGk89KRvxCUknfTyrhRvmtMkNK29xe4ngs3qUssLoayhPwAPuseJ84dl4TTlO08AqaWnQv0SwBd-5IJCxShTODuYldLnvXjMN3CQz-qUKnPRuonOTqO0zq6JFolj-oGctqKvT4CvxMJg6wBjgG6YxWYe4ZoNFYzIzAIv9RNp9agkGsbGcyyXpuZ3ZxU52YS_6KQDSKXw2zipAFfkEschcYc8183tWUl4w_G6Ni_wrkTSpRkOzPieIq_Zkh6o',
-    metrics: [
-      { name: 'On-time Delivery', value: '98%', icon: 'local_shipping', trend: 'up', color: 'text-green-500' },
-      { name: 'Avg. Response', value: '2 hrs', icon: 'schedule', trend: 'down', color: 'text-red-500' },
-      { name: 'NPS Score', value: '85', icon: 'thumb_up', trend: 'up', color: 'text-green-500' },
-      { name: 'Completed Orders', value: '500+', icon: 'task_alt', trend: 'up', color: 'text-green-500' },
-      { name: 'Avg. Order Value', value: '$15,000', icon: 'paid', trend: 'down', color: 'text-red-500' },
-      { name: 'Monthly Growth', value: '+12%', icon: 'trending_up', trend: 'up', color: 'text-green-500' }
-    ],
-    categories: ['Concrete', 'Lumber', 'Steel'],
-    certifications: [
-      { name: 'ISO 9001', icon: 'verified' },
-      { name: 'Quality Assurance Seal', icon: 'shield' }
-    ],
-    reviews: [
-      { rating: 5, percentage: 80, count: 96 },
-      { rating: 4, percentage: 15, count: 18 },
-      { rating: 3, percentage: 3, count: 4 },
-      { rating: 2, percentage: 1, count: 1 },
-      { rating: 1, percentage: 1, count: 1 }
-    ],
-    recentReviews: [
-      {
-        id: 1,
-        author: 'Anonymous',
-        date: '2 weeks ago',
-        rating: 5,
-        comment: 'Excellent supplier, always on time and quality materials. The best we\'ve worked with.',
-        helpful: 12,
-        comments: 0
-      },
-      {
-        id: 2,
-        author: 'Anonymous',
-        date: '3 weeks ago',
-        rating: 5,
-        comment: 'Fantastic service and product quality. Highly recommend BuildRight Supplies.',
-        helpful: 8,
-        comments: 0
-      },
-      {
-        id: 3,
-        author: 'Anonymous',
-        date: '1 month ago',
-        rating: 4,
-        comment: 'Good experience overall, some delays but resolved quickly.',
-        helpful: 2,
-        comments: 0
-      },
-      {
-        id: 4,
-        author: 'Anonymous',
-        date: '2 months ago',
-        rating: 5,
-        comment: 'Top-notch materials and customer service. Couldn\'t ask for more.',
-        helpful: 5,
-        comments: 0
-      }
-    ],
-    team: [
-      { 
-        name: 'Ava Chen', 
-        position: 'CEO',
-        phone: '+1 (555) 123-4567',
-        email: 'ava.chen@buildright.com'
-      },
-      { 
-        name: 'Leo Martinez', 
-        position: 'Accountant',
-        phone: '+1 (555) 234-5678',
-        email: 'leo.martinez@buildright.com'
-      }
-    ]
+  // Real profile data from API
+  const [profileData, setProfileData] = useState({
+    companyName: 'Loading...',
+    supplierId: 'Loading...',
+    rating: 0,
+    rank: 0,
+    totalSuppliers: 0,
+    totalReviews: 0,
+    profileImage: '',
+    metrics: [],
+    categories: [],
+    certifications: [],
+    reviews: [],
+    recentReviews: [],
+    team: []
   });
+
+  // Initialize flow data from location state
+  React.useEffect(() => {
+    if (location.state) {
+      setFlowData({
+        fromDashboard: location.state.fromDashboard || false,
+        flowStep: location.state.flowStep || null,
+        returnPath: location.state.returnPath || null
+      });
+    }
+  }, [location.state]);
+
+  // Load profile data from API
+  useEffect(() => {
+    loadProfileData();
+  }, []);
+
+  const loadProfileData = async () => {
+    try {
+      const [profileResponse, statsResponse] = await Promise.all([
+        userApi.getProfile(),
+        userApi.getSellerStats()
+      ]);
+
+      console.log('Profile data:', profileResponse);
+      console.log('Stats data:', statsResponse);
+
+      // Transform API data to UI format
+      setProfileData({
+        companyName: profileResponse.company?.name || 'Kompaniya nomi yo\'q',
+        supplierId: profileResponse.id || 'N/A',
+        rating: statsResponse.avg_rating || 0,
+        rank: statsResponse.sales_rank || 0,
+        totalSuppliers: 0, // Bu ma'lumot yo'q, TODO: qo'shish kerak
+        totalReviews: statsResponse.total_reviews || 0,
+        profileImage: profileResponse.avatar || '',
+        metrics: [
+          { name: 'Jami mahsulotlar', value: statsResponse.products?.total || '0', icon: 'inventory', trend: 'up', color: 'text-blue-500' },
+          { name: 'Faol takliflar', value: statsResponse.offers?.active || '0', icon: 'local_offer', trend: 'up', color: 'text-green-500' },
+          { name: 'Savdo buyurtmalari', value: statsResponse.orders?.total || '0', icon: 'shopping_cart', trend: 'up', color: 'text-purple-500' },
+          { name: 'Profil to\'liqligi', value: `${statsResponse.profile_completion}%`, icon: 'verified', trend: statsResponse.profile_completion === 100 ? 'up' : 'down', color: 'text-green-500' }
+        ],
+        categories: statsResponse.categories || [],
+        certifications: [],
+        reviews: [],
+        recentReviews: [],
+        team: []
+      });
+
+    } catch (error) {
+      console.error('Profile yuklashda xatolik:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBack = () => {
     if (showReviewsModal) {
       setShowReviewsModal(false);
       setSelectedRating('all');
+    } else if (flowData.returnPath) {
+      navigate(flowData.returnPath);
     } else {
       navigate(-1);
     }
   };
 
   const handleEditProfile = () => {
-    navigate('/seller/edit-profile');
+    navigate('/seller/edit-profile', {
+      state: {
+        fromProfile: true,
+        flowStep: 'profile-edit',
+        returnPath: '/seller/profile'
+      }
+    });
   };
 
   const handleCall = (phone) => {
@@ -233,7 +211,7 @@ const SellerProfile = () => {
     if (sortBy === 'recent') {
       return new Date(b.date) - new Date(a.date);
     } else {
-      return new Date(a.date) - new Date(b.date);
+      return new Date(a.date) - new(Date);
     }
   });
 
@@ -291,16 +269,18 @@ const SellerProfile = () => {
             </section>
 
             {/* Product Categories */}
-            <section>
-              <h2 className="text-lg font-bold text-[#140e1b]">Product Categories</h2>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {profileData.categories.map((category, index) => (
-                  <span key={index} className="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700">
-                    {category}
-                  </span>
-                ))}
-              </div>
-            </section>
+            {profileData.categories.length > 0 && (
+              <section>
+                <h2 className="text-lg font-bold text-[#140e1b]">Product Categories</h2>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {profileData.categories.map((category, index) => (
+                    <span key={index} className="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700">
+                      {category}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         );
 
@@ -319,65 +299,52 @@ const SellerProfile = () => {
                 </button>
               </div>
               
-              <div className="mt-4 rounded-lg border border-gray-100 bg-gray-50/50 p-4 shadow-sm">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="py-2 font-medium text-gray-600">Rating</th>
-                      <th className="py-2 font-medium text-gray-600">Percentage</th>
-                      <th className="py-2 font-medium text-gray-600">Breakdown</th>
-                      <th className="py-2"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {profileData.reviews.map((review, index) => (
-                      <tr 
-                        key={index} 
-                        className="group cursor-pointer hover:bg-gray-100"
-                        onClick={() => setShowReviewsModal(true)}
-                      >
-                        <td className="py-2.5 font-medium text-gray-800">{review.rating} ⭐</td>
-                        <td className="py-2.5 font-medium text-gray-800">{review.percentage}%</td>
-                        <td className="py-2.5">
-                          <div className="h-2 w-full rounded-full bg-gray-200">
-                            <div 
-                              className="h-full rounded-full bg-yellow-400 transition-all duration-300"
-                              style={{ width: `${review.percentage}%` }}
-                            />
-                          </div>
-                        </td>
-                        <td className="py-2.5 text-right">
-                          <span className="material-symbols-outlined text-gray-400 group-hover:text-gray-600">chevron_right</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-4 space-y-5">
-                {profileData.recentReviews.slice(0, 2).map((review) => (
-                  <div key={review.id} className="rounded-lg border border-gray-100 p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex size-10 items-center justify-center rounded-full bg-gray-200">
-                        <span className="material-symbols-outlined text-gray-500">person</span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-baseline justify-between">
-                          <div>
-                            <p className="font-semibold text-[#140e1b]">{review.author}</p>
-                            <p className="text-xs text-gray-500">{review.date}</p>
-                          </div>
-                          <div className="flex gap-0.5">
-                            {renderStars(review.rating)}
-                          </div>
-                        </div>
-                        <p className="mt-2 text-sm text-gray-700">{review.comment}</p>
-                      </div>
+              {profileData.totalReviews === 0 ? (
+                <div className="mt-4 text-center py-8">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                      <span className="material-symbols-outlined text-gray-400 text-2xl">star</span>
                     </div>
+                    <p className="text-gray-500">Hozircha sharhlar yo'q</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-lg border border-gray-100 bg-gray-50/50 p-4 shadow-sm">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="py-2 font-medium text-gray-600">Rating</th>
+                        <th className="py-2 font-medium text-gray-600">Percentage</th>
+                        <th className="py-2 font-medium text-gray-600">Breakdown</th>
+                        <th className="py-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {profileData.reviews.map((review, index) => (
+                        <tr 
+                          key={index} 
+                          className="group cursor-pointer hover:bg-gray-100"
+                          onClick={() => setShowReviewsModal(true)}
+                        >
+                          <td className="py-2.5 font-medium text-gray-800">{review.rating} ⭐</td>
+                          <td className="py-2.5 font-medium text-gray-800">{review.percentage}%</td>
+                          <td className="py-2.5">
+                            <div className="h-2 w-full rounded-full bg-gray-200">
+                              <div 
+                                className="h-full rounded-full bg-yellow-400 transition-all duration-300"
+                                style={{ width: `${review.percentage}%` }}
+                              />
+                            </div>
+                          </td>
+                          <td className="py-2.5 text-right">
+                            <span className="material-symbols-outlined text-gray-400 group-hover:text-gray-600">chevron_right</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </section>
           </div>
         );
@@ -427,7 +394,7 @@ const SellerProfile = () => {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-[#140e1b] truncate">{doc.title}</h3>
                         <p className="text-sm text-gray-500">{getDocumentTypeLabel(doc.type)}</p>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center gap-2 mt-2.5 mt-1">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(doc.status)}`}>
                             {getStatusText(doc.status)}
                           </span>
@@ -471,33 +438,44 @@ const SellerProfile = () => {
             {/* Team Members */}
             <section>
               <h2 className="text-lg font-bold text-[#140e1b]">Team</h2>
-              <div className="mt-3 space-y-3">
-                {profileData.team.map((member, index) => (
-                  <div key={index} className="flex items-center gap-3 rounded-lg border border-gray-100 p-3">
-                    <div className="flex size-10 items-center justify-center rounded-full bg-[#ede8f3] text-[#735095]">
-                      <span className="material-symbols-outlined">person</span>
+              {profileData.team.length === 0 ? (
+                <div className="mt-4 text-center py-8">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                      <span className="material-symbols-outlined text-gray-400 text-2xl">group</span>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-[#140e1b]">{member.name}</p>
-                      <p className="text-sm text-gray-500">{member.position}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => handleCall(member.phone)}
-                        className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-xl">call</span>
-                      </button>
-                      <button 
-                        onClick={() => handleEmail(member.email)}
-                        className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-xl">mail</span>
-                      </button>
-                    </div>
+                    <p className="text-gray-500">Hozircha jamoa a'zolari qo'shilmagan</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="mt-3 space-y-3">
+                  {profileData.team.map((member, index) => (
+                    <div key={index} className="flex items-center gap-3 rounded-lg border border-gray-100 p-3">
+                      <div className="flex size-10 items-center justify-center rounded-full bg-[#ede8f3] text-[#735095]">
+                        <span className="material-symbols-outlined">person</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-[#140e1b]">{member.name}</p>
+                        <p className="text-sm text-gray-500">{member.position}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleCall(member.phone)}
+                          className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-xl">call</span>
+                        </button>
+                        <button 
+                          onClick={() => handleEmail(member.email)}
+                          className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-xl">mail</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           </div>
         );
@@ -506,6 +484,17 @@ const SellerProfile = () => {
         return null;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin w-8}h-8 border-4 border-[#6C4FFF] border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">Profil yuklanmoqda...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex size-full min-h-screen flex-col justify-between group/design-root overflow-x-hidden bg-white">
@@ -529,23 +518,27 @@ const SellerProfile = () => {
               className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-28" 
               style={{ backgroundImage: `url("${profileData.profileImage}")` }}
             />
-            <div className="absolute bottom-0 right-0 flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700 ring-2 ring-white">
-              <span className="material-symbols-outlined text-sm">star</span>
-              <span>Top Rated</span>
-            </div>
+            {profileData.rating > 0 && (
+              <div className="absolute bottom-0 right-0 flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700 ring-2 ring-white">
+                <span className="material-symbols-outlined text-sm">star</span>
+                <span>Top Rated</span>
+              </div>
+            )}
           </div>
           
           <div className="text-center">
             <p className="text-[22px] font-bold text-[#140e1b]">{profileData.companyName}</p>
             <p className="text-sm text-gray-500">Supplier ID: {profileData.supplierId}</p>
-            <div className="mt-2 flex flex-col items-center gap-1">
-              <div className="flex items-center gap-1 text-sm text-gray-500">
-                <span className="font-semibold text-yellow-500">{profileData.rating}</span>
-                <span className="material-symbols-outlined text-base text-yellow-500">star</span>
-                <span className="text-gray-400">·</span>
-                <span className="font-medium text-gray-600">Rank #{profileData.rank} of {profileData.totalSuppliers}</span>
+            {profileData.rating > 0 && (
+              <div className="mt-2 flex flex-col items-center gap-1">
+                <div className="flex items-center gap-1 text-sm text-gray-500">
+                  <span className="font-semibold text-yellow-500">{profileData.rating}</span>
+                  <span className="material-symbols-outlined text-base text-yellow-500">star</span>
+                  <span className="text-gray-400">·</span>
+                  <span className="font-medium text-gray-600">Rank #{profileData.rank}</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -739,7 +732,7 @@ const SellerProfile = () => {
                 onClick={handleSortChange}
                 className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
               >
-                <span>{sortBy === 'recent' ? 'Most Recent' : 'Oldest First'}</span>
+                <span>{sortBy === ' recent' ? 'Most Recent' : 'Oldest First'}</span>
                 <span className="material-symbols-outlined text-base">unfold_more</span>
               </button>
             </div>
